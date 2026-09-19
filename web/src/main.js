@@ -104,7 +104,7 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
-window.__setMode=(mode)=>setMode(mode);
+window.__setMode=(mode)=>{try{return setMode(mode);}catch(err){window.__lastGameError=String(err?.message||err);if(window.__fallbackMode){return window.__fallbackMode(mode,true);}throw err;}};
 function showAbilityDetails(playerId,abilityId){
   const p=ALL_PLAYERS.find(x=>x.id===Number(playerId)); if(!p)return;
   const a=cardModel(p,developmentFor(save,p.id)).abilityEffects.find(x=>x.id===abilityId); if(!a)return;
