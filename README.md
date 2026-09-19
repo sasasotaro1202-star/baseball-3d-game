@@ -16,3 +16,7 @@ GitHub is the source of truth. Keep simulation deterministic/testable, separate 
 
 ## iPhone
 On a Mac with Xcode: `npm install`, `npx cap add ios`, `npx cap sync ios`, `npx cap open ios`. Select an iPhone, enable automatic signing, and Run.
+
+
+## Intended use
+This project is currently intended for personal/non-commercial use. Non-commercial intent does not waive third-party licenses, attribution requirements, database terms, copyright, trademark, publicity, or other applicable rights. Third-party code/data/assets must remain subject to their original licenses and provenance records.
