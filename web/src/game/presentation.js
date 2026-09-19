@@ -4,18 +4,19 @@ export function gachaRevealType(result){if(result?.duplicate)return'DUPLICATE';i
 export async function playGachaReveal({rarity,name,image,rank,limited,duplicate=false,banner,cardType,limitedTheme}){
  const root=ensurePresentationLayer(),k=document.getElementById('pres-kicker'),t=document.getElementById('pres-title'),s=document.getElementById('pres-sub'),flash=document.getElementById('pres-flash'),pc=document.getElementById('pres-card');
  const type=gachaRevealType({rarity,name,image,rank,limited,duplicate,banner});
- root.className='pres-show gacha-page gacha-opening '+type.toLowerCase()+(limited?' limited-card ':'')+' '+String(cardType||'').toLowerCase();
+ const special=limited?'limited':rank==='S'?'s-rank':rank==='A'?'a-rank':rarity==='LEGEND'?'legend':rarity==='STAR'?'star':'normal';
+ root.className='pres-show gacha-page gacha-opening '+type.toLowerCase()+' '+special+(limited?' limited-card ':'')+' '+String(cardType||'').toLowerCase();
  k.textContent='SCOUT';t.textContent='';s.textContent='PLAYER ACQUISITION';
  if(pc)pc.innerHTML='';
  await wait(180);
  root.classList.add('gacha-stadium');
- await wait(type==='ROOKIE'?900:type==='PRO'?1150:1450);
+ await wait(limited?1800:rank==='S'?1900:type==='ROOKIE'?900:type==='PRO'?1150:1450);
  root.classList.remove('gacha-opening');root.classList.add('gacha-reveal');
  k.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):(type==='S_GUARANTEED'||type==='LIMITED_S'?'SPECIAL':'RESULT');
  t.textContent=name||'PLAYER';s.textContent=(limited?'LIMITED CARD · ':'')+((rank||rarity||'').toString())+' · '+(banner||'SCOUT');
  if(pc)pc.innerHTML=image?'<img src="'+image+'" alt="">':'<div class="no-card">PLAYER</div>';
- flash.className='pres-flash active';setTimeout(()=>flash.className='pres-flash',260);
- await wait(type==='S_GUARANTEED'||type==='LIMITED_S'?2100:type==='LEGEND'?1800:1450);
+ flash.className='pres-flash active';setTimeout(()=>flash.className='pres-flash',limited||rank==='S'?520:260);
+ await wait(limited?3000:rank==='S'?2800:type==='S_GUARANTEED'||type==='LIMITED_S'?2100:type==='LEGEND'?1800:1450);
  root.className='';return type;
 }
 export async function playMatchEvent(type,detail=''){ensurePresentationLayer();const root=document.getElementById('presentation'),k=document.getElementById('pres-kicker'),t=document.getElementById('pres-title'),s=document.getElementById('pres-sub');const map={inning:['GAME PRESENTATION',detail||'PLAY BALL'],pitch:['PITCH',detail||'投球開始'],single:['HIT','SINGLE'],double:['HIT','DOUBLE'],triple:['HIT','TRIPLE'],home_run:['HOME RUN','GOING DEEP'],strikeout:['STRIKEOUT','BATTER OUT'],out:['OUT','PLAY MADE'],walk:['BASE ON BALLS','TAKE YOUR BASE']};const v=map[type]||['PLAY',''+detail];root.className='pres-show match-event '+(type||'');k.textContent=v[0];t.textContent=v[1];s.textContent=detail&&detail!==v[1]?detail:'';await wait(type==='home_run'?1700:850);root.className='';}
