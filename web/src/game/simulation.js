@@ -1,8 +1,8 @@
 export const PITCHES=Object.freeze({
  FASTBALL:{speed:96,break:0.08},SLIDER:{speed:84,break:0.62},CURVEBALL:{speed:76,break:0.88},CHANGEUP:{speed:82,break:0.35}
 });
-export const REGULATION_INNINGS=2;
-export const EXTRA_INNING_START_BASES=Object.freeze([true,true,false]);
+export const REGULATION_INNINGS=9;
+export const EXTRA_INNING_START_BASES=Object.freeze([false,false,false]);
 
 function runner(id,base,speed=70,reaction=70){return{id,base,speed,reaction,status:'LIVE',tagged:false,advanceIntent:'HOLD',startBase:base};}
 export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
@@ -12,7 +12,7 @@ function resetCount(s){s.balls=0;s.strikes=0;}
 function isExtra(s){return s.inning>REGULATION_INNINGS;}
 function syncBases(s){s.bases=[0,1,2].map(b=>s.runners.some(r=>r.status==='LIVE'&&r.base===b));}
 function nextRunner(s,speed=70,reaction=70){const id=s.nextRunnerId++;return runner(id,'HOME',speed,reaction);}
-function enterHalf(s,half,inning){s.half=half;s.inning=inning;s.outs=0;resetCount(s);s.extraInnings=isExtra(s);s.runners=s.extraInnings?[runner(s.nextRunnerId++,1,70,70),runner(s.nextRunnerId++,0,70,70)]:[];syncBases(s);s.lastPlay={type:'HALF_START',extra:s.extraInnings};}
+function enterHalf(s,half,inning){s.half=half;s.inning=inning;s.outs=0;resetCount(s);s.extraInnings=isExtra(s);s.runners=s.extraInnings?EXTRA_INNING_START_BASES.flatMap((occupied,base)=>occupied?[runner(s.nextRunnerId++,base,70,70)]:[]):[];syncBases(s);s.lastPlay={type:'HALF_START',extra:s.extraInnings};}
 function rotateHalf(s){if(s.outs<3)return s;const nextHalf=s.half==='TOP'?'BOTTOM':'TOP';const nextInning=s.half==='TOP'?s.inning:s.inning+1;if(s.half==='TOP'&&s.inning>=REGULATION_INNINGS&&s.score.home>s.score.away){s.ended=true;return s;}if(s.half==='BOTTOM'&&s.inning>=REGULATION_INNINGS&&s.score.home!==s.score.away){s.ended=true;return s;}enterHalf(s,nextHalf,nextInning);return s;}
 function scoreRuns(s,runs){if(runs>0)s.score[offenseKey(s)]+=runs;}
 function checkGameEndAfterScore(s){if(s.half==='BOTTOM'&&s.score.home>s.score.away&&s.inning>=REGULATION_INNINGS)s.ended=true;}
@@ -39,4 +39,4 @@ if(outcome==='OUT'){s.outs++;resetCount(s);s.lastOutcome='OUT';return rotateHalf
 if(outcome==='DOUBLE_PLAY')return doublePlay(s);
 throw new Error('Unknown outcome: '+outcome);}
 export function resolveContact({timing=.5,power=.5,contact=.5,rng=Math.random,defensePosition='NORMAL'}={}){const q=Math.max(0,Math.min(1,.55*timing+.25*power+.20*contact)),x=rng();if(q>.86&&x<.20)return'HOME_RUN';if(q>.72&&x<.42)return'DOUBLE';if(q>.58&&x<.62)return'SINGLE';if(x<.18)return'GROUND_OUT';if(x<.30)return'FLY_OUT';if(x<.94)return'OUT';return'FOUL';}
-export function resolvePitch({pitch='FASTBALL',timing=.5,contact=.5,power=.5,rng=Math.random}={}){const p=PITCHES[pitch]||PITCHES.FASTBALL;const miss=Math.max(0,Math.min(1,Math.abs(timing-.5)*1.8)),x=rng();if(x<.04+miss*.12)return'BALL';if(x<.16+miss*.12)return'STRIKE';if(x<.21)return'FOUL';return resolveContact({timing,power:Math.min(1,p.speed/100),contact,rng});}
+export function resolvePitch({pitch='FASTBALL',timing=.5,contact=.5,power=.5,rng=Math.random}={}){const p=PITCHES[pitch]||PITCHES.FASTBALL;const miss=Math.max(0,Math.min(1,Math.abs(timing-.5)*1.8));const x=rng();const zone=Math.max(0,Math.min(1,1-Math.abs(timing-.5)*2));const pitchQuality=Math.max(.25,Math.min(1,(p.speed/96)*.55+(1-Math.abs(p.break-.45))*.25+zone*.20));if(x<.035+miss*.14)return'BALL';if(x<.13+miss*.10)return'STRIKE';if(x<.205)return'FOUL';const adjustedContact=Math.max(0,Math.min(1,contact*.78+pitchQuality*.22));return resolveContact({timing,power:Math.min(1,p.speed/100),contact:adjustedContact,rng});}
