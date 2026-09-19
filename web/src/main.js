@@ -8,7 +8,7 @@ import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud}
 import {ensurePresentationLayer,playGachaReveal,playMatchEvent} from './game/presentation.js';
 import {createPlayerModel,animatePlayer} from './game/player-models.js';
 import {choosePitch,chooseSwing} from './game/ai.js';
-import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward} from './game/player-system.js';
+import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward,releasePlayer} from './game/player-system.js';
 
 ensurePresentationLayer();
 const canvas=document.querySelector('#game');
@@ -47,7 +47,7 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
-function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));}
+function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));card.querySelectorAll('[data-release-id]').forEach(b=>b.onclick=()=>{const p=HISTORIC_PLAYERS.find(x=>x.id===Number(b.dataset.releaseId));if(!p)return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});}
 function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');bindPlayerCards();}
 function renderTraining(){
   const players=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean);
