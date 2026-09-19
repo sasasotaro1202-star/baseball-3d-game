@@ -219,7 +219,7 @@ function renderGacha(){
     if(busy)return;
     const cost=250*count;
     if(!save.unlimitedCoins && save.currency<cost){
-      resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 ${cost.toLocaleString('ja-JP')} / 所持 ${save.currency.toLocaleString('ja-JP')}</small></div>';
+      resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+save.currency.toLocaleString('ja-JP')+'</small></div>';
       return;
     }
     busy=true;
@@ -289,31 +289,6 @@ function renderTraining(){
   }).join('')||'<p>スカウトで選手を獲得してください。</p>')+'</div><button class="action back" id="back">ホームへ</button>';
   $('back').onclick=()=>setMode('home');
   card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('育成に必要なコインが不足しています');return}save=r.state;persist();renderTraining();});
-}
-function renderGacha(){
-  const featured=ALL_PLAYERS.find(p=>p.limited)||ALL_PLAYERS[4];
-  card.innerHTML='<h2>スカウト</h2><div class="gacha-showcase" id="gacha-showcase"></div><div class="gacha-tabs">'+GACHA_BANNERS.map((b,i)=>'<button type="button" class="gacha-tab '+(i===0?'selected':'')+'" data-banner="'+b.id+'"><b>'+b.name+'</b><small>'+b.subtitle+'</small></button>').join('')+'</div><div id="banner-info" class="banner-info"></div><div id="reveal" class="reveal"><span>SCOUT READY</span><small>選択したスカウトから選手を獲得</small></div><div class="row"><button type="button" class="action" id="pull">スカウトする</button><button type="button" class="action" id="back">戻る</button></div>';
-  $('back').onclick=()=>setMode('home');
-  let bannerId=GACHA_BANNERS[0].id,busy=false;
-  const info=()=>{
-    const b=GACHA_BANNERS.find(x=>x.id===bannerId)||GACHA_BANNERS[0];
-    $('banner-info').innerHTML='<b>'+b.name+'</b>　'+b.kind+'<br><span>'+b.subtitle+' · '+b.rateBonus+'</span>';
-    const pool=ALL_PLAYERS.filter(b.filter), picks=[featured,...pool.filter(x=>x.id!==featured.id).slice(0,2)];
-    $('gacha-showcase').innerHTML=picks.map((p,i)=>'<div class="gacha-preview">'+(p.image?'<img src="'+p.image+'" alt="" loading="lazy">':'<div class="portrait-fallback"><span>?</span></div>')+'<b>'+p.name+'</b><small>'+p.rank+' · '+(p.limited?'LIMITED':'STANDARD')+'</small></div>').join('');
-  };
-  info();
-  card.querySelectorAll('.gacha-tab').forEach(b=>b.onclick=()=>{if(busy)return;bannerId=b.dataset.banner;card.querySelectorAll('.gacha-tab').forEach(x=>x.classList.toggle('selected',x===b));info();});
-  $('pull').onclick=async()=>{
-    if(busy)return;busy=true;$('pull').disabled=true;$('pull').textContent='演出中…';
-    try{
-      const r=pullOnce(save,ALL_PLAYERS,undefined,bannerId);
-      if(r.error){$('reveal').innerHTML='<b>コイン不足</b><small>必要コイン 250</small>';return}
-      save=r.state;persist();const p=r.result.player;
-      $('reveal').innerHTML='<div class="reveal-result">'+(p.image?'<img src="'+p.image+'" alt="">':'')+'<div><b>'+p.name+'</b><br><span>'+r.result.rank+' RANK · '+r.result.rarity+(r.result.limited?' · LIMITED':'')+'</span></div></div>';
-      await playGachaReveal({rarity:r.result.rarity,name:p.name,image:p.image,rank:r.result.rank,limited:r.result.limited,duplicate:r.duplicate,banner:bannerId,cardType:p.cardType,limitedTheme:p.limitedTheme});
-    }catch(e){console.error(e);$('reveal').innerHTML='<b>スカウト処理エラー</b>'}
-    finally{busy=false;$('pull').disabled=false;$('pull').textContent='スカウトする';}
-  };
 }
 function resetMatchView(){
   cameraMode='BATTER';camera.position.set(0,4.4,15.5);camera.lookAt(0,1.8,-5.5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();
