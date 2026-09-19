@@ -16,4 +16,4 @@ jobs:
       - run: npm install
       - run: npm run check
       - run: npm test
-      - run: npm run build
+      - run: npm run build\n      - run: node scripts/web-smoke.mjs
