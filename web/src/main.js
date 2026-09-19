@@ -238,10 +238,7 @@ function updateMatchHUD(){
   document.querySelectorAll('[data-pitch]').forEach(b=>b.style.display=batting?'none':'block');
   const zone=$('strike-zone');if(zone)zone.classList.toggle('active',true);
 }
-<style id="pro-bb-ui-v4">
-#match-intro{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#f4c53d22,#02050add 55%,#000 100%);pointer-events:none;transition:opacity .35s ease}.match-intro-kicker{font-size:10px;letter-spacing:.35em;color:#f4c53d;margin-bottom:8px}.match-intro strong{font-size:48px;font-weight:1000;letter-spacing:-.05em;text-shadow:0 0 28px #f4c53d66}.match-intro span{font-size:10px;color:#c8d0da;margin-top:8px}.match-intro.hide{opacity:0}
-.training-level{position:absolute;right:4px;bottom:4px;background:#05080dcc;border:1px solid #f4c53d77;border-radius:3px;padding:2px 4px;font-size:7px;color:#ffe27b}
-</style>const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
+const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();resetMatchView();updateMatchHUD();}}));
 $('aim-area')?.addEventListener('pointermove',updateAimFromPointer);$('aim-area')?.addEventListener('pointerdown',e=>{updateAimFromPointer(e);if(match.half==='TOP'&&pitchState==='pitch')pointerSwing();});
