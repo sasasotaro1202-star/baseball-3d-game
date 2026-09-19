@@ -59,4 +59,19 @@
 </style><style>
 .view .lock-badge{position:absolute;z-index:3;right:5px;top:5px;font-size:8px;padding:4px 5px;border-radius:5px;background:#07101dd9;border:1px solid #ffffff20}
 .view .encyclopedia-player.locked .player-portrait img{filter:grayscale(.7) brightness(.72)}
+</style><style id="training-ui-v2">
+.training-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+.training-player{padding:6px!important;min-width:0}
+.training-portrait{height:92px!important;border-radius:10px!important;position:relative!important;overflow:hidden;background:#101b2b}
+.training-portrait img{width:100%;height:100%;display:block;object-fit:contain;object-position:center top;padding:2px}
+.training-level{position:absolute;right:4px;bottom:4px;padding:3px 5px;border-radius:5px;background:#07101de8;border:1px solid #ffffff25;font-size:8px;font-weight:900}
+.training-player .player-head{display:flex;align-items:center;justify-content:space-between;gap:3px;margin-top:5px}
+.training-player .player-head strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.training-player .player-head b{font-size:9px;white-space:nowrap}
+.training-player .player-meta{display:block;font-size:8px;color:#9eabba;margin-top:2px}
+.training-player .mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:5px}
+.training-player .mini-stats span{font-size:7px;text-align:center;background:#ffffff0b;border-radius:4px;padding:3px 1px}
+.training-player .row{gap:3px;margin-top:5px}
+.training-player .train{min-height:30px!important;padding:4px 2px!important;font-size:8px!important;border-radius:6px!important}
+@media(max-width:360px){.training-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.training-portrait{height:100px!important}}
 </style>
