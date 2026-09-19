@@ -1,0 +1,2 @@
+export const MODES=Object.freeze({HOME:'home',MATCH:'match',GACHA:'gacha',ROSTER:'roster',TRAINING:'training',COLLECTION:'collection',SETTINGS:'settings'});
+export function transition(state,next){if(!Object.values(MODES).includes(next))throw new Error('Invalid mode');return {...state,screen:next};}
