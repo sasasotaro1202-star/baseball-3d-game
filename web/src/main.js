@@ -47,7 +47,7 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
-function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));card.querySelectorAll('[data-release-id]').forEach(b=>b.onclick=()=>{const p=HISTORIC_PLAYERS.find(x=>x.id===Number(b.dataset.releaseId));if(!p)return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});}
+function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=HISTORIC_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});}
 function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');bindPlayerCards();}
 function renderTraining(){
   const players=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean);
