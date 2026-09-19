@@ -301,6 +301,24 @@ body{background:#050505}
 .limited-awakened{color:#ff8d5c;background:linear-gradient(145deg,#291008,#70200f 55%,#160906)}
 .card-type-label{display:inline-flex;padding:2px 6px;border-radius:999px;border:1px solid currentColor;font-size:9px;letter-spacing:.05em}
 .limited-badge{position:absolute;top:6px;left:6px;z-index:2;padding:3px 6px;border-radius:5px;background:#050505d9;color:#fff;font-size:9px;font-weight:900;letter-spacing:.06em}
+</style><style id="gacha-rarity-effects">
+.gacha-opening.s-rank,.gacha-opening.limited{background:radial-gradient(circle at 50% 38%,#ffffff22,#05060a 55%,#000)}
+.gacha-opening.s-rank .gacha-lights{animation:gachaSFlash .65s ease-in-out infinite alternate}
+.gacha-opening.s-rank .gacha-ball{filter:drop-shadow(0 0 18px #fff);animation:gachaSPulse .8s ease-in-out infinite alternate}
+.gacha-opening.limited .gacha-lights{animation:gachaLimitedLight .5s ease-in-out infinite alternate}
+.gacha-opening.limited .gacha-ball{filter:drop-shadow(0 0 24px #ffd76a);animation:gachaLimitedPulse .65s ease-in-out infinite alternate}
+.gacha-reveal.s-rank .pres-title{font-size:clamp(46px,16vw,96px);text-shadow:0 0 12px #fff,0 0 42px #ffd86a,0 8px 30px #000;animation:s-rank-reveal .9s cubic-bezier(.16,1.5,.3,1)}
+.gacha-reveal.limited .pres-title{font-size:clamp(40px,14vw,86px);text-shadow:0 0 12px #fff,0 0 38px #ffb84d,0 8px 30px #000;animation:limited-reveal 1s cubic-bezier(.16,1.5,.3,1)}
+.gacha-reveal.s-rank .pres-kicker{letter-spacing:.42em;font-size:12px}
+.gacha-reveal.limited .pres-kicker{letter-spacing:.38em;font-size:12px}
+.gacha-reveal.s-rank .gacha-particles,.gacha-reveal.limited .gacha-particles{animation:particle-burst .9s ease-out}
+@keyframes gachaSFlash{from{opacity:.35;transform:scale(1)}to{opacity:1;transform:scale(1.16)}}
+@keyframes gachaLimitedLight{from{opacity:.25;transform:rotate(-2deg) scale(1)}to{opacity:1;transform:rotate(2deg) scale(1.1)}}
+@keyframes gachaSPulse{to{transform:scale(1.25)}}
+@keyframes gachaLimitedPulse{to{transform:scale(1.3)}}
+@keyframes s-rank-reveal{0%{transform:scale(.25) rotate(-4deg);opacity:0;filter:blur(12px)}55%{transform:scale(1.15) rotate(1deg);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+@keyframes limited-reveal{0%{transform:scale(.2) rotate(6deg);opacity:0;filter:blur(14px)}50%{transform:scale(1.18) rotate(-1deg);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+@keyframes particle-burst{0%{transform:scale(.2);opacity:0}35%{opacity:1}100%{transform:scale(1.6);opacity:0}}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
