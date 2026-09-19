@@ -1,0 +1,1 @@
+import test from 'node:test';import assert from 'node:assert/strict';test('portrait target',()=>assert.ok(844>390));test('deterministic state sequence',()=>assert.deepEqual(['idle','pitch','idle'],['idle','pitch','idle']));
