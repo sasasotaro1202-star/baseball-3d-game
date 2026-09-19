@@ -263,6 +263,34 @@ body{background:#050505}
   #match-ui .aim-area{inset:104px 0 154px}
   #match-ui .strike-zone{width:92px;height:126px}
 }
+</style><style id="premium-encyclopedia-fix">
+#view .player-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:none!important;overflow:visible!important}
+#view .encyclopedia-card{display:block!important;min-height:170px!important;visibility:visible!important;opacity:1!important}
+#view .encyclopedia-card.locked{opacity:.72!important}
+@media(max-width:420px){#view .player-grid{grid-template-columns:1fr 1fr}}
+#presentation.gacha-page{position:fixed;inset:0;z-index:99999!important;display:flex!important;align-items:center;justify-content:center;background:#030507;overflow:hidden}
+#presentation.gacha-page .gacha-stage{position:absolute;inset:0}
+#presentation.gacha-page .gacha-sky{position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(255,218,118,.28),transparent 38%),linear-gradient(#07111d,#020407 72%)}
+#presentation.gacha-page .gacha-lights{position:absolute;inset:-20%;background:conic-gradient(from 0deg,transparent 0 20%,rgba(255,221,130,.16) 25%,transparent 30% 50%,rgba(255,221,130,.12) 55%,transparent 60% 100%);animation:presSpin 8s linear infinite}
+#presentation.gacha-page .gacha-field{position:absolute;left:-10%;right:-10%;bottom:-18%;height:48%;background:radial-gradient(ellipse at 50% 0%,#193a26 0,#07130d 55%,#020503 100%);transform:perspective(500px) rotateX(52deg)}
+#presentation.gacha-page .gacha-card-slot{position:absolute;left:50%;top:52%;width:230px;height:310px;transform:translate(-50%,-50%);display:grid;place-items:center}
+#presentation.gacha-page .pres-card{width:190px;height:265px;border:1px solid rgba(255,220,130,.7);border-radius:16px;background:linear-gradient(145deg,#111820,#050608);box-shadow:0 0 25px rgba(255,215,100,.22),inset 0 0 30px rgba(255,255,255,.04);overflow:hidden;transform:scale(.5) rotateY(25deg);opacity:0}
+#presentation.gacha-page .pres-card img{width:100%;height:100%;object-fit:cover}
+#presentation.gacha-page.gacha-reveal .pres-card{animation:cardReveal 1s cubic-bezier(.2,.8,.2,1) forwards}
+#presentation.gacha-page .pres-vignette{position:absolute;inset:0;box-shadow:inset 0 0 110px #000;pointer-events:none}
+#presentation.gacha-page .pres-kicker,.pres-title,.pres-sub{position:absolute;left:50%;transform:translateX(-50%);text-align:center;width:90%;z-index:3;text-shadow:0 3px 15px #000}
+#presentation.gacha-page .pres-kicker{top:10%;font-size:12px;letter-spacing:.35em;color:#e8cf88}
+#presentation.gacha-page .pres-title{top:14%;font-size:30px;font-weight:900;color:#fff}
+#presentation.gacha-page .pres-sub{top:21%;font-size:12px;color:#b9c0c8}
+#presentation.gacha-page .pres-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#presentation.gacha-page .pres-flash.active{animation:presFlash .26s ease-out}
+#presentation.gacha-page .gacha-particles{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,220,130,.9) 0 1px,transparent 2px);background-size:37px 43px;opacity:.25;animation:particleDrift 5s linear infinite}
+#presentation.gacha-page.s_guaranteed .pres-card,#presentation.gacha-page.limited_s .pres-card{border-color:#fff0a0;box-shadow:0 0 55px rgba(255,222,110,.8),0 0 130px rgba(255,177,55,.35)}
+#presentation.gacha-page.legend .pres-card{border-color:#fff;box-shadow:0 0 60px rgba(255,255,255,.8),0 0 140px rgba(140,190,255,.3)}
+@keyframes cardReveal{0%{opacity:0;transform:scale(.35) rotateY(75deg) translateY(70px)}65%{opacity:1;transform:scale(1.08) rotateY(-8deg) translateY(-8px)}100%{opacity:1;transform:scale(1) rotateY(0) translateY(0)}}
+@keyframes presFlash{0%{opacity:.9}100%{opacity:0}}
+@keyframes presSpin{to{transform:rotate(360deg)}}
+@keyframes particleDrift{to{background-position:0 220px}}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
