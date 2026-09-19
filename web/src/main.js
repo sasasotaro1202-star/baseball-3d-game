@@ -48,7 +48,6 @@ function showPlayer3D(id){
   const old=scene.userData.playerPreview;
   if(old)scene.remove(old);
   scene.userData.playerPreview=preview;
-  $('pitch-readout')?.textContent;
   const root=ensurePresentationLayer();
   root.className='pres-show';
   $('pres-kicker').textContent='PLAYER';
