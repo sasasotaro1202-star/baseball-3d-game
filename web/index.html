@@ -134,6 +134,65 @@ body{background:#050505}
 .pitch-control button,.match-action-pad button{border-color:#e6b431!important;background:linear-gradient(#252525,#070707)!important}
 .match-action-pad .swing-main{background:linear-gradient(#f1c03b,#744905)!important;color:#110c04!important}
 @media(max-width:430px){.hero{min-height:46vh}.view .player-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.view .compact-player .player-portrait{height:92px}}
+</style><style id="gacha-ui-v4">
+.gacha-title{text-align:center!important;color:#ffe28a;text-shadow:0 2px 8px #000}
+.gacha-balance{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:5px 0 8px;padding:7px 9px;background:#050a11;border:1px solid #f4c53d33;border-radius:5px;font-size:9px;color:#aeb9c7}
+.gacha-balance b{color:#ffe28a;font-size:13px;margin-right:auto}
+.gacha-tabs{grid-template-columns:repeat(2,1fr)!important;gap:5px!important;margin:7px 0!important}
+.gacha-tab{position:relative;min-height:58px!important;padding:7px!important;text-align:left!important;background:linear-gradient(180deg,#202b37,#080d14)!important;border:1px solid #ffffff25!important;border-radius:6px!important}
+.gacha-tab b{font-size:10px!important;color:#fff}
+.gacha-tab small{font-size:8px!important;color:#aeb9c7!important}
+.gacha-tab em{position:absolute;right:6px;top:6px;font-style:normal;font-size:7px;color:#ffe28a;border:1px solid #f4c53d55;padding:2px 4px;border-radius:3px}
+.gacha-tab.selected{background:linear-gradient(180deg,#3b3218,#161008)!important;border-color:#f4c53d!important;box-shadow:0 0 0 1px #f4c53d22,0 3px 12px #000}
+.gacha-banner-card{display:grid;grid-template-columns:.85fr 1.15fr;gap:7px;padding:9px;background:linear-gradient(135deg,#172434,#070b10);border:1px solid #f4c53d55;border-radius:7px;min-height:142px}
+.gacha-banner-copy{display:flex;flex-direction:column;justify-content:center}
+.gacha-banner-copy small{font-size:7px;letter-spacing:.18em;color:#f4c53d}
+.gacha-banner-copy h3{margin:4px 0;font-size:21px;color:#fff;font-weight:1000}
+.gacha-banner-copy p{margin:0 0 4px;color:#ffe28a;font-size:10px}
+.gacha-banner-copy b{font-size:8px;color:#aeb9c7}
+.gacha-featured{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;align-items:stretch}
+.gacha-feature-card{min-width:0;padding:3px;background:linear-gradient(145deg,#202a35,#070b10);border:1px solid #ffffff20;border-radius:4px;overflow:hidden;text-align:center}
+.gacha-feature-card.limited{border-color:#d9a52d}
+.gacha-feature-card img,.gacha-feature-card .gacha-fallback{width:100%;height:76px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#121b26}
+.gacha-feature-card strong{display:block;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.gacha-feature-card small{font-size:6px;color:#aeb9c7}
+.gacha-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:6px;margin:7px 0}
+.gacha-actions button{min-height:55px;border:1px solid #f4c53d99;border-radius:6px;color:#fff;font-weight:1000;box-shadow:0 3px 10px #0008}
+.gacha-actions button span{display:block;font-size:8px;margin-top:3px;color:#ffe28a}
+.gacha-pull-one{background:linear-gradient(180deg,#3a3a35,#111)!important}
+.gacha-pull-ten{background:linear-gradient(180deg,#e7b733,#6f4304)!important;color:#100c04!important}
+.gacha-actions button:disabled{opacity:.55}
+.banner-info{margin-top:4px!important;padding:7px!important;background:#050a11!important;border:1px solid #ffffff1d!important;border-radius:5px!important;font-size:8px!important}
+.banner-info-head{display:flex;justify-content:space-between;margin-bottom:2px}.banner-info-head b{font-size:11px;color:#ffe28a}.banner-info-head span{color:#aeb9c7}
+.banner-info>strong{font-size:9px;color:#fff}.banner-info>small{display:block;color:#aeb9c7;margin-top:2px}
+.rate-row{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:5px}
+.rate-row span{padding:3px 1px;text-align:center;background:#111923;border-radius:2px;color:#cbd5df;font-size:7px}
+.rate-row span:first-child{color:#ffe28a;border:1px solid #f4c53d44}
+.banner-note{margin-top:4px;color:#8998aa;font-size:7px}
+.gacha-results{margin-top:7px}
+.results-head{display:flex;justify-content:space-between;align-items:center;padding:5px 2px;color:#ffe28a;font-size:10px}
+.results-head small{color:#8998aa;font-size:8px}
+.gacha-result-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.gacha-result-card{position:relative;min-width:0;padding:3px;background:linear-gradient(145deg,#1a232d,#070b10);border:1px solid #ffffff18;border-radius:4px;text-align:center;overflow:hidden}
+.gacha-result-card.rank-S{border-color:#f4c53d;box-shadow:inset 0 0 16px #f4c53d18}
+.gacha-result-card.rank-A{border-color:#c08cff55}
+.gacha-result-card.limited{border-color:#f4c53d}
+.gacha-result-card img,.gacha-result-card .gacha-fallback{width:100%;height:67px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#111923}
+.gacha-result-card strong{display:block;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.gacha-result-card small{display:block;font-size:6px;color:#aeb9c7}
+.result-badge{position:absolute;z-index:2;left:3px;top:3px;min-width:15px;padding:2px 3px;background:#050505e8;color:#ffe28a;border:1px solid #f4c53d77;border-radius:2px;font-size:7px;font-weight:1000}
+.gacha-result-card em{display:block;font-size:6px;color:#61e6a7;font-style:normal}
+.gacha-empty,.gacha-error{padding:20px 8px;text-align:center;border:1px solid #ffffff18;background:#050a11;border-radius:5px}
+.gacha-empty b,.gacha-error b{display:block;color:#ffe28a;font-size:14px}.gacha-empty small,.gacha-error small{display:block;color:#8998aa;font-size:8px;margin-top:4px}
+.gacha-error b{color:#ff9a9a}
+.gacha-actions button.loading{filter:brightness(.75)}
+@media(max-width:380px){
+  .gacha-banner-card{grid-template-columns:1fr;min-height:0}
+  .gacha-feature-card img,.gacha-feature-card .gacha-fallback{height:62px}
+  .gacha-result-grid{grid-template-columns:repeat(5,1fr)}
+  .gacha-result-card img,.gacha-result-card .gacha-fallback{height:55px}
+  .rate-row span{font-size:6px}
+}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
