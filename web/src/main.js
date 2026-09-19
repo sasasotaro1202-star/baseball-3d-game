@@ -27,6 +27,24 @@ const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,20,20),new THREE.MeshStan
 const pitcher=createPlayerModel(modelConfig(ALL_PLAYERS[0]));pitcher.position.set(0,0,3);scene.add(pitcher);
 const batter=createPlayerModel(modelConfig(ALL_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;scene.add(batter);
 const fielders=[[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]].map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
+
+/* Lightweight 3D stadium dressing: geometry only, no external assets. */
+function addFieldLine(a,b,width=.035){
+  const dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
+  const m=new THREE.Mesh(new THREE.BoxGeometry(width,.012,len),new THREE.MeshBasicMaterial({color:0xffffff}));
+  m.position.set((a[0]+b[0])/2,.02,(a[1]+b[1])/2);m.rotation.y=-Math.atan2(dx,dz);scene.add(m);
+}
+addFieldLine([-8,-8],[0,-8]);addFieldLine([0,-8],[8,-8]);addFieldLine([8,-8],[0,0]);addFieldLine([0,0],[-8,-8]);
+for(const x of [-30,-20,-10,0,10,20,30]){
+  const stand=new THREE.Mesh(new THREE.BoxGeometry(7,4,1.5),new THREE.MeshStandardMaterial({color:0x1b2633,roughness:.9}));
+  stand.position.set(x,2,19);scene.add(stand);
+}
+const backstop=new THREE.Mesh(new THREE.BoxGeometry(46,8,.45),new THREE.MeshStandardMaterial({color:0x17212b,roughness:.95}));
+backstop.position.set(0,4,24);scene.add(backstop);
+const wall=new THREE.Mesh(new THREE.CylinderGeometry(28,28,3,64,1,true,0,Math.PI),new THREE.MeshStandardMaterial({color:0x0d3b24,roughness:1,side:THREE.DoubleSide}));
+wall.rotation.y=Math.PI;wall.position.set(0,1,9);scene.add(wall);
+const baseMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.7});
+for(const [x,z] of [[0,-8],[8,-8],[8,0],[0,0]]){const b=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.5),baseMat);b.position.set(x,.1,z);b.rotation.y=Math.PI/4;scene.add(b);}
 let fieldingFrom={x:0,z:0};let fielderTarget=null;
 
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER';
