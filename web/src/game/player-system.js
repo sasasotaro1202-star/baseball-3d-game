@@ -46,12 +46,12 @@ export function ensureDevelopment(save,id){
 }
 export function trainPlayer(save,player,focus='contact'){
   const next=ensureDevelopment(save,player.id);
-  if((next.currency||0)<DEVELOPMENT_COST)return{state:next,error:'NOT_ENOUGH_CURRENCY'};
+  if(!next.unlimitedCoins && (next.currency||0)<DEVELOPMENT_COST)return{state:next,error:'NOT_ENOUGH_CURRENCY'};
   const p={...next.progress.players[player.id]};
   const stats={...(p.stats||{})};
   stats[focus]=Math.min(15,(stats[focus]||0)+1);
   p.level=(p.level||1)+1;p.xp=(p.xp||0)+DEVELOPMENT_XP;p.stats=stats;
-  return{state:{...next,currency:next.currency-DEVELOPMENT_COST,progress:{...next.progress,players:{...next.progress.players,[player.id]:p}}},result:p};
+  return{state:{...next,currency:next.unlimitedCoins?next.currency:next.currency-DEVELOPMENT_COST,progress:{...next.progress,players:{...next.progress.players,[player.id]:p}}},result:p};
 }
 export function developmentFor(save,id){return save.progress?.players?.[id]||{level:1,xp:0,stats:{}};}
 export function duplicateReward(rarity){return rarity==='LEGEND'?500:rarity==='STAR'?300:rarity==='PRO'?150:75;}
