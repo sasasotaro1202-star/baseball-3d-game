@@ -22,7 +22,7 @@ export function modelConfig(player,progress={}){
   const hue=(Number(player.id)*0.137)%1;
   const color=new Uint8Array([Math.floor(50+130*hue),Math.floor(70+90*(1-hue)),Math.floor(120+80*hue)]);
   const uniform=(color[0]<<16)|(color[1]<<8)|color[2];
-  return {uniform,scale:0.94+(s.power/99)*0.12};
+  return {uniform,skin:player.skinColor??0xc98262,scale:0.94+(s.power/99)*0.12,profile:{height:player.height||1,build:player.build||'athletic',batting:player.batting||'right',signature:player.signature||'standard'}};
 }
 export function aiProfile(player,progress={}){
   const s=playerStats(player,progress);
