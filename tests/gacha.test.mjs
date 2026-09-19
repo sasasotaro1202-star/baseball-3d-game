@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {roll} from '../web/src/data/gacha.js';
+test('gacha probabilities are deterministic at boundaries',()=>{assert.equal(roll(()=>0),'LEGEND');assert.equal(roll(()=>.999999),'ROOKIE')});
