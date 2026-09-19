@@ -1,4 +1,4 @@
-import {SPECIAL_ABILITIES,abilityRate,resolveAbility} from '../data/special-abilities.js';
+import {SPECIAL_ABILITIES,abilityRate,resolveAbility,abilityEffects} from '../data/special-abilities.js';
 
 const DEFAULTS={power:70,contact:70,field:70,control:70,speed:70,arm:70,stamina:70,vision:70};
 export const DEVELOPMENT_COST=100;
@@ -33,9 +33,9 @@ export function triggerSpecialAbility(player,id,rng=Math.random){
   const entry=(player.abilities||[]).find(x=>x[0]===id);
   return entry?resolveAbility(id,rng,entry[1]||0):false;
 }
-export function cardModel(player,progress={}){
+export function abilityStatEffects(player){return (player.abilities||[]).map(([id,modifier=0])=>({id,name:SPECIAL_ABILITIES.find(x=>x.id===id)?.name||id,ratePercent:Math.round(abilityRate(id,modifier)*100),effects:abilityEffects(id)}));}\nexport function cardModel(player,progress={}){
   const s=playerStats(player,progress);
-  return {id:player.id,name:player.name,era:player.era,pos:player.pos,overall:overall(player,progress),stats:s,rarity:player.rarity||'LEGEND',rank:player.rank||'B',abilities:specialAbilities(player),achievements:player.achievements||[]};
+  return {id:player.id,name:player.name,era:player.era,pos:player.pos,overall:overall(player,progress),stats:s,rarity:player.rarity||'LEGEND',rank:player.rank||'B',abilities:specialAbilities(player),abilityEffects:abilityStatEffects(player),achievements:player.achievements||[]};
 }
 export function modelConfig(player,progress={}){
   const s=playerStats(player,progress);
