@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createMatchState,applyOutcome,resolveContact,resolvePitch} from '../web/src/game/simulation.js';
+test('three outs rotate from top to bottom',()=>{let s=createMatchState();s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');assert.equal(s.half,'BOTTOM');assert.equal(s.inning,1);assert.equal(s.outs,0);});
+test('home run scores batter and clears bases',()=>{let s=createMatchState();s.bases=[true,true,false];s=applyOutcome(s,'HOME_RUN');assert.equal(s.score.away,3);assert.deepEqual(s.bases,[false,false,false]);});
+test('contact resolver is deterministic with injected RNG',()=>{assert.equal(resolveContact({timing:1,power:1,contact:1,rng:()=>0}),'HOME_RUN');});
+test('pitch resolver always returns a legal outcome',()=>{const legal=new Set(['BALL','STRIKE','FOUL','SINGLE','DOUBLE','TRIPLE','HOME_RUN','OUT']);for(const x of [0,.1,.2,.4,.8,.99])assert.ok(legal.has(resolvePitch({rng:()=>x})));});
