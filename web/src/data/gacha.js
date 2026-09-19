@@ -6,12 +6,12 @@ export const GACHA_BANNERS=Object.freeze([
 {id:'speed',name:'SPEED & DEFENSE',subtitle:'走守特化スカウト',kind:'走守型',rateBonus:'走力・守備型を優先',filter:p=>Math.max(p.speed||0,p.field||0)>=80},
 {id:'two-way',name:'TWO-WAY',subtitle:'二刀流・投手型スカウト',kind:'投手/二刀流',rateBonus:'投手能力を優先',filter:p=>p.pos?.includes('P')||p.abilities?.some(a=>a[0]==='two_way')}
 ]);
-export const RANK_RATES={S:.05,A:.12,B:.20,C:.25,D:.23,F:.15};
+export const RANK_RATES={S:.03,A:.08,B:.14,C:.20,D:.25,F:.30};
 export const LIMITED_RATE=.06;
-export const RARITIES={LEGEND:{rate:.01},STAR:{rate:.05},PRO:{rate:.16},ROOKIE:{rate:.48},MOB:{rate:.30}};
+export const RARITIES={LEGEND:{rate:.005},STAR:{rate:.025},PRO:{rate:.10},ROOKIE:{rate:.32},MOB:{rate:.55}};
 export function rollRank(rng=Math.random){const x=rng();let c=0;for(const [rank,rate] of Object.entries(RANK_RATES)){c+=rate;if(x<c)return rank}return'F'}
 export function rollLimited(rng=Math.random){return rng()<LIMITED_RATE}
 export function roll(rng=Math.random){const x=rng();let c=0;for(const [rarity,{rate}] of Object.entries(RARITIES)){c+=rate;if(x<c)return rarity}return'MOB'}
 function weightedPick(pool,rank,rng){const byRank=pool.filter(p=>p.rank===rank);const source=byRank.length?byRank:pool;return source[Math.floor(rng()*source.length)]}
 function mobPool(players){const p=players.filter(x=>x.rank==='F'||x.rank==='D'||x.rank==='C'||x.rarity==='MOB');return p.length?p:players}
-export function draw(players,count=1,rng=Math.random,bannerId='standard'){return Array.from({length:count},()=>{const banner=GACHA_BANNERS.find(b=>b.id===bannerId)||GACHA_BANNERS[0];const limited=rollLimited(rng);const rank=rollRank(rng);let pool=players.filter(p=>banner.filter(p));if(!pool.length)pool=players;const limitedPool=pool.filter(p=>p.limited);const normalPool=pool.filter(p=>!p.limited);let source=limited&&limitedPool.length?limitedPool:normalPool.length?normalPool:pool;const mobRoll=rank==='F'||rng()<.22;if(mobRoll)source=mobPool(source);const player=weightedPick(source,rank,rng);return{rarity:player.rarity||roll(rng),rank:player.rank||rank,limited:!!player.limited,player,banner:banner.id}})}
+export function draw(players,count=1,rng=Math.random,bannerId='standard'){return Array.from({length:count},()=>{const banner=GACHA_BANNERS.find(b=>b.id===bannerId)||GACHA_BANNERS[0];const limited=rollLimited(rng);const rank=rollRank(rng);let pool=players.filter(p=>banner.filter(p));if(!pool.length)pool=players;const limitedPool=pool.filter(p=>p.limited);const normalPool=pool.filter(p=>!p.limited);let source=limited&&limitedPool.length?limitedPool:normalPool.length?normalPool:pool;const mobRoll=rank==='F'||rng()<.55;if(mobRoll)source=mobPool(source);const player=weightedPick(source,rank,rng);return{rarity:player.rarity||roll(rng),rank:player.rank||rank,limited:!!player.limited,player,banner:banner.id}})}
