@@ -5,4 +5,14 @@
 .portrait-fallback span{font-size:30px;font-weight:900}
 .portrait-fallback small{font-size:9px;opacity:.65;margin-top:5px}
 .player-card{min-width:0}.release-player{width:100%;margin-top:10px;padding:10px;border-radius:12px;font-size:12px}.player-card{cursor:pointer}
+</style><style>
+.view{z-index:10;justify-content:flex-start;padding:0;overflow:hidden;background:#07101d;pointer-events:auto}
+.view .card{width:100%;height:100%;max-height:none;overflow-y:auto;overflow-x:hidden;border:0;border-radius:0;padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 24px);background:linear-gradient(180deg,#0b1728 0%,#07101d 100%);backdrop-filter:none}
+.view .card h2{font-size:28px;margin-top:8px}
+.view .card p{font-size:14px}
+.view .player-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.view .player-card{padding:12px}
+.view .player-portrait{height:190px}
+.view .action{min-height:50px}
+.view .back{position:sticky;bottom:0;width:100%;margin-top:16px;background:#14253aee}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home"><div class="hero"><div class="hero-kicker">2026 SEASON</div><h1>BASEBALL 3D</h1><p>PLAY • BUILD • COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span></div></div><div class="menu"><button class="primary" data-mode="match">試合をはじめる</button><button data-mode="gacha">スカウト</button><button data-mode="roster">オーダー</button><button data-mode="training">育成</button><button data-mode="collection">選手名鑑</button><button data-mode="settings">設定</button></div></div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden"><div class="match-top"><div class="inning-label" id="inning-label">1回表</div><div class="scoreboard"><span>AWAY <b id="away-score">0</b></span><span class="score-dash">-</span><span>HOME <b id="home-score">0</b></span></div><div class="count-label" id="count-label">B 0 / S 0 / O 0</div></div><div id="matchhud" class="matchhud">1回表　0 - 0</div><div class="atbat-card"><div><span class="small">NEXT BATTER</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">PITCH</span><b id="pitch-readout">READY</b></div></div><div class="matchcontrols"><button id="pitch"><span>投球</span><small>AI PITCH</small></button><button id="swing" class="swing-btn"><span>打つ</span><small>タイミング</small></button><button id="matchback" class="danger"><span>終了</span><small>ホーム</small></button></div></div></div><script type="module" src="./src/main.js"></script></body></html>
