@@ -315,6 +315,18 @@ window.__fallbackRender=function(mode){
         resultBox.innerHTML='<b>スカウト処理エラー</b><p>'+String(err?.message||err)+'</p>';
       }finally{one.disabled=false;ten.disabled=false;}
     };
+    const fallbackTabs=document.querySelectorAll('.gacha-tab');
+    fallbackTabs.forEach((tab)=>{
+      tab.onclick=()=>{
+        fallbackTabs.forEach(x=>x.classList.remove('selected'));
+        tab.classList.add('selected');
+        const name=tab.querySelector('b')?.textContent||'SCOUT';
+        const info=document.getElementById('fallback-results');
+        if(info)info.innerHTML='<b>'+name+' 選択中</b><p>このバナーからスカウトできます。</p>';
+      };
+      tab.ontouchend=(e)=>{e.preventDefault();tab.click()};
+      tab.style.pointerEvents='auto';
+    });
     const pull1=document.getElementById('fallback-pull'),pull10=document.getElementById('fallback-pull10');
     pull1.onclick=()=>doPull(1); pull10.onclick=()=>doPull(10);
     pull1.ontouchend=(e)=>{e.preventDefault();doPull(1)}; pull10.ontouchend=(e)=>{e.preventDefault();doPull(10)};
