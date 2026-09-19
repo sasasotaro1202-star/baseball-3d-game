@@ -319,6 +319,16 @@ body{background:#050505}
 @keyframes s-rank-reveal{0%{transform:scale(.25) rotate(-4deg);opacity:0;filter:blur(12px)}55%{transform:scale(1.15) rotate(1deg);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes limited-reveal{0%{transform:scale(.2) rotate(6deg);opacity:0;filter:blur(14px)}50%{transform:scale(1.18) rotate(-1deg);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes particle-burst{0%{transform:scale(.2);opacity:0}35%{opacity:1}100%{transform:scale(1.6);opacity:0}}
+</style><style id="roster-training-photo-fix">
+.order-starting-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0 14px}
+.lineup-player{position:relative;background:linear-gradient(180deg,#1b1b1b,#080808);border:1px solid #9d741e;border-radius:6px;padding:5px;text-align:center;overflow:hidden}
+.lineup-player .lineup-portrait{height:92px!important;margin:0 0 5px!important;border-radius:4px!important}
+.lineup-player strong{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lineup-player small{display:block;font-size:7px;color:#aaa;margin-top:2px}
+.lineup-number{position:absolute;z-index:5;top:3px;left:3px;background:#f4c53d;color:#111;border-radius:3px;padding:2px 4px;font-size:8px;font-weight:900}
+.order-section-title{font-size:12px;color:#ffe27a;margin:8px 0}
+.training-grid .training-portrait{height:105px!important}
+.training-player .player-portrait img{object-position:50% 20%}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
