@@ -217,6 +217,7 @@ function renderGacha(){
 
   async function runPull(count){
     if(busy)return;
+    resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT PROCESSING</b><small>選手抽選を実行しています…</small></div>';
     const cost=250*count;
     if(!save.unlimitedCoins && save.currency<cost){
       resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+save.currency.toLocaleString('ja-JP')+'</small></div>';
@@ -240,7 +241,7 @@ function renderGacha(){
       renderResults(results);
       const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
       if(best?.result?.player){
-        await playGachaReveal({rarity:best.result.rarity,name:best.result.player.name,image:best.result.player.image,rank:best.result.rank,limited:best.result.limited,duplicate:best.duplicate,banner:bannerId,cardType:best.result.player.cardType,limitedTheme:best.result.player.limitedTheme});
+        try{await Promise.race([playGachaReveal({rarity:best.result.rarity,name:best.result.player.name,image:best.result.player.image,rank:best.result.rank,limited:best.result.limited,duplicate:best.duplicate,banner:bannerId,cardType:best.result.player.cardType,limitedTheme:best.result.player.limitedTheme}),new Promise(r=>setTimeout(r,1800))]);}catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
       }
     }catch(err){
       console.error(err);
