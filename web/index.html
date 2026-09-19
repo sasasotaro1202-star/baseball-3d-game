@@ -293,6 +293,7 @@ window.__fallbackRender=function(mode){
     collection:'<h2>選手名鑑</h2><p>獲得選手を確認できます。</p><div class="player-grid"><div class="player-card"><strong>選手データ</strong><p>スカウトで選手を獲得すると、ここにカードが追加されます。</p></div></div>',
     settings:'<h2>設定</h2><p>ゲーム設定・保存データ</p><div class="card" style="padding:12px;background:#050a11"><b>ローカル保存</b><p>ブラウザ内にゲーム状態を保存します。</p></div>'
   };
+  card.style.pointerEvents='auto';
   card.innerHTML=(pages[mode]||'<h2>HOME</h2><p>ホームへ戻りました。</p>')+'<button class="action back" id="fallback-back">ホームへ戻る</button>';
   document.getElementById('fallback-back').onclick=()=>window.__fallbackMode('home');
   if(mode==='gacha'){
@@ -314,8 +315,10 @@ window.__fallbackRender=function(mode){
         resultBox.innerHTML='<b>スカウト処理エラー</b><p>'+String(err?.message||err)+'</p>';
       }finally{one.disabled=false;ten.disabled=false;}
     };
-    document.getElementById('fallback-pull').onclick=()=>doPull(1);
-    document.getElementById('fallback-pull10').onclick=()=>doPull(10);
+    const pull1=document.getElementById('fallback-pull'),pull10=document.getElementById('fallback-pull10');
+    pull1.onclick=()=>doPull(1); pull10.onclick=()=>doPull(10);
+    pull1.ontouchend=(e)=>{e.preventDefault();doPull(1)}; pull10.ontouchend=(e)=>{e.preventDefault();doPull(10)};
+    pull1.style.pointerEvents='auto'; pull10.style.pointerEvents='auto';
   }
 };
 window.__fallbackMode=function(mode,force){
