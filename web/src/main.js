@@ -193,7 +193,7 @@ function renderCollection(){
 }
 function renderGacha(){
   const escape=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const rankRate=(rank)=>({S:'0.5%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'}[rank]||'-');
+  const rankRate=(rank)=>({S:'0.1%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'}[rank]||'-');
   let bannerId=GACHA_BANNERS[0].id,busy=false;
 
   card.innerHTML=`
@@ -230,7 +230,7 @@ function renderGacha(){
       <div class="banner-info-head"><b>${escape(b.name)}</b><span>${escape(b.kind)}</span></div>
       <strong>${escape(b.subtitle)}</strong>
       <small>${escape(b.rateBonus)}</small>
-      <div class="rate-row"><span>S 0.5%</span><span>A 8%</span><span>B 15%</span><span>C 22%</span><span>D 25%</span><span>F 29.5%</span></div>
+      <div class="rate-row"><span>S 0.1%</span><span>A 8%</span><span>B 15%</span><span>C 22%</span><span>D 25%</span><span>F 29.5%</span></div>
       <div class="banner-note">MOB・低ランク選手も多く登場。Sランクは極めて低確率。</div>
     `;
     $('gacha-banner-card').innerHTML=`
