@@ -291,7 +291,17 @@ body{background:#050505}
 @keyframes presFlash{0%{opacity:.9}100%{opacity:0}}
 @keyframes presSpin{to{transform:rotate(360deg)}}
 @keyframes particleDrift{to{background-position:0 220px}}
-</style><style id="photo-reliability">.player-portrait{position:relative;background:#101827}.player-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block;background:#101827}.player-portrait img[src]{min-height:100%}.portrait-fallback{position:absolute;inset:0}.portrait-fallback small{font-size:9px;opacity:.6}</style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
+</style><style id="photo-reliability">.player-portrait{position:relative;background:#101827}.player-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block;background:#101827}.player-portrait img[src]{min-height:100%}.portrait-fallback{position:absolute;inset:0}.portrait-fallback small{font-size:9px;opacity:.6}</style><style id="limited-card-types">
+.compact-player.limited-player{position:relative;border-width:2px;overflow:hidden}
+.compact-player.limited-player:after{content:'';position:absolute;inset:0;pointer-events:none;border:1px solid currentColor;opacity:.35}
+.limited-selection{color:#f3d27a;background:linear-gradient(145deg,#151515,#2a2110 55%,#0c0c0c)}
+.limited-anniversary{color:#ffcf70;background:linear-gradient(145deg,#201126,#4b173d 55%,#15101d)}
+.limited-best9{color:#8fd9ff;background:linear-gradient(145deg,#081827,#123c59 55%,#071018)}
+.limited-legend_ob{color:#d9d9e8;background:linear-gradient(145deg,#171724,#39394c 55%,#101018)}
+.limited-awakened{color:#ff8d5c;background:linear-gradient(145deg,#291008,#70200f 55%,#160906)}
+.card-type-label{display:inline-flex;padding:2px 6px;border-radius:999px;border:1px solid currentColor;font-size:9px;letter-spacing:.05em}
+.limited-badge{position:absolute;top:6px;left:6px;z-index:2;padding:3px 6px;border-radius:5px;background:#050505d9;color:#fff;font-size:9px;font-weight:900;letter-spacing:.06em}
+</style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
 <button class="primary" data-mode="match">試合をはじめる</button>
