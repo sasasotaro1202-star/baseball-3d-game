@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {HISTORIC_PLAYERS} from '../web/src/data/players.js';
+test('player IDs are unique and core attributes are bounded',()=>{const ids=HISTORIC_PLAYERS.map(p=>p.id);assert.equal(new Set(ids).size,ids.length);for(const p of HISTORIC_PLAYERS){assert.ok(p.name);assert.ok(p.pos);assert.ok(p.power>=0&&p.power<=100);assert.ok(p.contact>=0&&p.contact<=100);}});
