@@ -56,7 +56,7 @@ function playerCards(){
     const image=p.image||'';
     const limited=p.limited===true;
     const type=p.cardType||'STANDARD';
-    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
+    const typeLabel={SELECTION:'SELECTION',ANNIVERSARY:'ANNIVERSARY',BEST9:'BEST 9',LEGEND_OB:'LEGEND OB',AWAKENED:'覚醒選手',CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
     const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%<button type="button" class="ability-info" data-ability="'+a.id+'">i</button></span>').join('');
     return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
       '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.parentElement.innerHTML=\'<div class=\"portrait-fallback\"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>\'">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>'+
