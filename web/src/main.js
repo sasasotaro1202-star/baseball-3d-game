@@ -1,4 +1,14 @@
+import * as THREE from 'three';
 import {ALL_PLAYERS} from './data/players.js';
+import {pullOnce} from './game/gacha-service.js';
+import {createMatchState,resolvePitch,applyOutcome} from './game/simulation.js';
+import {loadSave,saveGame} from './game/save.js';
+import {modeLabel} from './game/ui.js';
+import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
+import {ensurePresentationLayer,playGachaReveal,playMatchEvent} from './game/presentation.js';
+import {createPlayerModel,animatePlayer} from './game/player-models.js';
+import {choosePitch,chooseSwing} from './game/ai.js';
+import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward,releasePlayer} from './game/player-system.js';
 function encyclopediaCards(){
   return ALL_PLAYERS.map(p=>{
     const owned=save.collection.includes(p.id);
