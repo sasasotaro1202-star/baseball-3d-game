@@ -1,0 +1,3 @@
+export const RARITIES={LEGEND:{rate:0.01},STAR:{rate:0.09},PRO:{rate:0.30},ROOKIE:{rate:0.60}};
+export function roll(rng=Math.random){const x=rng();let c=0;for(const [rarity,{rate}] of Object.entries(RARITIES)){c+=rate;if(x<c)return rarity}return 'ROOKIE'}
+export function draw(players,count=1,rng=Math.random){return Array.from({length:count},()=>({rarity:roll(rng),player:players[Math.floor(rng()*players.length)]}))}
