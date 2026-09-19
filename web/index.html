@@ -329,6 +329,51 @@ body{background:#050505}
 .order-section-title{font-size:12px;color:#ffe27a;margin:8px 0}
 .training-grid .training-portrait{height:105px!important}
 .training-player .player-portrait img{object-position:50% 20%}
+</style><style id="match-console-presentation">
+#match-ui{background:linear-gradient(180deg,#02040700 0 48%,#02040755 72%,#020407e8 100%);font-family:system-ui,-apple-system,sans-serif}
+#match-ui:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0008,transparent 22%,transparent 78%,#0008),radial-gradient(ellipse at 50% 45%,transparent 30%,#0006 100%);z-index:2}
+#match-ui .match-stage{z-index:1}
+#match-premium-hud{position:absolute;inset:0;z-index:8;pointer-events:none;color:#fff;text-shadow:0 2px 5px #000}
+.mph-top{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:min(94vw,520px);height:58px;display:grid;grid-template-columns:1fr 74px 1fr;background:linear-gradient(180deg,#111820ee,#05070ae8);border:1px solid #ffffff28;border-radius:7px;box-shadow:0 7px 24px #0008;overflow:hidden}
+.mph-team{display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:linear-gradient(90deg,#0a1624,#162b3b);border-right:1px solid #ffffff18}
+.mph-team.mph-home{background:linear-gradient(90deg,#291b0a,#0d0b07);border-left:1px solid #ffffff18;border-right:0}
+.mph-team b{font-size:9px;letter-spacing:.08em;color:#d4dde6;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mph-team strong{font-size:25px;line-height:1}
+.mph-inning{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#070a0e}
+.mph-inning small{font-size:9px;color:#f3cf6a;font-weight:900}
+.mph-inning b{font-size:8px;letter-spacing:2px;color:#8893a0;margin-top:5px}
+.mph-batter{position:absolute;top:73px;left:12px;display:grid;grid-template-columns:auto auto;gap:3px 7px;align-items:center;background:#05080dcc;border-left:3px solid #f0c74f;border-radius:3px;padding:6px 9px;min-width:150px}
+.mph-batter span{font-size:12px;font-weight:900;grid-column:1/-1}
+.mph-batter b{font-size:8px;color:#f4cf67}
+.mph-batter small{font-size:8px;color:#aab3bd}
+.mph-count{position:absolute;top:73px;right:12px;display:flex;gap:4px}
+.mph-count b{font-size:9px;background:#05080dcc;border:1px solid #ffffff22;padding:5px 7px;border-radius:3px}
+.mph-base{position:absolute;right:14px;top:112px;width:70px;height:58px}
+.mph-base i{position:absolute;width:15px;height:15px;border:2px solid #cbd5df;transform:rotate(45deg);background:#10151bdd;transition:.18s}
+.mph-base i[data-base="0"]{left:28px;top:37px}
+.mph-base i[data-base="1"]{right:4px;top:21px}
+.mph-base i[data-base="2"]{left:28px;top:5px}
+.mph-base i[data-base="3"]{left:4px;top:21px}
+.mph-base i.on{background:#f0c64e;border-color:#fff;box-shadow:0 0 12px #f0c64e}
+#mph-event{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.7);font-size:clamp(25px,9vw,54px);font-weight:1000;letter-spacing:.08em;opacity:0;white-space:nowrap;text-align:center}
+#mph-event.show{animation:mphEvent .9s cubic-bezier(.16,1.4,.3,1)}
+#mph-event.hr{color:#ffe17a;text-shadow:0 0 16px #ff9d2e,0 5px 20px #000}
+#mph-event.hit{color:#fff}
+#mph-event.strike{color:#b9d9ff}
+#mph-event.ball{color:#ddd}
+#mph-speed{position:absolute;left:50%;bottom:152px;transform:translateX(-50%);font-size:12px;font-weight:900;opacity:.85}
+@keyframes mphEvent{0%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(-3deg)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(0)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.04)}}
+#match-ui .pitch-control{z-index:10}
+#match-ui .match-action-pad{z-index:10}
+#match-ui .aim-area{z-index:5}
+#match-ui .strike-zone{box-shadow:0 0 0 1px #ffffff22,0 0 28px #0008}
+#match-ui .swing-main{min-height:58px;border-radius:8px;font-size:18px;font-weight:1000;box-shadow:0 5px 18px #0008}
+#match-ui .pitch-control button{min-height:38px;border-radius:5px;font-weight:800;background:linear-gradient(#172330,#080d12);border:1px solid #ffffff2a}
+@media(max-width:520px){
+ .mph-top{height:54px;width:96vw;grid-template-columns:1fr 66px 1fr}
+ .mph-team{padding:0 8px}.mph-team strong{font-size:22px}.mph-batter{top:67px;left:8px}.mph-count{top:67px;right:8px}.mph-base{top:105px;right:8px}
+ #mph-event{top:40%}.mph-speed{bottom:145px}
+}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
