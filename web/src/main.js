@@ -107,7 +107,7 @@ function renderGacha(){
   $('pull').onclick=async()=>{if(busy)return;busy=true;const btn=$('pull');btn.disabled=true;btn.textContent='演出中…';try{
     const r=pullOnce(save,ALL_PLAYERS,undefined,bannerId);if(r.error){$('reveal').innerHTML='<b>コイン不足</b><small>必要コイン 250</small>';return}
     save=r.state;persist();const p=r.result.player;$('reveal').innerHTML='<div class="reveal-result">'+(p.image?'<img src="'+p.image+'" alt="'+p.name+'">':'')+'<b>'+p.name+'</b><span>'+r.result.rank+' RANK · '+r.result.rarity+'</span></div>';
-    await playGachaReveal({rarity:r.result.rarity,name:p.name,image:p.image,rank:r.result.rank,limited:r.result.limited,duplicate:r.duplicate,banner:bannerId});
+    await playGachaReveal({rarity:r.result.rarity,name:p.name,image:p.image,rank:r.result.rank,limited:r.result.limited,duplicate:r.duplicate,banner:bannerId,cardType:p.cardType,limitedTheme:p.limitedTheme});
   }catch(err){console.error(err);$('reveal').innerHTML='<b>スカウト処理を完了できませんでした</b><small>もう一度操作できます</small>';}finally{busy=false;btn.disabled=false;btn.textContent='このスカウトを引く';}};
 }
 function updateAimUI(){const el=$('aim-cursor');if(!el)return;el.style.left=`${50+aimTarget.x*34}%`;el.style.top=`${50-aimTarget.y*28}%`;el.classList.toggle('active',pitchState==='idle');const p=$('trajectory');if(p){p.style.left=`${50+aimTarget.x*34}%`;p.style.top=`${50-aimTarget.y*28}%`;p.classList.toggle('active',match.half==='BOTTOM'&&pitchState==='idle');}document.querySelectorAll('[data-pitch]').forEach(b=>b.classList.toggle('selected',b.dataset.pitch===selectedPitch));const help=$('aim-help');if(help)help.textContent=match.half==='BOTTOM'?'投球：ドラッグでコース指定 → 投球':'打撃：ドラッグでミートカーソル移動 → 投球を見てスイング';}
