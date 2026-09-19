@@ -21,4 +21,12 @@ export const LIMITED_PLAYERS=[
 {id:104,basePlayerId:6,image:HISTORIC_PLAYERS[5].image,name:'Ichiro Suzuki - Lightning',era:'Limited',pos:'OF',rarity:'LIMITED',rank:'S',limited:true,skinColor:HISTORIC_PLAYERS[5].skinColor,build:'lean',batting:'left',signature:'ichiro',power:62,contact:97,field:93,speed:96,arm:92,control:60,stamina:95,vision:96,achievements:['限定強化カード','コンタクト+2','走力+2'],abilities:[['legend_contact',.09],['legend_speed',.08],['speedster',.08]]},
 {id:105,basePlayerId:4,image:HISTORIC_PLAYERS[3].image,name:'Hank Aaron - Hammer',era:'Limited',pos:'OF',rarity:'LIMITED',rank:'A',limited:true,cardType:'MOMENT',limitedTheme:'HAMMER',skinColor:HISTORIC_PLAYERS[3].skinColor,build:'athletic',batting:'right',signature:'aaron',power:94,contact:90,field:80,speed:72,arm:82,control:60,stamina:92,vision:92,achievements:['限定強化カード','打撃+2','安定感+2'],abilities:[['power_hitter',.08],['contact_hitter',.07],['consistency',.08]]}
 ];
-export const ALL_PLAYERS=[...HISTORIC_PLAYERS,...LIMITED_PLAYERS];
+
+// Common/MOB pool: intentionally ordinary fictional depth players. These are not historical identities.
+export const MOB_PLAYERS=Array.from({length:40},(_,i)=>{
+  const id=1000+i, n=i+1;
+  const names=['MOB Rookie','Reserve Player','Utility Player','Farm Player'];
+  const base=48+(i%8)*2;
+  return {id,name:`${names[i%names.length]} ${String(n).padStart(2,'0')}`,era:'COMMON',pos:['OF','IF','2B','3B','C','P'][i%6],rarity:'MOB',rank:'F',build:i%3===0?'lean':'athletic',batting:i%2?'right':'left',power:Math.min(68,base+(i%5)),contact:Math.min(70,base-2+(i%6)),field:Math.min(72,base+(i%7)),speed:Math.min(72,base+(i%9)),arm:Math.min(70,base-1+(i%8)),control:Math.min(70,base+(i%6)),stamina:Math.min(72,base+3+(i%6)),vision:Math.min(70,base+(i%5)),achievements:['一般選手','成長枠'],abilities:i%4===0?[['consistency',.02]]:i%4===1?[['base_running',.01]]:[]};
+});
+export const ALL_PLAYERS=[...HISTORIC_PLAYERS,...LIMITED_PLAYERS,...MOB_PLAYERS];
