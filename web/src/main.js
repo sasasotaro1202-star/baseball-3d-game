@@ -136,7 +136,84 @@ function choosePitchManual(type){if(pitchState!=='idle'||match.ended||match.half
 function resetMatchView(){cameraMode='BATTER';camera.position.set(0,7.5,18);camera.lookAt(0,2,-5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();}
 function aiBatterAtBat(){const batterPlayer=ALL_PLAYERS[4];const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',profile:aiProfile(batterPlayer,developmentFor(save,batterPlayer.id))});const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));const contact=decision.action==='TAKE'?0.08:decision.contact;const outcome=decision.action==='TAKE'?((Math.random()<.58)?'BALL':'STRIKE'):resolvePitch({pitch:window.__lastPitch||'FASTBALL',timing,contact,power:.75});finishPlay(outcome);}
 function pointerSwing(){swing();}
-const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
+
+/* Premium console-baseball presentation layer. Clean-room UI; no proprietary assets/code. */
+function lineupPlayer(index){
+  const ids=save.collection||[];
+  return ids.length?ALL_PLAYERS.find(p=>p.id===ids[index%ids.length])||ALL_PLAYERS[index%ALL_PLAYERS.length]:ALL_PLAYERS[index%ALL_PLAYERS.length];
+}
+function miniPlayer(p,label){
+  const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'';
+  return '<div class="lineup-slot"><b>'+label+'</b>'+(img?'<img src="'+img+'" alt="" style="width:30px;height:30px;object-fit:cover;border-radius:3px;float:left;margin-right:4px">':'')+'<strong>'+c.name+'</strong><small>'+c.rank+' · OVR '+c.overall+'</small></div>';
+}
+function renderRoster(){
+  const pos=[['LF','左翼手',12,17],['CF','中堅手',50,11],['RF','右翼手',88,17],['3B','三塁手',20,47],['SS','遊撃手',38,41],['2B','二塁手',62,41],['1B','一塁手',80,47],['DH','指名打者',50,67],['C','捕手',50,82]];
+  const bench=(save.collection||[]).slice(9,14).map((id,i)=>{const p=ALL_PLAYERS.find(x=>x.id===id);return p?miniPlayer(p,'ベンチ '+(i+1)):''}).join('');
+  const slots=pos.map(([a,l,x,y],i)=>{const p=lineupPlayer(i);return '<div style="position:absolute;left:'+x+'%;top:'+y+'%">'+miniPlayer(p,l)+'</div>'}).join('');
+  const p=lineupPlayer(9);
+  card.innerHTML='<h2>通常オーダー</h2><div class="order-tabs"><button class="selected">野手</button><button>控え</button><button>投手</button></div><div class="order-field">'+slots+'</div><div class="row" style="overflow:auto;gap:4px">'+bench+'</div><div class="row"><button class="action" id="order-reset">リセット</button><button class="action" id="order-save">オーダー保存</button><button class="action" id="back">ホーム</button></div>';
+  $('back').onclick=()=>setMode('home');
+  $('order-save').onclick=()=>{save.team={...(save.team||{}),lineup:(save.collection||[]).slice(0,14)};persist();$('order-save').textContent='保存済み';};
+  $('order-reset').onclick=()=>renderRoster();
+}
+function renderTraining(){
+  const players=(save.collection||[]).map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
+  card.innerHTML='<h2>選手育成</h2><p>選手カードを確認しながら、打撃・パワー・守備を個別強化。</p><div class="player-grid training-grid">'+(players.map(p=>{
+    const d=developmentFor(save,p.id),c=cardModel(p,d),image=p.image||'';
+    const portrait=image?'<img src="'+image+'" alt="" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>';
+    return '<div class="player-card training-player"><div class="player-portrait training-portrait">'+portrait+'<span class="training-level">LV '+d.level+'</span></div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+c.pos+' · XP '+d.xp+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">ミート</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
+  }).join('')||'<p>スカウトで選手を獲得してください。</p>')+'</div><button class="action back" id="back">ホームへ</button>';
+  $('back').onclick=()=>setMode('home');
+  card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('育成に必要なコインが不足しています');return}save=r.state;persist();renderTraining();});
+}
+function renderGacha(){
+  const featured=ALL_PLAYERS.find(p=>p.limited)||ALL_PLAYERS[4];
+  card.innerHTML='<h2>スカウト</h2><div class="gacha-showcase" id="gacha-showcase"></div><div class="gacha-tabs">'+GACHA_BANNERS.map((b,i)=>'<button type="button" class="gacha-tab '+(i===0?'selected':'')+'" data-banner="'+b.id+'"><b>'+b.name+'</b><small>'+b.subtitle+'</small></button>').join('')+'</div><div id="banner-info" class="banner-info"></div><div id="reveal" class="reveal"><span>SCOUT READY</span><small>選択したスカウトから選手を獲得</small></div><div class="row"><button type="button" class="action" id="pull">スカウトする</button><button type="button" class="action" id="back">戻る</button></div>';
+  $('back').onclick=()=>setMode('home');
+  let bannerId=GACHA_BANNERS[0].id,busy=false;
+  const info=()=>{
+    const b=GACHA_BANNERS.find(x=>x.id===bannerId)||GACHA_BANNERS[0];
+    $('banner-info').innerHTML='<b>'+b.name+'</b>　'+b.kind+'<br><span>'+b.subtitle+' · '+b.rateBonus+'</span>';
+    const pool=ALL_PLAYERS.filter(b.filter), picks=[featured,...pool.filter(x=>x.id!==featured.id).slice(0,2)];
+    $('gacha-showcase').innerHTML=picks.map((p,i)=>'<div class="gacha-preview">'+(p.image?'<img src="'+p.image+'" alt="" loading="lazy">':'<div class="portrait-fallback"><span>?</span></div>')+'<b>'+p.name+'</b><small>'+p.rank+' · '+(p.limited?'LIMITED':'STANDARD')+'</small></div>').join('');
+  };
+  info();
+  card.querySelectorAll('.gacha-tab').forEach(b=>b.onclick=()=>{if(busy)return;bannerId=b.dataset.banner;card.querySelectorAll('.gacha-tab').forEach(x=>x.classList.toggle('selected',x===b));info();});
+  $('pull').onclick=async()=>{
+    if(busy)return;busy=true;$('pull').disabled=true;$('pull').textContent='演出中…';
+    try{
+      const r=pullOnce(save,ALL_PLAYERS,undefined,bannerId);
+      if(r.error){$('reveal').innerHTML='<b>コイン不足</b><small>必要コイン 250</small>';return}
+      save=r.state;persist();const p=r.result.player;
+      $('reveal').innerHTML='<div class="reveal-result">'+(p.image?'<img src="'+p.image+'" alt="">':'')+'<div><b>'+p.name+'</b><br><span>'+r.result.rank+' RANK · '+r.result.rarity+(r.result.limited?' · LIMITED':'')+'</span></div></div>';
+      await playGachaReveal({rarity:r.result.rarity,name:p.name,image:p.image,rank:r.result.rank,limited:r.result.limited,duplicate:r.duplicate,banner:bannerId,cardType:p.cardType,limitedTheme:p.limitedTheme});
+    }catch(e){console.error(e);$('reveal').innerHTML='<b>スカウト処理エラー</b>'}
+    finally{busy=false;$('pull').disabled=false;$('pull').textContent='スカウトする';}
+  };
+}
+function resetMatchView(){
+  cameraMode='BATTER';camera.position.set(0,4.4,15.5);camera.lookAt(0,1.8,-5.5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();
+  let ov=document.getElementById('match-intro');
+  if(!ov){ov=document.createElement('div');ov.id='match-intro';ov.innerHTML='<div class="match-intro-kicker">BASEBALL 3D</div><strong>PLAY BALL</strong><span>1回表 · STARTING LINEUP</span>';document.body.appendChild(ov);}
+  ov.classList.remove('hide');setTimeout(()=>ov.classList.add('hide'),1150);
+}
+function updateMatchHUD(){
+  const batting=match.half==='TOP';
+  $('matchhud').textContent=match.inning+'回'+(batting?'表':'裏')+'　'+match.score.away+' - '+match.score.home;
+  $('inning-label').textContent=match.inning+'回'+(batting?'表':'裏');
+  $('away-score').textContent=match.score.away;$('home-score').textContent=match.score.home;
+  $('count-label').textContent='B'+match.balls+' S'+match.strikes+' O'+match.outs;
+  $('batter-name').textContent=batting?'Shohei Ohtani':'AI打者';
+  $('pitch-readout').textContent=pitchState==='pitch'?selectedPitch:'READY';
+  $('pitch').querySelector('span').textContent=batting?'投手AI':'投球';
+  $('pitch').style.display=batting?'none':'block';
+  document.querySelectorAll('[data-pitch]').forEach(b=>b.style.display=batting?'none':'block');
+  const zone=$('strike-zone');if(zone)zone.classList.toggle('active',true);
+}
+<style id="pro-bb-ui-v4">
+#match-intro{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#f4c53d22,#02050add 55%,#000 100%);pointer-events:none;transition:opacity .35s ease}.match-intro-kicker{font-size:10px;letter-spacing:.35em;color:#f4c53d;margin-bottom:8px}.match-intro strong{font-size:48px;font-weight:1000;letter-spacing:-.05em;text-shadow:0 0 28px #f4c53d66}.match-intro span{font-size:10px;color:#c8d0da;margin-top:8px}.match-intro.hide{opacity:0}
+.training-level{position:absolute;right:4px;bottom:4px;background:#05080dcc;border:1px solid #f4c53d77;border-radius:3px;padding:2px 4px;font-size:7px;color:#ffe27b}
+</style>const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();resetMatchView();updateMatchHUD();}}));
 $('aim-area')?.addEventListener('pointermove',updateAimFromPointer);$('aim-area')?.addEventListener('pointerdown',e=>{updateAimFromPointer(e);if(match.half==='TOP'&&pitchState==='pitch')pointerSwing();});
