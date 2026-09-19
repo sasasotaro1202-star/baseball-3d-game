@@ -20,3 +20,6 @@ On a Mac with Xcode: `npm install`, `npx cap add ios`, `npx cap sync ios`, `npx 
 
 ## Intended use
 This project is currently intended for personal/non-commercial use. Non-commercial intent does not waive third-party licenses, attribution requirements, database terms, copyright, trademark, publicity, or other applicable rights. Third-party code/data/assets must remain subject to their original licenses and provenance records.
+
+
+<!-- Pages deployment trigger: 2026-09-19T21:31:27.783Z -->
