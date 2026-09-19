@@ -291,7 +291,11 @@ function renderTraining(){
   card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('育成に必要なコインが不足しています');return}save=r.state;persist();renderTraining();});
 }
 function resetMatchView(){
-  cameraMode='BATTER';camera.position.set(0,4.4,15.5);camera.lookAt(0,1.8,-5.5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();
+  cameraMode='BATTER';
+  camera.fov=52;camera.updateProjectionMatrix();
+  camera.position.set(0,6.8,22.5);
+  camera.lookAt(0,2.1,-7.5);
+  aimTarget={x:0,y:0};updateAimUI();updateZoneUI();
   let ov=document.getElementById('match-intro');
   if(!ov){ov=document.createElement('div');ov.id='match-intro';ov.innerHTML='<div class="match-intro-kicker">BASEBALL 3D</div><strong>PLAY BALL</strong><span>1回表 · STARTING LINEUP</span>';document.body.appendChild(ov);}
   ov.classList.remove('hide');setTimeout(()=>ov.classList.add('hide'),1150);
