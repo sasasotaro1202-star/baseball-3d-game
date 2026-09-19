@@ -139,7 +139,34 @@ async function renderSettings(){
   if(user) $('cloudLogout').onclick=async()=>{await signOutCloud();renderSettings();};
   else $('cloudLogin').onclick=async()=>{const email=$('cloudEmail').value.trim();if(!email)return;const {error}=await signInWithMagicLink(email);if(error)alert(error.message);else alert('ログインリンクをメールに送信しました。');};
 }
-function renderCollection(){const names=save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)?.name).filter(Boolean);card.innerHTML='<h2>選手名鑑</h2><p>獲得 '+names.length+' 名 / 全選手データは順次拡張</p><div class="player-grid">'+(playerCards()||'<p>まだ選手がいません</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';$('back').onclick=()=>setMode('home');bindPlayerCards();}
+function renderCollection(){
+  const owned=new Set(save.collection||[]);
+  const total=ALL_PLAYERS.length;
+  const cards=ALL_PLAYERS.map(p=>{
+    const ownedNow=owned.has(p.id);
+    const c=cardModel(p,developmentFor(save,p.id));
+    const image=p.image||'';
+    const limited=p.limited===true;
+    const type=p.cardType||'STANDARD';
+    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
+    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
+    const portrait=ownedNow
+      ? (image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')
+      : '<div class="portrait-fallback locked-portrait"><span>?</span><small>LOCKED</small></div>';
+    return '<div class="player-card compact-player encyclopedia-card '+(!ownedNow?'locked':'')+' '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
+      '<div class="player-portrait">'+portrait+'<span class="rank-badge">'+c.rank+'</span>'+(ownedNow&&limited?'<span class="limited-badge">LIMITED</span>':'')+'</div>'+
+      '<div class="player-head"><strong>'+ (ownedNow?c.name:'？？？') +'</strong><b>'+(ownedNow?'OVR '+c.overall:'LOCKED')+'</b></div>'+
+      '<span class="player-meta">'+(ownedNow?(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era:'スカウトで解放')+'</span>'+
+      '<div class="mini-stats">'+(ownedNow?'<span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span>':'<span>？？</span><span>？？</span><span>？？</span><span>？？</span>')+'</div>'+
+      '<div class="ability-list">'+(ownedNow?abilities:'<span class="small">未獲得選手</span>')+'</div>'+
+    '</div>';
+  }).join('');
+  const unlocked=[...owned].filter(id=>ALL_PLAYERS.some(p=>p.id===id)).length;
+  card.innerHTML='<h2>選手名鑑</h2><p>解放 '+unlocked+' / 全 '+total+' 名　・　未獲得選手も一覧表示</p><div class="player-grid">'+cards+'</div><button class="action back" id="back">ホームへ戻る</button>';
+  $('back').onclick=()=>setMode('home');
+  card.querySelectorAll('.encyclopedia-card.locked').forEach(b=>b.onclick=()=>setMode('gacha'));
+  bindPlayerCards();
+}
 function renderGacha(){
   const escape=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const rankRate=(rank)=>({S:'0.5%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'}[rank]||'-');
@@ -241,7 +268,7 @@ function renderGacha(){
       renderResults(results);
       const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
       if(best?.result?.player){
-        try{await Promise.race([playGachaReveal({rarity:best.result.rarity,name:best.result.player.name,image:best.result.player.image,rank:best.result.rank,limited:best.result.limited,duplicate:best.duplicate,banner:bannerId,cardType:best.result.player.cardType,limitedTheme:best.result.player.limitedTheme}),new Promise(r=>setTimeout(r,1800))]);}catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
+        try{await playGachaReveal({rarity:best.result.rarity,name:best.result.player.name,image:best.result.player.image,rank:best.result.rank,limited:best.result.limited,duplicate:best.duplicate,banner:bannerId,cardType:best.result.player.cardType,limitedTheme:best.result.player.limitedTheme});}catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
       }
     }catch(err){
       console.error(err);
