@@ -1,0 +1,1 @@
+import fs from 'node:fs';for(const f of ['web/index.html','web/src/main.js','capacitor.config.ts','package.json']){if(!fs.existsSync(f))throw new Error('Missing '+f)}console.log('build-check: OK');
