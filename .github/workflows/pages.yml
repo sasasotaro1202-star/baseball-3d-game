@@ -21,7 +21,7 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
-      - uses: actions/upload-pages-artifact@v3
+      - name: Validate web shell before deployment\n        run: |\n          node scripts/web-smoke.mjs\n          node --check web/src/main.js\n      - uses: actions/upload-pages-artifact@v3
         with:
           path: web
       - id: deployment
