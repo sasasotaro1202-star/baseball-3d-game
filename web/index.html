@@ -296,10 +296,10 @@ window.__fallbackRender=function(mode){
   card.innerHTML=(pages[mode]||'<h2>HOME</h2><p>ホームへ戻りました。</p>')+'<button class="action back" id="fallback-back">ホームへ戻る</button>';
   document.getElementById('fallback-back').onclick=()=>window.__fallbackMode('home');
 };
-window.__fallbackMode=function(mode){
+window.__fallbackMode=function(mode,force){
   const home=document.getElementById('home'),view=document.getElementById('view'),match=document.getElementById('match-ui');
   if(!home||!view||!match)return;
-  if(window.__setMode){window.__setMode(mode);return;}
+  if(window.__setMode&&!force&&window.__gameReady&&!window.__lastGameError){window.__setMode(mode);return;}
   home.classList.toggle('hidden',mode!=='home');
   view.classList.toggle('hidden',mode==='home'||mode==='match');
   match.classList.toggle('hidden',mode!=='match');
@@ -308,11 +308,11 @@ window.__fallbackMode=function(mode){
 document.addEventListener('click',function(e){
   const b=e.target.closest?.('[data-mode]');
   if(!b)return;
-  if(window.__setMode)return;
+  if(window.__setMode&&window.__gameReady&&!window.__lastGameError)return;
   e.preventDefault();
   window.__fallbackMode(b.dataset.mode);
 },true);
-setTimeout(function(){if(!window.__setMode&&window.__lastGameError){window.__fallbackMode('home');}},900);
+setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__fallbackMode('home',true);}},1200);
 </script><script type="module" src="./src/main.js"></script></body></html>
 <style>
 /* Compact encyclopedia: smaller cards, but name/rank/OVR/face remain readable. */
