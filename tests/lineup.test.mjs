@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createLineup,setStarter} from '../web/src/game/lineup.js';
+test('lineup has nine starting slots',()=>{const l=createLineup(Array.from({length:12},(_,i)=>({id:i+1})));assert.equal(l.starters.length,9);assert.equal(l.bench.length,3);});
+test('starter replacement is immutable',()=>{const l=createLineup([{id:1}]);const n=setStarter(l,0,99,'P');assert.equal(l.starters[0].playerId,1);assert.equal(n.starters[0].playerId,99);});
