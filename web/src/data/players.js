@@ -27,6 +27,8 @@ export const MOB_PLAYERS=Array.from({length:40},(_,i)=>{
   const id=1000+i, n=i+1;
   const names=['MOB Rookie','Reserve Player','Utility Player','Farm Player'];
   const base=48+(i%8)*2;
-  return {id,name:`${names[i%names.length]} ${String(n).padStart(2,'0')}`,era:'COMMON',pos:['OF','IF','2B','3B','C','P'][i%6],rarity:'MOB',rank:'F',build:i%3===0?'lean':'athletic',batting:i%2?'right':'left',power:Math.min(68,base+(i%5)),contact:Math.min(70,base-2+(i%6)),field:Math.min(72,base+(i%7)),speed:Math.min(72,base+(i%9)),arm:Math.min(70,base-1+(i%8)),control:Math.min(70,base+(i%6)),stamina:Math.min(72,base+3+(i%6)),vision:Math.min(70,base+(i%5)),achievements:['一般選手','成長枠'],abilities:i%4===0?[['consistency',.02]]:i%4===1?[['base_running',.01]]:[]};
+  const rank=i<18?'F':i<28?'D':i<35?'C':i<39?'B':'A';
+  const rarity=rank==='A'?'PRO':rank==='B'?'ROOKIE':'MOB';
+  return {id,name:`${names[i%names.length]} ${String(n).padStart(2,'0')}`,era:'COMMON',pos:['OF','IF','2B','3B','C','P'][i%6],rarity,rank,build:i%3===0?'lean':'athletic',batting:i%2?'right':'left',power:Math.min(68,base+(i%5)),contact:Math.min(70,base-2+(i%6)),field:Math.min(72,base+(i%7)),speed:Math.min(72,base+(i%9)),arm:Math.min(70,base-1+(i%8)),control:Math.min(70,base+(i%6)),stamina:Math.min(72,base+3+(i%6)),vision:Math.min(70,base+(i%5)),achievements:['一般選手','成長枠'],abilities:i%4===0?[['consistency',.02]]:i%4===1?[['base_running',.01]]:[]};
 });
 export const ALL_PLAYERS=[...HISTORIC_PLAYERS,...LIMITED_PLAYERS,...MOB_PLAYERS];
