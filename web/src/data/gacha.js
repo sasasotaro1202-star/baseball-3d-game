@@ -1,7 +1,12 @@
 export const GACHA_BANNERS=Object.freeze([
 {id:'standard',name:'STANDARD',subtitle:'通常スカウト',kind:'通常',rateBonus:'全選手から幅広く登場',filter:p=>true},
 {id:'legends',name:'LEGENDS',subtitle:'歴代レジェンド',kind:'歴代',rateBonus:'高ランク選手を優先',filter:p=>p.rank==='S'||p.rank==='A'},
-{id:'limited',name:'LIMITED',subtitle:'限定強化スカウト',kind:'限定',rateBonus:'限定カード確率アップ',filter:p=>p.limited},
+{id:'limited',name:'LIMITED',subtitle:'限定強化スカウト',kind:'限定',rateBonus:'5系統の限定カード',filter:p=>p.limited},
+{id:'selection',name:'SELECTION',subtitle:'セレクション',kind:'限定',rateBonus:'SELECTION限定カード',filter:p=>p.cardType==='SELECTION'},
+{id:'anniversary',name:'ANNIVERSARY',subtitle:'アニバーサリー',kind:'限定',rateBonus:'ANNIVERSARY限定カード',filter:p=>p.cardType==='ANNIVERSARY'},
+{id:'best9',name:'BEST 9',subtitle:'ベストナイン',kind:'限定',rateBonus:'BEST 9限定カード',filter:p=>p.cardType==='BEST9'},
+{id:'legend-ob',name:'LEGEND OB',subtitle:'レジェンドOB',kind:'限定',rateBonus:'LEGEND OB限定カード',filter:p=>p.cardType==='LEGEND_OB'},
+{id:'awakened',name:'AWAKENED',subtitle:'覚醒選手',kind:'限定',rateBonus:'覚醒選手限定カード',filter:p=>p.cardType==='AWAKENED'},
 {id:'power',name:'POWER',subtitle:'長距離砲スカウト',kind:'打撃型',rateBonus:'パワー型を優先',filter:p=>(p.power||0)>=80},
 {id:'speed',name:'SPEED & DEFENSE',subtitle:'走守特化スカウト',kind:'走守型',rateBonus:'走力・守備型を優先',filter:p=>Math.max(p.speed||0,p.field||0)>=80},
 {id:'two-way',name:'TWO-WAY',subtitle:'二刀流・投手型スカウト',kind:'投手/二刀流',rateBonus:'投手能力を優先',filter:p=>p.pos?.includes('P')||p.abilities?.some(a=>a[0]==='two_way')}
