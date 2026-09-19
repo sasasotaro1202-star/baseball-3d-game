@@ -1,5 +1,7 @@
 name: Deploy playable web build to GitHub Pages
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,9 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - run: node --check web/src/main.js
       - run: node scripts/web-smoke.mjs
       - uses: actions/configure-pages@v5
