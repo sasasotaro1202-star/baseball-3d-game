@@ -12,7 +12,7 @@ function offenseKey(s){return s.half==='TOP'?'away':'home';}
 function resetCount(s){s.balls=0;s.strikes=0;}
 function isExtra(s){return s.inning>REGULATION_INNINGS;}
 function enterHalf(s,half,inning){s.half=half;s.inning=inning;s.outs=0;resetCount(s);s.bases=isExtra(s)?[true,true,false]:[false,false,false];s.extraInnings=isExtra(s);}
-function rotateHalf(s){if(s.outs<3)return s;const nextHalf=s.half==='TOP'?'BOTTOM':'TOP';const nextInning=s.half==='TOP'?s.inning:s.inning+1;if(s.half==='BOTTOM'&&s.inning>=REGULATION_INNINGS&&s.score.home!==s.score.away){s.ended=true;return s;}enterHalf(s,nextHalf,nextInning);return s;}
+function rotateHalf(s){if(s.outs<3)return s;const nextHalf=s.half==='TOP'?'BOTTOM':'TOP';const nextInning=s.half==='TOP'?s.inning:s.inning+1;if(s.half==='TOP'&&s.inning>=REGULATION_INNINGS&&s.score.home>s.score.away){s.ended=true;return s;}if(s.half==='BOTTOM'&&s.inning>=REGULATION_INNINGS&&s.score.home!==s.score.away){s.ended=true;return s;}enterHalf(s,nextHalf,nextInning);return s;}
 function scoreRuns(s,runs){if(runs>0)s.score[offenseKey(s)]+=runs;}
 function checkGameEndAfterScore(s){if(s.half==='BOTTOM'&&s.score.home>s.score.away){if(s.inning>=REGULATION_INNINGS||s.inning>REGULATION_INNINGS)s.ended=true;}}
 function advanceWalk(s){const b=s.bases.slice();if(b[0]&&b[1]&&b[2]){scoreRuns(s,1);checkGameEndAfterScore(s);return[true,true,true];}if(b[0]&&b[1])return[true,true,b[2]];if(b[0])return[true,b[1],b[2]];return[true,b[1],b[2]];}
