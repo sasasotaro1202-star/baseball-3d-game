@@ -243,6 +243,26 @@ body{background:#050505}
   .gacha-result-card strong{font-size:6px}
   .gacha-balance{grid-template-columns:1fr auto;gap:4px}
 }
+</style><style id="match-field-visibility-v4">
+/* Wider clean-room broadcast view: keep the 3D field and stadium readable around the batter. */
+#match-ui{background:linear-gradient(180deg,#0000 0%,#0000 58%,#02060bb8 100%);z-index:5}
+#match-ui .match-stage{z-index:1}
+#match-ui .aim-area{inset:108px 0 160px;z-index:4;background:radial-gradient(ellipse at 50% 52%,#0000 25%,#0002 72%,#0005 100%)}
+#match-ui .strike-zone{width:96px;height:132px;opacity:.82}
+#match-ui .aim-cursor{font-size:26px;opacity:.5}
+#match-ui .atbat-card{top:72px!important;max-width:520px;margin:auto}
+#match-ui .match-topbar{top:7px}
+#match-ui .match-action-pad{bottom:8px}
+#match-ui .pitch-control{bottom:82px}
+#match-intro{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle at 50% 42%,#ffffff14,#0000 42%,#0007);opacity:1;transition:opacity .25s ease}
+#match-intro.hide{opacity:0}
+#match-intro strong{font-size:clamp(42px,14vw,78px);letter-spacing:.06em;text-shadow:0 8px 35px #000}
+#match-intro span{position:absolute;margin-top:115px;font-size:10px;letter-spacing:.18em;color:#d9e2ec}
+#match-intro .match-intro-kicker{position:absolute;margin-top:-115px;font-size:9px;letter-spacing:.3em;color:#f4c53d;font-weight:900}
+@media(max-width:520px){
+  #match-ui .aim-area{inset:104px 0 154px}
+  #match-ui .strike-zone{width:92px;height:126px}
+}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
