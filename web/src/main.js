@@ -35,7 +35,7 @@ function playerCards(){
   return save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
     const c=cardModel(p,developmentFor(save,p.id));
     const image=p.image||`https://placehold.co/640x860/111827/ffffff?text=${encodeURIComponent(p.name)}`;
-    return '<div class="player-card"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></div>';
+    return '<button class="player-card" data-player-id="'+p.id+'"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></div>';
   }).join('');
 }
 function persist(){saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');updateProfileUI();void putCloudSave(save).catch(()=>{});}
@@ -47,14 +47,15 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
-function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');}
+function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));}
+function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');bindPlayerCards();}
 function renderTraining(){
   const players=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean);
   card.innerHTML='<h2>育成</h2><p>無料・コイン無制限。能力上昇は選手ごとに保存されます。</p><div class="player-grid">'+(players.map(p=>{
     const d=developmentFor(save,p.id),c=cardModel(p,d);
     return '<div class="player-card"><div class="player-portrait"><div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>LV '+d.level+'</small></div></div><strong>'+c.name+'</strong><span>OVR '+c.overall+' · XP '+d.xp+'</span><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">打撃</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
   }).join('')||'<p>育成する選手がいません。</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';
-  $('back').onclick=()=>setMode('home');
+  $('back').onclick=()=>setMode('home');bindPlayerCards();
   card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=HISTORIC_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('コイン不足');return}save=r.state;persist();renderTraining();});
 }
 function renderCard(title,body){card.innerHTML='<h2>'+title+'</h2><p>'+body+'</p><button class="action back" id="back">ホームへ戻る</button>'; $('back').onclick=()=>setMode('home');}
@@ -65,7 +66,7 @@ async function renderSettings(){
   if(user) $('cloudLogout').onclick=async()=>{await signOutCloud();renderSettings();};
   else $('cloudLogin').onclick=async()=>{const email=$('cloudEmail').value.trim();if(!email)return;const {error}=await signInWithMagicLink(email);if(error)alert(error.message);else alert('ログインリンクをメールに送信しました。');};
 }
-function renderCollection(){const names=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)?.name).filter(Boolean);card.innerHTML='<h2>選手名鑑</h2><p>獲得 '+names.length+' 名 / 全選手データは順次拡張</p><div class="player-grid">'+(playerCards()||'<p>まだ選手がいません</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';$('back').onclick=()=>setMode('home');}
+function renderCollection(){const names=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)?.name).filter(Boolean);card.innerHTML='<h2>選手名鑑</h2><p>獲得 '+names.length+' 名 / 全選手データは順次拡張</p><div class="player-grid">'+(playerCards()||'<p>まだ選手がいません</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';$('back').onclick=()=>setMode('home');bindPlayerCards();}
 function renderGacha(){card.innerHTML='<h2>スカウト</h2><p>無料・コイン無制限</p><div id="reveal" class="reveal">—</div><div class="row"><button class="action" id="pull">スカウトする</button><button class="action" id="back">戻る</button></div>';$('pull').onclick=()=>{const r=pullOnce(save,HISTORIC_PLAYERS);if(r.error){$('reveal').textContent='コイン不足';return}save=r.state;persist();void playGachaReveal({rarity:r.result.rarity,name:r.result.player.name});
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};persist();}}).catch(()=>{});$('reveal').textContent=r.result.rarity+'　'+r.result.player.name+(r.duplicate?'　重複→'+r.duplicateReward+'コイン':'');};$('back').onclick=()=>setMode('home');}
 function updateMatchHUD(){$('matchhud').textContent=`${match.inning}回${match.half==='TOP'?'表':'裏'}　${match.score.away} - ${match.score.home}`;$('inning-label').textContent=`${match.inning}回${match.half==='TOP'?'表':'裏'}`;$('away-score').textContent=match.score.away;$('home-score').textContent=match.score.home;$('count-label').textContent=`B ${match.balls} / S ${match.strikes} / O ${match.outs}`;}
