@@ -5,8 +5,8 @@ function encyclopediaCards(){
     const c=cardModel(p,developmentFor(save,p.id));
     const abilities=c.abilities.slice(0,3).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
     const image=p.image||'';
-    return '<div class="player-card compact-player encyclopedia-player '+(owned?'owned':'locked')+'" data-player-id="'+p.id+'">'+
-      '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(!owned?'<span class="lock-badge">未獲得</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div>'+
+    return '<div class="player-card compact-player encyclopedia-player '+(owned?'owned':'locked')+(p.limited?' limited-card':'')+'" data-player-id="'+p.id+'">'+
+      '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(p.limited?'<span class="limited-badge">LIMITED</span>':'')'+(!owned?'<span class="lock-badge">未獲得</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div>'+
       '<div class="player-head"><strong>'+c.name+'</strong><b>'+c.overall+'</b></div>'+
       '<span class="player-meta">'+c.pos+' · '+c.era+'</span>'+
       '<div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div>'+
