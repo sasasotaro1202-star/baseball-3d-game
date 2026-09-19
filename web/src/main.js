@@ -36,11 +36,14 @@ function playerCards(){
   return save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
     const c=cardModel(p,developmentFor(save,p.id));
     const image=p.image||'';
+    const limited=p.limited===true;
+    const type=p.cardType||'STANDARD';
+    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
     const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
-    return '<div class="player-card compact-player" data-player-id="'+p.id+'">'+
-      '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div>'+
+    return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
+      '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div>'+
       '<div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div>'+
-      '<span class="player-meta">'+c.pos+' · '+c.era+'</span>'+
+      '<span class="player-meta">'+(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era+'</span>'+
       '<div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div>'+
       '<div class="ability-list">'+abilities+'</div>'+
       '<button type="button" class="action release-player" data-id="'+p.id+'">放出</button>'+
