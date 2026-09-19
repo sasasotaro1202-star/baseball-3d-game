@@ -128,16 +128,27 @@ function playerCardsFor(players){
     return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'"><div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.parentElement.innerHTML=\'<div class=\"portrait-fallback\"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>\'">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="ability-list">'+abilities+'</div><button type="button" class="action release-player" data-id="'+p.id+'">放出</button></div>';
   }).join('');
 }
+function resolveOwnedPlayers(){
+  const ids=[...(save.collection||[])].map(id=>Number(id)).filter(Number.isFinite);
+  return [...new Set(ids)].map(id=>ALL_PLAYERS.find(p=>Number(p.id)===id)).filter(Boolean);
+}
+function portraitMarkup(p,extra=''){
+  const image=p.image||'';
+  const initials=p.name.split(' ').map(x=>x[0]).join('').slice(0,3);
+  return '<div class="player-portrait '+extra+'"><span class="rank-badge">'+(p.rank||'—')+'</span>'+
+    (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="portrait-fallback" style="display:none"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>':
+    '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
+}
 function renderRoster(){
-  const owned=[...new Set(save.collection||[])].map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
+  const owned=resolveOwnedPlayers();
   const render=()=>{const q=(document.getElementById('owned-search')?.value||'').trim().toLowerCase();const rank=document.getElementById('owned-rank')?.value||'ALL';const list=owned.filter(p=>(!q||p.name.toLowerCase().includes(q)||String(p.pos||'').toLowerCase().includes(q))&&(rank==='ALL'||p.rank===rank));const wrap=document.getElementById('owned-list');if(wrap){wrap.innerHTML=list.length?playerCardsFor(list):'<p class="small">条件に一致する所持選手はいません。</p>';bindPlayerCards();}};
-  card.innerHTML=`<h2>所持選手</h2><p>現在所持している選手を一覧で確認できます。全 ${owned.length} 名</p><div class="owned-toolbar"><input id="owned-search" type="search" placeholder="選手名・守備位置で検索"><select id="owned-rank"><option value="ALL">全ランク</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option><option>F</option></select></div><div id="owned-list" class="player-grid"></div><button class="action back" id="back">ホームへ戻る</button>`;
+  card.innerHTML=`<h2>オーダー</h2><p>所持選手 ${owned.length} 名。選手を確認してオーダーを組めます。</p><div class="owned-toolbar"><input id="owned-search" type="search" placeholder="選手名・守備位置で検索"><select id="owned-rank"><option value="ALL">全ランク</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option><option>F</option></select></div><div id="owned-list" class="player-grid"></div><button class="action back" id="back">ホームへ戻る</button>`;
   $('back').onclick=()=>setMode('home');document.getElementById('owned-search').oninput=render;document.getElementById('owned-rank').onchange=render;render();
 }function renderTraining(){
-  const players=save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
+  const players=resolveOwnedPlayers();
   card.innerHTML='<h2>育成</h2><p>選手名鑑と同じ顔写真カードで、育成対象を一目で確認できます。</p><div class="player-grid training-grid">'+(players.map(p=>{
     const d=developmentFor(save,p.id),c=cardModel(p,d),image=p.image||'';
-    const portrait=image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span>';
+    const portrait=portraitMarkup(p,'training-portrait');
     return '<div class="player-card training-player" data-player-id="'+p.id+'"><div class="player-portrait training-portrait">'+portrait+'<span class="training-level">LV '+d.level+'</span></div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+c.pos+' · XP '+d.xp+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">打撃</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
   }).join('')||'<p>育成する選手がいません。</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';
   $('back').onclick=()=>setMode('home');bindPlayerCards();
