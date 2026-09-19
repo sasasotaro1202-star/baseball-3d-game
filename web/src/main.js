@@ -8,6 +8,7 @@ import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud}
 import {ensurePresentationLayer,playGachaReveal,playMatchEvent} from './game/presentation.js';
 import {createPlayerModel,animatePlayer} from './game/player-models.js';
 import {choosePitch,chooseSwing} from './game/ai.js';
+import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward} from './game/player-system.js';
 
 ensurePresentationLayer();
 const canvas=document.querySelector('#game');
@@ -22,15 +23,21 @@ const infield=new THREE.Mesh(new THREE.CircleGeometry(10,4),new THREE.MeshStanda
 const mound=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,.3,32),new THREE.MeshStandardMaterial({color:0xc89565}));mound.position.set(0,.15,3);scene.add(mound);
 const home=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.12,5),new THREE.MeshStandardMaterial({color:0xffffff}));home.rotation.y=Math.PI/4;home.position.set(0,.08,-8);scene.add(home);
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,20,20),new THREE.MeshStandardMaterial({color:0xffffff}));ball.position.set(0,2.1,3);scene.add(ball);
-const pitcher=createPlayerModel({uniform:0x163a66,scale:1.05});pitcher.position.set(0,0,3);scene.add(pitcher);
-const batter=createPlayerModel({uniform:0x8b2635,scale:1.05});batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;scene.add(batter);
+const pitcher=createPlayerModel(modelConfig(HISTORIC_PLAYERS[0]));pitcher.position.set(0,0,3);scene.add(pitcher);
+const batter=createPlayerModel(modelConfig(HISTORIC_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;scene.add(batter);
 const fielders=[[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]].map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
 let fieldingFrom={x:0,z:0};let fielderTarget=null;
 
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0;
 const $=id=>document.getElementById(id); const homeUI=$('home'),viewUI=$('view'),card=$('card'),matchUI=$('match-ui'),currency=$('currency');
 function updateProfileUI(){const count=save.collection.length;const power=save.collection.reduce((sum,id)=>{const p=HISTORIC_PLAYERS.find(x=>x.id===id);return sum+(p?Math.round(((p.power||70)+(p.contact||70)+(p.field||70)+(p.control||70))/4):0)},0);$('record').textContent=`${save.wins}勝 ${save.matches}試合`;$('roster-count').textContent=count;$('team-power').textContent=count?Math.round(power/count):'—';}
-function playerCards(){return save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>`<div class="player-card"><strong>${p.name}</strong><span>${p.pos} · ${p.era}</span><div class="statline"><span>打撃</span><b>${p.contact??'—'}</b></div><div class="statline"><span>パワー</span><b>${p.power??'—'}</b></div></div>`).join('');}
+function playerCards(){
+  return save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
+    const c=cardModel(p,developmentFor(save,p.id));
+    const image=p.image||'';
+    return '<div class="player-card"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></div>';
+  }).join('');
+}
 function persist(){saveGame(save);currency.textContent=save.currency.toLocaleString('ja-JP');updateProfileUI();void putCloudSave(save).catch(()=>{});}
 function setMode(mode){
   homeUI.classList.toggle('hidden',mode!=='home'); viewUI.classList.toggle('hidden',mode==='home'||mode==='match'); matchUI.classList.toggle('hidden',mode!=='match');
@@ -41,7 +48,15 @@ function setMode(mode){
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
 function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');}
-function renderTraining(){const cards=playerCards()||'<p>育成する選手がいません。</p>';card.innerHTML=`<h2>育成</h2><p>選手を育てて能力を伸ばすための管理画面です。</p><h3>PLAYER DEVELOPMENT</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');}
+function renderTraining(){
+  const players=save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean);
+  card.innerHTML='<h2>育成</h2><p>1回100コイン。能力上昇は選手ごとに保存されます。</p><div class="player-grid">'+(players.map(p=>{
+    const d=developmentFor(save,p.id),c=cardModel(p,d);
+    return '<div class="player-card"><div class="player-portrait"><div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>LV '+d.level+'</small></div></div><strong>'+c.name+'</strong><span>OVR '+c.overall+' · XP '+d.xp+'</span><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">打撃</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
+  }).join('')||'<p>育成する選手がいません。</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';
+  $('back').onclick=()=>setMode('home');
+  card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=HISTORIC_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('コイン不足');return}save=r.state;persist();renderTraining();});
+}
 function renderCard(title,body){card.innerHTML='<h2>'+title+'</h2><p>'+body+'</p><button class="action back" id="back">ホームへ戻る</button>'; $('back').onclick=()=>setMode('home');}
 async function renderSettings(){
   const user=await getCloudUser();
@@ -54,8 +69,8 @@ function renderCollection(){const names=save.collection.map(id=>HISTORIC_PLAYERS
 function renderGacha(){card.innerHTML='<h2>スカウト</h2><p>1回 250コイン</p><div id="reveal" class="reveal">—</div><div class="row"><button class="action" id="pull">スカウトする</button><button class="action" id="back">戻る</button></div>';$('pull').onclick=()=>{const r=pullOnce(save,HISTORIC_PLAYERS);if(r.error){$('reveal').textContent='コイン不足';return}save=r.state;persist();void playGachaReveal({rarity:r.result.rarity,name:r.result.player.name});
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};persist();}}).catch(()=>{});$('reveal').textContent=r.result.rarity+'　'+r.result.player.name;};$('back').onclick=()=>setMode('home');}
 function updateMatchHUD(){$('matchhud').textContent=`${match.inning}回${match.half==='TOP'?'表':'裏'}　${match.score.away} - ${match.score.home}`;$('inning-label').textContent=`${match.inning}回${match.half==='TOP'?'表':'裏'}`;$('away-score').textContent=match.score.away;$('home-score').textContent=match.score.home;$('count-label').textContent=`B ${match.balls} / S ${match.strikes} / O ${match.outs}`;}
-function pitch(){if(pitchState!=='idle'||match.ended)return;pitchState='pitch';t=0;const pitch=choosePitch({count:[match.balls,match.strikes]});$('pitch-readout').textContent=pitch;void playMatchEvent('pitch',pitch);}
-function swing(){if(pitchState!=='pitch')return;pitchState='hit';t=0;const decision=chooseSwing({pitch:'FASTBALL'});const outcome=decision.action==='TAKE'?resolvePitch({timing:.25,contact:.1}):resolvePitch({timing:decision.timing,contact:decision.contact});match=applyOutcome(match,outcome);updateMatchHUD();$('pitch-readout').textContent=outcome;if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN'].includes(outcome)){fielderTarget={x:(Math.random()-.5)*18,z:Math.random()*16+2};fieldingFrom={x:0,z:0};}const type=outcome==='HOME_RUN'?'home_run':outcome==='DOUBLE'?'double':outcome==='TRIPLE'?'triple':outcome==='SINGLE'?'single':outcome==='OUT'?'out':outcome==='STRIKE'?'strikeout':outcome==='BALL'?'walk':'play';void playMatchEvent(type,outcome);}
+function pitch(){if(pitchState!=='idle'||match.ended)return;pitchState='pitch';t=0;const pitcherPlayer=HISTORIC_PLAYERS[0];const pitch=choosePitch({count:[match.balls,match.strikes],profile:aiProfile(pitcherPlayer,developmentFor(save,pitcherPlayer.id))});window.__lastPitch=pitch;$('pitch-readout').textContent=pitch;void playMatchEvent('pitch',pitch);}
+function swing(){if(pitchState!=='pitch')return;pitchState='hit';t=0;const batterPlayer=HISTORIC_PLAYERS[4];const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',profile:aiProfile(batterPlayer,developmentFor(save,batterPlayer.id))});const outcome=decision.action==='TAKE'?resolvePitch({timing:.25,contact:.1}):resolvePitch({timing:decision.timing,contact:decision.contact});match=applyOutcome(match,outcome);updateMatchHUD();$('pitch-readout').textContent=outcome;if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN'].includes(outcome)){fielderTarget={x:(Math.random()-.5)*18,z:Math.random()*16+2};fieldingFrom={x:0,z:0};}const type=outcome==='HOME_RUN'?'home_run':outcome==='DOUBLE'?'double':outcome==='TRIPLE'?'triple':outcome==='SINGLE'?'single':outcome==='OUT'?'out':outcome==='STRIKE'?'strikeout':outcome==='BALL'?'walk':'play';void playMatchEvent(type,outcome);}
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();updateMatchHUD();}}));
 $('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
