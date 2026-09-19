@@ -11,8 +11,8 @@ export async function playGachaReveal({rarity,name,image,rank,limited,duplicate=
  root.classList.add('gacha-stadium');
  await wait(type==='ROOKIE'?900:type==='PRO'?1150:1450);
  root.classList.remove('gacha-opening');root.classList.add('gacha-reveal');
- k.textContent=type==='S_GUARANTEED'||type==='LIMITED_S'?'SPECIAL':'RESULT';
- t.textContent=name||'PLAYER';s.textContent=(limited?'LIMITED · ':'')+((rank||rarity||'').toString())+' · '+(banner||'SCOUT');
+ k.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):(type==='S_GUARANTEED'||type==='LIMITED_S'?'SPECIAL':'RESULT');
+ t.textContent=name||'PLAYER';s.textContent=(limited?'LIMITED CARD · ':'')+((rank||rarity||'').toString())+' · '+(banner||'SCOUT');
  if(pc)pc.innerHTML=image?'<img src="'+image+'" alt="">':'<div class="no-card">PLAYER</div>';
  flash.className='pres-flash active';setTimeout(()=>flash.className='pres-flash',260);
  await wait(type==='S_GUARANTEED'||type==='LIMITED_S'?2100:type==='LEGEND'?1800:1450);
