@@ -1,4 +1,7 @@
 name: CI
+concurrency:
+  group: baseball-3d-game-${{ github.workflow }}
+  cancel-in-progress: true
 on:
   push:
     branches: [main]
