@@ -56,6 +56,6 @@ export const ABILITY_EFFECTS=Object.freeze({
   speedster:{speed:5},base_running:{speed:4},first_step:{field:4},range:{field:5},sure_hands:{field:4},strong_arm:{arm:5},quick_throw:{arm:4},relay_master:{arm:3,field:2},center_field:{field:4},corner_defense:{field:3},
   ace:{control:3,stamina:3},strikeout:{control:2},groundball:{control:2},flyball:{control:2},control_artist:{control:5},stamina:{stamina:5},velocity:{arm:4},pitch_mix:{control:4},
   comeback:{contact:3,power:3},late_inning:{control:3,contact:2},durability:{stamina:5},consistency:{contact:3,control:3},big_game:{power:3,contact:3},leadership:{vision:3},
-  two_way:{control:3,power:3},legend_power:{power:6},legend_contact:{contact:6},legend_speed:{speed:6},legend_field:{field:6},legend_complete:{power:3,contact:3,field:3,speed:3}
+  two_way:{control:3,power:3},legend_power:{power:3},legend_contact:{contact:3},legend_speed:{speed:3},legend_field:{field:3},legend_complete:{power:2,contact:2,field:2,speed:2}
 });
 export function abilityEffects(id){return {...(ABILITY_EFFECTS[id]||{})}}
