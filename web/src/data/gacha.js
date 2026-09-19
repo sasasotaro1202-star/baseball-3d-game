@@ -11,7 +11,7 @@ export const GACHA_BANNERS=Object.freeze([
 {id:'speed',name:'SPEED & DEFENSE',subtitle:'走守特化スカウト',kind:'走守型',rateBonus:'走力・守備型を優先',filter:p=>Math.max(p.speed||0,p.field||0)>=80},
 {id:'two-way',name:'TWO-WAY',subtitle:'二刀流・投手型スカウト',kind:'投手/二刀流',rateBonus:'投手能力を優先',filter:p=>p.pos?.includes('P')||p.abilities?.some(a=>a[0]==='two_way')}
 ]);
-export const RANK_RATES={S:.005,A:.08,B:.15,C:.22,D:.25,F:.295};
+export const RANK_RATES={S:.001,A:.08,B:.15,C:.22,D:.25,F:.295};
 export const LIMITED_RATE=.06;
 export const RARITIES={LEGEND:{rate:.005},STAR:{rate:.025},PRO:{rate:.10},ROOKIE:{rate:.32},MOB:{rate:.55}};
 export function rollRank(rng=Math.random){const x=rng();let c=0;for(const [rank,rate] of Object.entries(RANK_RATES)){c+=rate;if(x<c)return rank}return'F'}
