@@ -315,7 +315,7 @@ function ensureMatchPresentation(){
   if(hud)return hud;
   hud=document.createElement('div');
   hud.id='match-premium-hud';
-  hud.innerHTML='<div class="mph-top"><div class="mph-team"><b id="mph-away">HOME</b><strong id="mph-away-score">0</strong></div><div class="mph-inning"><small id="mph-count">1回表</small><b id="mph-outs">●●●</b></div><div class="mph-team mph-home"><b id="mph-home">AWAY</b><strong id="mph-home-score">0</strong></div></div>'+
+  hud.innerHTML='<div class="mph-top"><div class="mph-team"><b id="mph-away">AWAY</b><strong id="mph-away-score">0</strong></div><div class="mph-inning"><small id="mph-count">1回表</small><b id="mph-outs">●●●</b></div><div class="mph-team mph-home"><b id="mph-home">HOME</b><strong id="mph-home-score">0</strong></div></div>'+
   '<div class="mph-batter"><span id="mph-batter">BATTER</span><b id="mph-rank">RANK</b><small id="mph-ovr">OVR --</small></div>'+
   '<div class="mph-count"><b id="mph-balls">B 0</b><b id="mph-strikes">S 0</b><b id="mph-pitches">P 0</b></div>'+
   '<div class="mph-base"><i data-base="3"></i><i data-base="2"></i><i data-base="1"></i><i data-base="0"></i></div>'+
@@ -331,7 +331,7 @@ function updatePremiumHUD(){
   $('mph-batter').textContent=batting?(p?.name||'打者'):'AI打者';
   $('mph-rank').textContent=pc?.rank||'—';$('mph-ovr').textContent=pc?'OVR '+pc.overall:'OVR --';
   $('mph-balls').textContent='B '+match.balls;$('mph-strikes').textContent='S '+match.strikes;
-  $('mph-pitches').textContent='P '+(window.__pitchCount||0);
+  $('mph-pitches').textContent='P '+(match.pitches||0);
   document.querySelectorAll('.mph-base i').forEach(x=>x.classList.toggle('on',false));
   (match.runners||[]).forEach(r=>{const b=document.querySelector('.mph-base i[data-base="'+r.base+'"]');if(b)b.classList.add('on')});
 }
@@ -348,7 +348,7 @@ function updateAimUI(){
   const a=$('aim-cursor');if(a){a.style.left=(50+aimTarget.x*28)+'%';a.style.top=(50-aimTarget.y*28)+'%';}
 }
 function updateZoneUI(){const z=$('strike-zone');if(z)z.style.transform='translate(-50%,-50%) scale('+(1+Math.abs(aimTarget.x)*.05)+')';}
-function choosePitchManual(type){selectedPitch=PITCHES_FOR_UI[type]?type:'FASTBALL';matchEvent(selectedPitch,'pitch');}
+function choosePitchManual(type){selectedPitch=PITCHES_FOR_UI[type]?type:'FASTBALL';matchEvent('選択 '+selectedPitch,'pitch');updatePremiumHUD();}
 function pitch(){
   if(match.half!=='BOTTOM'||pitchState==='pitch')return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
@@ -386,6 +386,7 @@ function resetMatchView(){cameraMode='BATTER';camera.position.set(0,7.5,18);came
 function aiBatterAtBat(){const batterPlayer=ALL_PLAYERS[4];const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',profile:aiProfile(batterPlayer,developmentFor(save,batterPlayer.id))});const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));const contact=decision.action==='TAKE'?0.08:decision.contact;const outcome=decision.action==='TAKE'?((Math.random()<.58)?'BALL':'STRIKE'):resolvePitch({pitch:window.__lastPitch||'FASTBALL',timing,contact,power:.75});finishPlay(outcome);if(!['BALL','STRIKE','STRIKEOUT'].includes(outcome)){window.__hitOutcome=outcome;pitchState='hit';t=0;setFielderTarget(outcome);}}
 function pointerSwing(){swing();}
 function setFielderTarget(outcome){
+  cameraMode=outcome==='HOME_RUN'?'HOME_RUN':'FIELDING';
   const targets={SINGLE:[0,3],DOUBLE:[-7,1],TRIPLE:[11,-2],HOME_RUN:[0,18],GROUND_OUT:[4,2],FLY_OUT:[-9,0]};
   const q=targets[outcome]||[0,3];fielderTarget={x:q[0],z:q[1]};fieldingFrom={x:fielders[0].position.x,z:fielders[0].position.z};
   matchEvent(outcome==='HOME_RUN'?'HOMERUN':outcome==='GROUND_OUT'?'FIELDING':outcome==='FLY_OUT'?'FLY BALL':'IN PLAY','field');
@@ -453,6 +454,6 @@ document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',(
 $('aim-area')?.addEventListener('pointermove',updateAimFromPointer);$('aim-area')?.addEventListener('pointerdown',e=>{updateAimFromPointer(e);if(match.half==='TOP'&&pitchState==='pitch')pointerSwing();});
 $('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();updateAimUI();updateZoneUI();
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
-function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.12,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){t+=.018;const p=Math.min(t,1);const curve=Number(PITCH_CURVE[selectedPitch]||0);const x=pitchTarget.x*(p*p)+curve*Math.sin(Math.PI*p)*.28;const y=2.1+pitchTarget.y*(p*p)-.25*p+curve*Math.sin(Math.PI*p)*.12;ball.position.set(x,y,3-11*p);$('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0))+' km/h');if(p>=1){if(match.half==='BOTTOM'){aiBatterAtBat();}else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}}}else if(pitchState==='hit'){t+=.018;const p=Math.min(t,1);const o=window.__hitOutcome||'SINGLE';const arc=o==='GROUND_OUT'||o==='SINGLE'?1.2:o==='DOUBLE'?4:o==='TRIPLE'?7:o==='HOME_RUN'?13:5;const lateral=o==='DOUBLE'?-7:o==='TRIPLE'?10:o==='HOME_RUN'?0:4;ball.position.set(lateral*p,2.1+arc*Math.sin(Math.PI*p)+1.2*p,-8-(o==='HOME_RUN'?26:18)*p);if(p>=1){pitchState='idle';window.__hitOutcome=null;fielderTarget=null;ball.position.set(0,2.1,3)}}renderer.render(scene,camera)}animate();
+function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.16,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){t+=.018;const p=Math.min(t,1);const curve=Number(PITCH_CURVE[selectedPitch]||0);const x=pitchTarget.x*(p*p)+curve*Math.sin(Math.PI*p)*.28;const y=2.1+pitchTarget.y*(p*p)-.25*p+curve*Math.sin(Math.PI*p)*.12;ball.position.set(x,y,3-11*p);$('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0))+' km/h');if(p>=1){if(match.half==='BOTTOM'){aiBatterAtBat();}else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}}}else if(pitchState==='hit'){t+=.018;const p=Math.min(t,1);const o=window.__hitOutcome||'SINGLE';const arc=o==='GROUND_OUT'||o==='SINGLE'?1.2:o==='DOUBLE'?4:o==='TRIPLE'?7:o==='HOME_RUN'?13:5;const lateral=o==='DOUBLE'?-7:o==='TRIPLE'?10:o==='HOME_RUN'?0:4;ball.position.set(lateral*p,2.1+arc*Math.sin(Math.PI*p)+1.2*p,-8-(o==='HOME_RUN'?26:18)*p);if(p>=1){pitchState='idle';window.__hitOutcome=null;fielderTarget=null;ball.position.set(0,2.1,3);cameraMode='BATTER';camera.position.set(0,6.8,22.5);camera.lookAt(0,2.1,-7.5)}}else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
-window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-10-match-flow";
+window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-11-match-upgrade";
