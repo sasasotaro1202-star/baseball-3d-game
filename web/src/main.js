@@ -35,8 +35,26 @@ function playerCards(){
   return save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
     const c=cardModel(p,developmentFor(save,p.id));
     const image=p.image||'';
-    return '<button class="player-card" data-player-id="'+p.id+'"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></button>';
+    return '<div class="player-card" data-player-id="'+p.id+'"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div><button type="button" class="action release-player" data-id="'+p.id+'">放出</button></div>';
   }).join('');
+}
+function showPlayer3D(id){
+  const p=HISTORIC_PLAYERS.find(x=>x.id===Number(id));
+  if(!p)return;
+  const cfg=modelConfig(p);
+  const preview=createPlayerModel(cfg);
+  preview.position.set(0,0,-2);
+  scene.add(preview);
+  const old=scene.userData.playerPreview;
+  if(old)scene.remove(old);
+  scene.userData.playerPreview=preview;
+  $('pitch-readout')?.textContent;
+  const root=ensurePresentationLayer();
+  root.className='pres-show';
+  $('pres-kicker').textContent='PLAYER';
+  $('pres-title').textContent=p.name;
+  $('pres-sub').textContent=(p.pos||'')+' · OVR '+cardModel(p,developmentFor(save,p.id)).overall+'　3D PREVIEW';
+  setTimeout(()=>{root.className='';},1100);
 }
 function persist(){saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');updateProfileUI();void putCloudSave(save).catch(()=>{});}
 function setMode(mode){
