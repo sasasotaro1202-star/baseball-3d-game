@@ -1,0 +1,9 @@
+{
+  "name":"BASEBALL 3D GAME",
+  "short_name":"BASEBALL 3D",
+  "start_url":"./",
+  "display":"fullscreen",
+  "orientation":"portrait",
+  "background_color":"#07101d",
+  "theme_color":"#07101d"
+}
