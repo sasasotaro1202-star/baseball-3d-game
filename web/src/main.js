@@ -34,8 +34,8 @@ function updateProfileUI(){const count=save.collection.length;const power=save.c
 function playerCards(){
   return save.collection.map(id=>HISTORIC_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
     const c=cardModel(p,developmentFor(save,p.id));
-    const image=p.image||`https://placehold.co/640x860/111827/ffffff?text=${encodeURIComponent(p.name)}`;
-    return '<button class="player-card" data-player-id="'+p.id+'"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></div>';
+    const image=p.image||'';
+    return '<button class="player-card" data-player-id="'+p.id+'"><div class="player-portrait">'+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>3D PLAYER</small></div>')+'</div><strong>'+c.name+'</strong><span>'+c.pos+' · '+c.era+' · OVR '+c.overall+'</span><div class="statline"><span>打撃</span><b>'+c.stats.contact+'</b></div><div class="statline"><span>パワー</span><b>'+c.stats.power+'</b></div><div class="statline"><span>守備</span><b>'+c.stats.field+'</b></div><div class="statline"><span>走力</span><b>'+c.stats.speed+'</b></div></button>';
   }).join('');
 }
 function persist(){saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');updateProfileUI();void putCloudSave(save).catch(()=>{});}
@@ -43,7 +43,7 @@ function setMode(mode){
   homeUI.classList.toggle('hidden',mode!=='home'); viewUI.classList.toggle('hidden',mode==='home'||mode==='match'); matchUI.classList.toggle('hidden',mode!=='match');
   if(mode!=='match') renderer.domElement.style.opacity='0.35'; else renderer.domElement.style.opacity='1';
   if(mode==='home')return;
-  if(mode==='gacha')renderGacha(); else if(mode==='roster')renderCard('オーダー','スタメン・投手・ベンチを管理する画面。今後、守備適性・コンディション・交代戦略を統合します。');
+  if(mode==='gacha')renderGacha(); else if(mode==='roster')renderRoster();
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
