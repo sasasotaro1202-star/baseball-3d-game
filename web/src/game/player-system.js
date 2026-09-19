@@ -1,6 +1,14 @@
 const DEFAULTS={power:70,contact:70,field:70,control:70,speed:70,arm:70,stamina:70,vision:70};
 export const DEVELOPMENT_COST=100;
 export const DEVELOPMENT_XP=25;
+export const RELEASE_REWARD={LEGEND:1200,STAR:700,PRO:350,COMMON:150};
+export function releasePlayer(save,player){
+  if(!player)return{state:save,error:'PLAYER_NOT_FOUND'};
+  const collection=(save.collection||[]).filter(id=>id!==player.id);
+  const team=(save.team||[]).filter(id=>id!==player.id);
+  const reward=RELEASE_REWARD[player.rarity]??RELEASE_REWARD.COMMON;
+  return {state:{...save,collection,team,currency:save.unlimitedCoins?save.currency:(save.currency||0)+reward},reward};
+}
 export function playerStats(player,progress={}){
   const base={...DEFAULTS,...player};
   const growth=progress?.stats||{};
