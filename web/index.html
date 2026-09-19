@@ -287,7 +287,7 @@ body{background:#050505}
 window.__fallbackRender=function(mode){
   const card=document.getElementById('card'); if(!card)return;
   const pages={
-    gacha:'<h2>スカウト</h2><p>スカウトバナーを選択して選手を獲得</p><div class="gacha-tabs"><button class="gacha-tab selected"><b>STANDARD</b><small>通常スカウト</small></button><button class="gacha-tab"><b>LEGENDS</b><small>歴代スター</small></button><button class="gacha-tab"><b>LIMITED</b><small>限定選手</small></button><button class="gacha-tab"><b>POWER</b><small>長打型</small></button><button class="gacha-tab"><b>SPEED & DEFENSE</b><small>走守型</small></button><button class="gacha-tab"><b>TWO-WAY</b><small>二刀流</small></button></div><div class="banner-info"><b>SCOUT BANNER</b><br>6種類のスカウトを切り替えできます。<div class="rate-row"><span>S 0.5%</span><span>A 8%</span><span>B 15%</span><span>C 22%</span><span>D 25%</span><span>F 29.5%</span></div></div><div class="row" style="margin-top:10px"><button class="action" id="fallback-pull">1回スカウト<br><small>250 コイン</small></button><button class="action" id="fallback-pull10">10連スカウト<br><small>2,500 コイン</small></button></div><div class="card" style="margin-top:10px;padding:12px;background:#050a11"><b>SCOUT READY</b><p>本体モジュールが復旧すると、実データ・演出・10連結果がここに表示されます。</p></div>',
+    gacha:'<h2>スカウト</h2><p>スカウトバナーを選択して選手を獲得</p><div class="gacha-tabs"><button class="gacha-tab selected"><b>STANDARD</b><small>通常スカウト</small></button><button class="gacha-tab"><b>LEGENDS</b><small>歴代スター</small></button><button class="gacha-tab"><b>LIMITED</b><small>限定選手</small></button><button class="gacha-tab"><b>POWER</b><small>長打型</small></button><button class="gacha-tab"><b>SPEED & DEFENSE</b><small>走守型</small></button><button class="gacha-tab"><b>TWO-WAY</b><small>二刀流</small></button></div><div class="banner-info"><b>所持コイン ∞</b><br>無料テスト中・コイン消費なし<div class="rate-row"><span>S 0.5%</span><span>A 8%</span><span>B 15%</span><span>C 22%</span><span>D 25%</span><span>F 29.5%</span></div></div><div class="row" style="margin-top:10px"><button class="action" id="fallback-pull">1回スカウト<br><small>無料</small></button><button class="action" id="fallback-pull10">10連スカウト<br><small>無料</small></button></div><div id="fallback-results" class="card" style="margin-top:10px;padding:12px;background:#050a11"><b>SCOUT READY</b><p>スカウトを開始できます。</p></div>',
     roster:'<h2>オーダー</h2><p>スタメン・ベンチ・投手を管理します。</p><div class="order-field"></div><div class="row"><button class="action">野手</button><button class="action">控え</button><button class="action">投手</button></div>',
     training:'<h2>育成</h2><p>所持選手の能力を個別に強化します。</p><div class="player-grid"><div class="player-card"><strong>打撃</strong><p>ミート・選球眼を強化</p></div><div class="player-card"><strong>パワー</strong><p>長打力を強化</p></div><div class="player-card"><strong>守備</strong><p>守備・肩力を強化</p></div><div class="player-card"><strong>走塁</strong><p>走力・盗塁を強化</p></div></div>',
     collection:'<h2>選手名鑑</h2><p>獲得選手を確認できます。</p><div class="player-grid"><div class="player-card"><strong>選手データ</strong><p>スカウトで選手を獲得すると、ここにカードが追加されます。</p></div></div>',
@@ -295,6 +295,28 @@ window.__fallbackRender=function(mode){
   };
   card.innerHTML=(pages[mode]||'<h2>HOME</h2><p>ホームへ戻りました。</p>')+'<button class="action back" id="fallback-back">ホームへ戻る</button>';
   document.getElementById('fallback-back').onclick=()=>window.__fallbackMode('home');
+  if(mode==='gacha'){
+    const resultBox=document.getElementById('fallback-results');
+    const doPull=async(count)=>{
+      const one=document.getElementById('fallback-pull'),ten=document.getElementById('fallback-pull10');
+      one.disabled=true;ten.disabled=true;
+      try{
+        const [{pullOnce,pullMany},{ALL_PLAYERS}]=await Promise.all([import('./src/game/gacha-service.js'),import('./src/data/players.js')]);
+        const raw=localStorage.getItem('baseball3d.save.v1');
+        const save=raw?JSON.parse(raw):{version:1,currency:0,unlimitedCoins:true,collection:[],team:[],settings:{sound:true,haptics:true},progress:{matches:0,wins:0}};
+        save.unlimitedCoins=true;
+        const r=count===1?pullOnce(save,ALL_PLAYERS):pullMany(save,ALL_PLAYERS,10);
+        if(r.error) throw new Error(r.error);
+        const results=count===1?[{result:r.result,duplicate:r.duplicate}]:r.results;
+        localStorage.setItem('baseball3d.save.v1',JSON.stringify(r.state));
+        resultBox.innerHTML='<b>スカウト結果</b><div style="display:grid;gap:6px;margin-top:8px">'+results.map(x=>'<div style="padding:8px;border:1px solid #ffffff20;border-radius:7px"><strong>'+String(x.result.player.name).replace(/[&<>]/g,'')+'</strong>　'+x.result.rank+'</div>').join('')+'</div>';
+      }catch(err){
+        resultBox.innerHTML='<b>スカウト処理エラー</b><p>'+String(err?.message||err)+'</p>';
+      }finally{one.disabled=false;ten.disabled=false;}
+    };
+    document.getElementById('fallback-pull').onclick=()=>doPull(1);
+    document.getElementById('fallback-pull10').onclick=()=>doPull(10);
+  }
 };
 window.__fallbackMode=function(mode,force){
   const home=document.getElementById('home'),view=document.getElementById('view'),match=document.getElementById('match-ui');
