@@ -39,7 +39,7 @@ function playerCards(){
     const limited=p.limited===true;
     const type=p.cardType||'STANDARD';
     const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
-    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
+    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%<button type="button" class="ability-info" data-ability="'+a.id+'">i</button></span>').join('');
     return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
       '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div>'+
       '<div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div>'+
@@ -76,7 +76,21 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
-function bindPlayerCards(){card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});}
+function showAbilityDetails(playerId,abilityId){
+  const p=ALL_PLAYERS.find(x=>x.id===Number(playerId)); if(!p)return;
+  const a=cardModel(p,developmentFor(save,p.id)).abilityEffects.find(x=>x.id===abilityId); if(!a)return;
+  let modal=document.getElementById('ability-modal');
+  if(!modal){modal=document.createElement('div');modal.id='ability-modal';document.body.appendChild(modal);}
+  const labels={power:'パワー',contact:'ミート',field:'守備',speed:'走力',arm:'肩力',control:'制球',stamina:'スタミナ',vision:'選球眼'};
+  const effects=Object.entries(a.effects).map(([k,v])=>'<span>'+labels[k]+' <b>+'+v+'</b></span>').join('');
+  modal.innerHTML='<div class="ability-modal-box"><div class="ability-modal-kicker">SPECIAL ABILITY</div><h3>'+a.name+'</h3><p>発動率 '+a.ratePercent+'%</p><div class="ability-effects">'+(effects||'<span>固有効果</span>')+'</div><small>発動時に表示能力へ反映されるゲーム内補正</small><button type="button" id="ability-close">閉じる</button></div>';
+  modal.classList.add('show'); modal.querySelector('#ability-close').onclick=()=>modal.classList.remove('show');
+}
+function bindPlayerCards(){
+  card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));
+  card.querySelectorAll('.ability-info').forEach(b=>b.onclick=e=>{e.stopPropagation();showAbilityDetails(b.closest('[data-player-id]')?.dataset.playerId,b.dataset.ability);});
+  card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});
+}
 function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');bindPlayerCards();}
 function renderTraining(){
   const players=save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
