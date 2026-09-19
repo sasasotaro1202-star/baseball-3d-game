@@ -120,8 +120,20 @@ function bindPlayerCards(){
   card.querySelectorAll('.ability-info').forEach(b=>b.onclick=e=>{e.stopPropagation();showAbilityDetails(b.closest('[data-player-id]')?.dataset.playerId,b.dataset.ability);});
   card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});
 }
-function renderRoster(){const cards=playerCards()||'<p>まずスカウトで選手を獲得してください。</p>';card.innerHTML=`<h2>オーダー</h2><p>所持選手からスタメン・ベンチを組みます。</p><h3>MY PLAYERS</h3><div class="player-grid">${cards}</div><button class="action back" id="back">ホームへ戻る</button>`;$('back').onclick=()=>setMode('home');bindPlayerCards();}
-function renderTraining(){
+function playerCardsFor(players){
+  return players.map(p=>{
+    const c=cardModel(p,developmentFor(save,p.id)),image=p.image||'',limited=p.limited===true,type=p.cardType||'STANDARD';
+    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
+    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
+    return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'"><div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>')+'</div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="ability-list">'+abilities+'</div><button type="button" class="action release-player" data-id="'+p.id+'">放出</button></div>';
+  }).join('');
+}
+function renderRoster(){
+  const owned=[...new Set(save.collection||[])].map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
+  const render=()=>{const q=(document.getElementById('owned-search')?.value||'').trim().toLowerCase();const rank=document.getElementById('owned-rank')?.value||'ALL';const list=owned.filter(p=>(!q||p.name.toLowerCase().includes(q)||String(p.pos||'').toLowerCase().includes(q))&&(rank==='ALL'||p.rank===rank));const wrap=document.getElementById('owned-list');if(wrap){wrap.innerHTML=list.length?playerCardsFor(list):'<p class="small">条件に一致する所持選手はいません。</p>';bindPlayerCards();}};
+  card.innerHTML=`<h2>所持選手</h2><p>現在所持している選手を一覧で確認できます。全 ${owned.length} 名</p><div class="owned-toolbar"><input id="owned-search" type="search" placeholder="選手名・守備位置で検索"><select id="owned-rank"><option value="ALL">全ランク</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option><option>F</option></select></div><div id="owned-list" class="player-grid"></div><button class="action back" id="back">ホームへ戻る</button>`;
+  $('back').onclick=()=>setMode('home');document.getElementById('owned-search').oninput=render;document.getElementById('owned-rank').onchange=render;render();
+}function renderTraining(){
   const players=save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
   card.innerHTML='<h2>育成</h2><p>選手名鑑と同じ顔写真カードで、育成対象を一目で確認できます。</p><div class="player-grid training-grid">'+(players.map(p=>{
     const d=developmentFor(save,p.id),c=cardModel(p,d),image=p.image||'';
