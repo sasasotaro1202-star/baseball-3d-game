@@ -1,0 +1,21 @@
+name: iOS Capacitor
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install
+      - run: npx cap add ios
+      - run: npx cap sync ios
+      - run: test -f ios/App/App.xcodeproj/project.pbxproj
+      - run: test -f ios/App/App/Info.plist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: baseball-3d-ios-project
+          path: ios
