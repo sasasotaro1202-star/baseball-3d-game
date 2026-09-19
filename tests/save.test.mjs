@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {defaultSave,loadSave,saveGame} from '../web/src/game/save.js';
+function storage(){const m=new Map();return{getItem:k=>m.get(k)??null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)}}
+test('save roundtrip preserves currency and collection',()=>{const s=storage();const state={...defaultSave(),currency:750,collection:[1,2,3]};saveGame(state,s);const loaded=loadSave(s);assert.equal(loaded.currency,750);assert.deepEqual(loaded.collection,[1,2,3]);});
