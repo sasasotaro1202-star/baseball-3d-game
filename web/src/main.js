@@ -85,7 +85,17 @@ function showPlayer3D(id){
   const pc=cardModel(p,developmentFor(save,p.id)); $('pres-sub').textContent=(p.pos||'')+' · '+pc.rank+' RANK · OVR '+pc.overall+'　3D PREVIEW';
   setTimeout(()=>{root.className='';},1100);
 }
-function persist(){saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');updateProfileUI();void putCloudSave(save).catch(()=>{});}
+let cloudSyncTimer=null;
+let cloudSyncEnabled=false;
+getCloudUser().then(user=>{cloudSyncEnabled=Boolean(user)}).catch(()=>{});
+function persist(){
+  saveGame(save);
+  currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');
+  updateProfileUI();
+  if(!cloudSyncEnabled)return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer=setTimeout(()=>{void putCloudSave(save).catch(()=>{});},30000);
+}
 function setMode(mode){
   homeUI.classList.toggle('hidden',mode!=='home'); viewUI.classList.toggle('hidden',mode==='home'||mode==='match'); matchUI.classList.toggle('hidden',mode!=='match');
   if(mode!=='match') renderer.domElement.style.opacity='0.35'; else renderer.domElement.style.opacity='1';
