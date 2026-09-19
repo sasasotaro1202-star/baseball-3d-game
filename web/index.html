@@ -16,3 +16,30 @@
 .view .action{min-height:50px}
 .view .back{position:sticky;bottom:0;width:100%;margin-top:16px;background:#14253aee}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home"><div class="hero"><div class="hero-kicker">2026 SEASON</div><h1>BASEBALL 3D</h1><p>PLAY • BUILD • COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span></div></div><div class="menu"><button class="primary" data-mode="match">試合をはじめる</button><button data-mode="gacha">スカウト</button><button data-mode="roster">オーダー</button><button data-mode="training">育成</button><button data-mode="collection">選手名鑑</button><button data-mode="settings">設定</button></div></div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden"><div class="match-top"><div class="inning-label" id="inning-label">1回表</div><div class="scoreboard"><span>AWAY <b id="away-score">0</b></span><span class="score-dash">-</span><span>HOME <b id="home-score">0</b></span></div><div class="count-label" id="count-label">B 0 / S 0 / O 0</div></div><div id="matchhud" class="matchhud">1回表　0 - 0</div><div class="atbat-card"><div><span class="small">NEXT BATTER</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">PITCH</span><b id="pitch-readout">READY</b></div></div><div class="matchcontrols"><button id="pitch"><span>投球</span><small>AI PITCH</small></button><button id="swing" class="swing-btn"><span>打つ</span><small>タイミング</small></button><button id="matchback" class="danger"><span>終了</span><small>ホーム</small></button></div></div></div><script type="module" src="./src/main.js"></script></body></html>
+<style>
+/* Compact encyclopedia: smaller cards, but name/rank/OVR/face remain readable. */
+.view .player-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.view .compact-player{padding:8px;border-radius:15px;min-width:0}
+.view .compact-player .player-portrait{height:112px;border-radius:12px;margin-bottom:7px;position:relative;background:#101b2b}
+.view .compact-player .player-portrait img{object-fit:contain;object-position:center top;padding:2px}
+.view .rank-badge{position:absolute;z-index:2;top:5px;left:5px;min-width:24px;height:24px;display:grid;place-items:center;border-radius:7px;background:#07101de8;border:1px solid #ffffff35;font-size:12px;font-weight:900}
+.view .player-head{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.view .player-head strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.view .player-head b{font-size:11px;white-space:nowrap}
+.view .player-meta{display:block;font-size:9px;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.view .mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:6px}
+.view .mini-stats span{font-size:9px;text-align:center;background:#ffffff0b;border-radius:5px;padding:3px 1px}
+.view .ability-list{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;min-height:25px}
+.view .ability-chip{font-size:8px;line-height:1.15;padding:3px 4px;border-radius:5px;background:#14253a;border:1px solid #ffffff12}
+.view .ability-special{border-color:#d8b45a66;background:#3a2d12}
+.view .compact-player .release-player{min-height:30px;padding:4px 7px;margin-top:6px;font-size:10px}
+@media (max-width:520px){
+  .view .player-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .view .compact-player .player-portrait{height:96px}
+  .view .compact-player{padding:6px}
+  .view .player-head strong{font-size:11px}
+  .view .player-head b{font-size:9px}
+  .view .mini-stats span{font-size:8px}
+  .view .ability-chip{font-size:7px}
+}
+</style>
