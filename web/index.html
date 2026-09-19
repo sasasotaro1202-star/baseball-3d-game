@@ -392,7 +392,7 @@ body{background:#050505}
 #presentation.gacha-page.gacha-rank-s .pres-flash.active{animation:presFlashS .5s ease-out}
 #presentation.gacha-page.gacha-limited-result .pres-flash.active{background:#ffe29a}
 @keyframes presFlashS{0%{opacity:1}35%{opacity:.75}100%{opacity:0}}
-</style><style id="match-flow-v10">
+</style><style id="match-view-controls">.match-view-switch{position:absolute;left:50%;top:50px;transform:translateX(-50%);z-index:14;display:flex;gap:4px;padding:3px;border:1px solid #ffffff1c;border-radius:7px;background:#050a11dd}.match-view-switch button{border:1px solid #ffffff18;background:#111b27;color:#aebdca;border-radius:5px;padding:5px 9px;font-size:9px;font-weight:900}.match-view-switch button.selected{background:#e8c35a;color:#111;border-color:#ffe79a}.aim-area{height:min(36vh,300px)!important;max-height:300px!important;touch-action:none!important}.aim-area .aim-cursor{left:50%!important;top:50%!important}@media(max-width:520px){.match-view-switch{top:47px}.match-view-switch button{padding:5px 7px}.aim-area{height:32vh!important;max-height:250px!important}}</style><style id="match-flow-v10">
 #mph-speed{position:absolute;right:12px;top:96px;min-width:72px;padding:5px 8px;border:1px solid #ffffff22;border-radius:5px;background:#05080dcc;color:#fff;text-align:center;font-size:10px;font-weight:950;letter-spacing:.08em;box-shadow:0 5px 18px #0008}
 #mph-speed:before{content:'PITCH';display:block;font-size:6px;color:#8ea2b5;letter-spacing:.16em;margin-bottom:2px}
 #mph-event.field{border-color:#79c68b;color:#dfffe5}
@@ -406,7 +406,7 @@ body{background:#050505}
 </div></div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden">
 <div class="match-topbar"><div class="score-pill" id="inning-label">1回表</div><div class="score-pill scoreboard"><span>A <b id="away-score">0</b> - <b id="home-score">0</b> H</span></div><div class="score-pill" id="count-label">B0 S0 O0</div></div>
 <div id="matchhud" class="matchhud">1回表　0 - 0</div>
-<div id="aim-area" class="aim-area"><div id="strike-zone" class="strike-zone"><i></i><i></i><i></i><i></i></div><div id="trajectory" class="trajectory"></div><div id="aim-cursor" class="aim-cursor">＋</div></div>
+<div class="match-view-switch"><button type="button" data-view="BATTER" class="selected">打者視点</button><button type="button" data-view="PITCHER">投手視点</button></div><div id="aim-area" class="aim-area"><div id="strike-zone" class="strike-zone"><i></i><i></i><i></i><i></i></div><div id="trajectory" class="trajectory"></div><div id="aim-cursor" class="aim-cursor">＋</div></div>
 <div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b></div></div>
 <div class="aim-help" id="aim-help">投球時：画面をドラッグしてコース指定</div>
 <div class="pitch-control"><button type="button" data-pitch="FASTBALL">ストレート</button><button type="button" data-pitch="SLIDER">スライダー</button><button type="button" data-pitch="CURVEBALL">カーブ</button><button type="button" data-pitch="CHANGEUP">チェンジアップ</button></div>
