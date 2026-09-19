@@ -154,7 +154,23 @@ body{background:#050505}
 </div>
 <button id="matchback" class="danger" style="position:absolute;right:8px;top:48px;z-index:13;pointer-events:auto;border:1px solid #ffffff25;background:#050a11dd;color:#fff;border-radius:5px;padding:6px 8px;font-size:9px">終了</button>
 <div id="fielding-banner" class="fielding-banner">守備操作</div>
-</div></div><script type="module" src="./src/main.js"></script></body></html>
+</div></div><script>
+window.__fallbackMode=function(mode){
+  const home=document.getElementById('home'),view=document.getElementById('view'),match=document.getElementById('match-ui');
+  if(!home||!view||!match)return;
+  if(window.__setMode){window.__setMode(mode);return;}
+  home.classList.toggle('hidden',mode!=='home');
+  view.classList.toggle('hidden',mode==='home'||mode==='match');
+  match.classList.toggle('hidden',mode!=='match');
+};
+document.addEventListener('click',function(e){
+  const b=e.target.closest?.('[data-mode]');
+  if(!b)return;
+  if(window.__setMode)return;
+  e.preventDefault();
+  window.__fallbackMode(b.dataset.mode);
+},true);
+</script><script type="module" src="./src/main.js"></script></body></html>
 <style>
 /* Compact encyclopedia: smaller cards, but name/rank/OVR/face remain readable. */
 .view .player-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
