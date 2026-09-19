@@ -104,6 +104,7 @@ function setMode(mode){
   else if(mode==='training')renderTraining();
   else if(mode==='collection')renderCollection(); else if(mode==='settings')renderSettings();
 }
+window.__setMode=(mode)=>setMode(mode);
 function showAbilityDetails(playerId,abilityId){
   const p=ALL_PLAYERS.find(x=>x.id===Number(playerId)); if(!p)return;
   const a=cardModel(p,developmentFor(save,p.id)).abilityEffects.find(x=>x.id===abilityId); if(!a)return;
