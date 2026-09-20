@@ -268,8 +268,12 @@ function renderGacha(){
 
   async function runPull(count){
     if(busy)return;
-    resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT PROCESSING</b><small>選手抽選を実行しています…</small></div>';
     const cost=250*count;
+    const normalizeSave=()=>{
+      const currency=Number.isFinite(Number(save.currency))?Number(save.currency):1000;
+      save={...save,currency,collection:Array.isArray(save.collection)?save.collection:[],progress:(save.progress&&typeof save.progress==='object')?save.progress:{},team:Array.isArray(save.team)?save.team:[]};
+    };
+    normalizeSave();
     if(!save.unlimitedCoins && save.currency<cost){
       resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+save.currency.toLocaleString('ja-JP')+'</small></div>';
       return;
@@ -280,23 +284,40 @@ function renderGacha(){
     one.classList.add('loading');ten.classList.add('loading');
     one.querySelector('span').textContent='処理中…';ten.querySelector('span').textContent='処理中…';
     try{
+      resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT PROCESSING</b><small>選手抽選を実行しています…</small></div>';
       const r=count===1
         ? pullOnce(save,ALL_PLAYERS,Math.random,bannerId)
-        : pullMany(save,ALL_PLAYERS,10,Math.random,bannerId);
-      if(r.error){
-        resultEl.innerHTML='<div class="gacha-error"><b>スカウトできません</b><small>コインを確認してください</small></div>';
-        return;
-      }
-      save=r.state;persist();updateBalance();
-      const results=count===1?[{result:r.result,duplicate:r.duplicate,duplicateReward:r.duplicateReward||0}]:r.results;
+        : pullMany(save,ALL_PLAYERS,count,Math.random,bannerId);
+      if(!r || r.error) throw new Error(r?.error||'SCOUT_RESULT_INVALID');
+      if(!r.state) throw new Error('SCOUT_STATE_INVALID');
+      save=r.state;
+      persist();
+      updateBalance();
+      const results=count===1
+        ? [{result:r.result,duplicate:!!r.duplicate,duplicateReward:r.duplicateReward||0}]
+        : (Array.isArray(r.results)?r.results:[]);
+      if(!results.length || !results.every(x=>x?.result?.player)) throw new Error('SCOUT_RESULT_EMPTY');
       renderResults(results);
       const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
       if(best?.result?.player){
-        try{await playGachaReveal({rarity:best.result.rarity,name:best.result.player.name,image:best.result.player.image,rank:best.result.rank,limited:best.result.limited,duplicate:best.duplicate,banner:bannerId,cardType:best.result.player.cardType,limitedTheme:best.result.player.limitedTheme});}catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
+        try{
+          await playGachaReveal({
+            rarity:best.result.rarity,
+            name:best.result.player.name,
+            image:best.result.player.image,
+            rank:best.result.rank,
+            limited:best.result.limited,
+            duplicate:best.duplicate,
+            banner:bannerId,
+            cardType:best.result.player.cardType,
+            limitedTheme:best.result.player.limitedTheme
+          });
+        }catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
       }
     }catch(err){
-      console.error(err);
-      resultEl.innerHTML='<div class="gacha-error"><b>処理を完了できませんでした</b><small>状態は変更されていません。もう一度実行できます。</small></div>';
+      console.error('SCOUT_ERROR',err);
+      const detail=String(err?.message||err||'UNKNOWN_ERROR');
+      resultEl.innerHTML='<div class="gacha-error"><b>スカウト処理エラー</b><small>'+escape(detail)+'</small></div>';
     }finally{
       busy=false;
       one.disabled=false;ten.disabled=false;
@@ -456,4 +477,4 @@ $('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',s
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
 function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.16,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){t+=.018;const p=Math.min(t,1);const curve=Number(PITCH_CURVE[selectedPitch]||0);const x=pitchTarget.x*(p*p)+curve*Math.sin(Math.PI*p)*.28;const y=2.1+pitchTarget.y*(p*p)-.25*p+curve*Math.sin(Math.PI*p)*.12;ball.position.set(x,y,3-11*p);$('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0))+' km/h');if(p>=1){if(match.half==='BOTTOM'){aiBatterAtBat();}else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}}}else if(pitchState==='hit'){t+=.018;const p=Math.min(t,1);const o=window.__hitOutcome||'SINGLE';const arc=o==='GROUND_OUT'||o==='SINGLE'?1.2:o==='DOUBLE'?4:o==='TRIPLE'?7:o==='HOME_RUN'?13:5;const lateral=o==='DOUBLE'?-7:o==='TRIPLE'?10:o==='HOME_RUN'?0:4;ball.position.set(lateral*p,2.1+arc*Math.sin(Math.PI*p)+1.2*p,-8-(o==='HOME_RUN'?26:18)*p);if(p>=1){pitchState='idle';window.__hitOutcome=null;fielderTarget=null;ball.position.set(0,2.1,3);setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER')}}else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
-window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-13-gacha-fix";
+window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-14-gacha-robust";
