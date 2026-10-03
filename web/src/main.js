@@ -397,7 +397,7 @@ function pitch(){
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
 }
 function swing(){
-  if(match.half!=='TOP'||pitchState!=='pitch')return;
+  if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
   const timing=Math.max(0,Math.min(1,t/1.0)), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
   const p=lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
@@ -405,7 +405,7 @@ function swing(){
   matchEvent(outcome,'result');finishPlay(outcome);window.__hitOutcome=outcome;pitchState='hit';t=0;setFielderTarget(outcome);
 }
 function take(){
-  if(match.half!=='TOP'||pitchState!=='pitch')return;
+  if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
   const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
@@ -418,6 +418,7 @@ function finishPlay(outcome){
   else if(outcome==='STRIKE')matchEvent('STRIKE','strike');
   else if(outcome==='BALL')matchEvent('BALL','ball');
   updateMatchHUD();updatePremiumHUD();
+  recordMatchResult();
   if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
 function resetMatchView(){cameraMode='BATTER';camera.position.set(0,7.5,18);camera.lookAt(0,2,-5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();}
@@ -459,6 +460,16 @@ function renderTraining(){
   $('back').onclick=()=>setMode('home');
   card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('育成に必要なコインが不足しています');return}save=r.state;persist();renderTraining();});
 }
+function recordMatchResult(){
+  if(!match.ended||matchResultRecorded)return;
+  matchResultRecorded=true;
+  save.matches=Math.max(0,Number(save.matches)||0)+1;
+  if(match.score.away>match.score.home)save.wins=Math.max(0,Number(save.wins)||0)+1;
+  persist();
+  matchEvent(match.score.away===match.score.home?'試合終了':'試合終了 '+(match.score.away>match.score.home?'WIN':'LOSE'),'result');
+  $('swing').disabled=true;
+  $('pitch').disabled=true;
+}
 function resetMatchView(){
   ensureMatchPresentation();
   window.__pitchVelocity=0;window.__hitOutcome=null;fielderTarget=null;
@@ -488,7 +499,7 @@ function updateMatchHUD(){
 }
 const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();resetMatchView();updateMatchHUD();scheduleTopPitch(700);}}));
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;resetMatchView();updateMatchHUD();scheduleTopPitch(700);}}));
 $('aim-area')?.addEventListener('pointerdown',e=>{aimDragging=true;updateAimFromPointer(e);if(match.half==='TOP'&&pitchState==='pitch')pointerSwing();$('aim-area').setPointerCapture?.(e.pointerId);});$('aim-area')?.addEventListener('pointermove',e=>{if(aimDragging)updateAimFromPointer(e);});$('aim-area')?.addEventListener('pointerup',e=>{aimDragging=false;$('aim-area').releasePointerCapture?.(e.pointerId);});$('aim-area')?.addEventListener('pointercancel',()=>aimDragging=false);document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
 $('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();updateAimUI();updateZoneUI();
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
