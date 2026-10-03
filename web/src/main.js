@@ -429,6 +429,7 @@ function take(){
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
 function finishPlay(outcome){
+  if(isOnlineMatch()&&onlineRole==='GUEST')return;
   pitchState='idle';t=0;match=applyOutcome(match,outcome);
   if(outcome==='HOME_RUN')matchEvent('ホームラン！','hr');
   else if(outcome==='TRIPLE')matchEvent('TRIPLE','hit');
@@ -437,7 +438,13 @@ function finishPlay(outcome){
   else if(outcome==='STRIKE')matchEvent('STRIKE','strike');
   else if(outcome==='BALL')matchEvent('BALL','ball');
   updateMatchHUD();updatePremiumHUD();
+  if(isOnlineMatch())onlineSend({type:'ONLINE_STATE',match});
   recordMatchResult();
+  if(isOnlineMatch()){
+    if(match.ended)return;
+    if(isLocalPitcher()&&pitchState==='idle')setTimeout(()=>pitch(),450);
+    return;
+  }
   if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
 function aiBatterAtBat(){
@@ -659,27 +666,32 @@ function setBattingMode(mode){
   const pill=$('bat-mode-pill');if(pill)pill.dataset.mode=battingMode;
 }
 function updateMatchHUD(){
-  const batting=match.half==='TOP';
+  const batting=isLocalBatter();
   matchUI.classList.toggle('batting-phase',batting);
   matchUI.classList.toggle('pitching-phase',!batting);
-  const batter=lineupPlayer(0);
-  $('matchhud').textContent=match.inning+'回'+(batting?'表':'裏')+'　'+match.score.away+' - '+match.score.home;
-  $('inning-label').textContent=match.inning+'回'+(batting?'表':'裏');
+  const batter=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):lineupPlayer(0);
+  $('matchhud').textContent=match.inning+'回'+(match.half==='TOP'?'表':'裏')+'　'+match.score.away+' - '+match.score.home;
+  $('inning-label').textContent=match.inning+'回'+(match.half==='TOP'?'表':'裏');
   $('away-score').textContent=match.score.away;$('home-score').textContent=match.score.home;
   $('count-label').textContent='B'+match.balls+' S'+match.strikes+' O'+match.outs;
-  $('batter-name').textContent=batting?(batter?.name||'打者'):'AI打者';
+  $('batter-name').textContent=batter?.name||'打者';
   $('pitch-readout').textContent=pitchState==='pitch'?selectedPitch:'READY';
-  $('pitch').querySelector('span').textContent=batting?'投手AI':'投球';
-  $('pitch').style.display=batting?'none':'block';
+  $('pitch').querySelector('span').textContent='投球';
+  $('pitch').style.display=isLocalPitcher()?'block':'none';
   $('take').style.display=batting?'block':'none';
   $('swing').style.display=batting?'block':'none';
-  document.querySelectorAll('[data-pitch]').forEach(b=>b.style.display=batting?'none':'block');
+  document.querySelectorAll('[data-pitch]').forEach(b=>b.style.display=isLocalPitcher()?'block':'none');
   const help=$('aim-help');if(help)help.textContent=batting?'タップでスイング ・ ドラッグでミート位置':'ドラッグでコース指定 → 投球';
   const zone=$('strike-zone');if(zone)zone.classList.toggle('active',true);
+  updatePitchControlUI();
 }
 const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;resetMatchView();updateMatchHUD();scheduleTopPitch(700);}}));
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{
+  const mode=b.dataset.mode;
+  if(mode==='match'||mode==='ai-match'){startAIMatch();return;}
+  setMode(mode);
+}));
 let aimPointerStart=null;let aimPointerMoved=false;
 $('aim-area')?.addEventListener('pointerdown',e=>{aimDragging=true;aimPointerMoved=false;aimPointerStart={x:e.clientX,y:e.clientY};updateAimFromPointer(e);$('aim-area').setPointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointermove',e=>{if(!aimDragging)return;if(aimPointerStart&&Math.hypot(e.clientX-aimPointerStart.x,e.clientY-aimPointerStart.y)>8)aimPointerMoved=true;updateAimFromPointer(e);});
@@ -697,7 +709,8 @@ function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchSta
     $('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0)*1.60934)+' km/h');
     if(ballPhysics.done){
       ballPhysics=null;
-      if(match.half==='BOTTOM')aiBatterAtBat();
+      if(isOnlineMatch()){onlinePendingPitch=onlinePendingPitch||{id:onlinePendingPitchId};}
+      else if(match.half==='BOTTOM')aiBatterAtBat();
       else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}
     }
   }
@@ -708,7 +721,13 @@ function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchSta
     t=ballPhysics.time;ball.position.set(...ballPhysics.position);
     if(fielderTarget&&cameraMode==='FIELDING'){const lead=fielders[fielderIndex];if(lead){const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*1.6);}}}
     if(ballPhysics.done){
-      const completed=pendingOutcome||'OUT';pendingOutcome=null;window.__hitOutcome=null;ballPhysics=null;finishPlay(completed);fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
+      const completed=pendingOutcome||'OUT';
+      if(isOnlineMatch()&&onlineRole==='GUEST'){
+        pendingOutcome=completed;
+        ball.position.set(...ballPhysics.position);
+      }else{
+        pendingOutcome=null;window.__hitOutcome=null;ballPhysics=null;finishPlay(completed);fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
+      }
     }
   }
 }else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
