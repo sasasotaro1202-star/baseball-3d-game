@@ -12,6 +12,8 @@ const checks = [
   ["mobile manifest", html.includes('rel="manifest"')],
   ["runtime readiness flag", js.includes("window.__gameReady = true")],
   ["match simulation import", js.includes("resolvePitch")],
+  ["live state assignment", js.includes("match=applyOutcome(match,outcome)")],
+  ["automatic AI pitching", js.includes("scheduleTopPitch(700)") && js.includes("count:[match.balls,match.strikes]")],
   ["persistent save", js.includes("loadSave")],
 ];
 for (const [name, ok] of checks) {
