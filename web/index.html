@@ -397,6 +397,144 @@ body{background:#050505}
 #mph-speed:before{content:'PITCH';display:block;font-size:6px;color:#8ea2b5;letter-spacing:.16em;margin-bottom:2px}
 #mph-event.field{border-color:#79c68b;color:#dfffe5}
 @media(max-width:520px){#mph-speed{top:90px;right:8px;min-width:62px;font-size:9px}}
+</style><style id="match-readability-v6">
+/* Clean-room console baseball match HUD: one clear hierarchy, portrait-first. */
+#match-ui{background:transparent!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif}
+#match-ui:before{background:linear-gradient(180deg,#02060bd8 0,#02060b30 24%,#02060b00 55%,#02060bd4 100%)!important;z-index:1!important}
+#match-ui .match-topbar,#match-ui>#matchhud{display:none!important}
+#match-premium-hud{inset:0!important;z-index:20!important;pointer-events:none!important;text-shadow:0 2px 6px #000}
+#match-premium-hud .mph-top{
+  top:10px!important;left:8px!important;right:8px!important;transform:none!important;width:auto!important;
+  height:58px!important;grid-template-columns:1fr 72px 1fr!important;
+  background:linear-gradient(180deg,#0a111be8,#03070ce8)!important;
+  border:1px solid #ffffff30!important;border-radius:10px!important;
+  box-shadow:0 6px 20px #0009!important;
+}
+#match-premium-hud .mph-team{
+  min-width:0!important;padding:0 11px!important;background:#0b1726e8!important;
+}
+#match-premium-hud .mph-team.mph-home{background:#17100ae8!important}
+#match-premium-hud .mph-team b{font-size:10px!important;color:#dbe4ed!important;letter-spacing:.08em!important}
+#match-premium-hud .mph-team strong{font-size:28px!important;color:#fff!important}
+#match-premium-hud .mph-inning{background:#05080de8!important}
+#match-premium-hud .mph-inning small{font-size:10px!important;color:#f3cb59!important}
+#match-premium-hud .mph-inning b{font-size:9px!important;letter-spacing:1px!important;margin-top:4px!important}
+#match-premium-hud .mph-batter{
+  top:76px!important;left:9px!important;min-width:178px!important;
+  display:grid!important;grid-template-columns:auto auto!important;gap:2px 8px!important;
+  background:#03070be8!important;border:1px solid #ffffff26!important;border-left:3px solid #edc34f!important;
+  border-radius:7px!important;padding:7px 10px!important;box-shadow:0 4px 12px #0007!important;
+}
+#match-premium-hud .mph-batter span{font-size:13px!important;font-weight:950!important}
+#match-premium-hud .mph-batter b{font-size:9px!important;color:#f3d36e!important}
+#match-premium-hud .mph-batter small{font-size:9px!important;color:#aebac8!important}
+#match-premium-hud .mph-count{
+  top:76px!important;right:9px!important;display:flex!important;gap:4px!important;
+}
+#match-premium-hud .mph-count b{
+  font-size:10px!important;min-width:31px!important;text-align:center!important;
+  background:#03070be8!important;border:1px solid #ffffff26!important;
+  padding:6px 5px!important;border-radius:6px!important;
+}
+#match-premium-hud .mph-base{top:121px!important;right:9px!important;width:72px!important;height:58px!important}
+#match-premium-hud .mph-base i{width:14px!important;height:14px!important;border-width:2px!important}
+#match-premium-hud .mph-base i[data-base="0"]{left:29px!important;top:37px!important}
+#match-premium-hud .mph-base i[data-base="1"]{right:4px!important;top:21px!important}
+#match-premium-hud .mph-base i[data-base="2"]{left:29px!important;top:5px!important}
+#match-premium-hud .mph-base i[data-base="3"]{left:4px!important;top:21px!important}
+#match-premium-hud .mph-base i.on{background:#f1c84e!important;border-color:#fff!important;box-shadow:0 0 9px #f1c84e!important}
+#mph-event{
+  top:44%!important;left:50%!important;
+  font-size:clamp(28px,9vw,60px)!important;
+  font-weight:1000!important;letter-spacing:.04em!important;
+  text-shadow:0 3px 18px #000!important;
+}
+#mph-speed{
+  left:50%!important;bottom:132px!important;
+  transform:translateX(-50%)!important;font-size:13px!important;
+  font-weight:950!important;background:#03070bd9!important;border:1px solid #ffffff22!important;
+  border-radius:999px!important;padding:5px 10px!important;
+}
+#match-ui .aim-area{
+  inset:154px 0 158px!important;
+  z-index:5!important;background:transparent!important;
+}
+#match-ui .strike-zone{
+  width:118px!important;height:164px!important;
+  border:2px solid #ffffff9c!important;
+  background:#ffffff05!important;
+  box-shadow:0 0 0 1px #0009,0 8px 28px #0008!important;
+}
+#match-ui .strike-zone i{background:#ffffff35!important}
+#match-ui .aim-cursor{font-size:28px!important;opacity:.45!important;text-shadow:0 2px 8px #000!important}
+#match-ui .trajectory{background:#fff!important;box-shadow:0 0 8px 2px #fff!important}
+#match-ui .aim-help{
+  left:50%!important;bottom:136px!important;
+  background:#03070bd9!important;border:1px solid #ffffff22!important;
+  color:#dce4ed!important;border-radius:999px!important;padding:5px 9px!important;
+  font-size:9px!important;white-space:nowrap!important;
+}
+#match-ui .pitch-control{
+  left:8px!important;right:8px!important;bottom:81px!important;
+  z-index:30!important;gap:4px!important;
+}
+#match-ui .pitch-control button{
+  min-height:35px!important;border-radius:7px!important;
+  background:linear-gradient(180deg,#0d1927f2,#03080eeF)!important;
+  border:1px solid #ffffff25!important;color:#fff!important;
+  font-size:9px!important;font-weight:900!important;
+}
+#match-ui .pitch-control button.selected{background:linear-gradient(180deg,#294760f5,#102234f5)!important;border-color:#f0c65a!important}
+#match-ui .match-action-pad{
+  left:8px!important;right:8px!important;bottom:8px!important;
+  grid-template-columns:84px 1fr 84px!important;gap:6px!important;
+  z-index:31!important;
+}
+#match-ui .match-action-pad button{
+  min-height:61px!important;border-radius:9px!important;
+  background:linear-gradient(180deg,#101b29f5,#03070cf7)!important;
+  border:1px solid #ffffff2b!important;box-shadow:0 5px 14px #000a!important;
+  font-size:12px!important;
+}
+#match-ui .match-action-pad .swing-main{
+  min-height:69px!important;
+  background:linear-gradient(180deg,#f0ca55,#8a5f08)!important;
+  border-color:#ffe59a!important;color:#171007!important;
+  text-shadow:none!important;font-size:18px!important;
+}
+#match-ui .match-action-pad small{font-size:8px!important;color:#bac5d1!important}
+#match-ui .match-action-pad .swing-main small{color:#2a1c06!important}
+#match-ui #matchback{
+  right:9px!important;top:77px!important;z-index:35!important;
+  border-radius:999px!important;padding:6px 9px!important;
+  background:#03070bd9!important;border:1px solid #ffffff26!important;
+  font-size:9px!important;
+}
+#match-ui .fielding-banner{top:61%!important;z-index:28!important}
+@media(max-width:520px){
+  #match-premium-hud .mph-top{top:8px!important;height:54px!important;grid-template-columns:1fr 62px 1fr!important}
+  #match-premium-hud .mph-team{padding:0 8px!important}
+  #match-premium-hud .mph-team strong{font-size:23px!important}
+  #match-premium-hud .mph-batter{top:70px!important;left:8px!important;min-width:160px!important}
+  #match-premium-hud .mph-count{top:70px!important;right:8px!important}
+  #match-premium-hud .mph-base{top:113px!important;right:8px!important}
+  #match-ui .aim-area{inset:145px 0 150px!important}
+  #match-ui .strike-zone{width:104px!important;height:148px!important}
+  #match-ui .aim-help{bottom:129px!important}
+  #match-ui .pitch-control{bottom:77px!important}
+  #match-ui .match-action-pad{bottom:7px!important;grid-template-columns:76px 1fr 76px!important}
+  #match-ui .match-action-pad button{min-height:56px!important}
+  #match-ui .match-action-pad .swing-main{min-height:63px!important}
+  #mph-event{top:46%!important}
+  #mph-speed{bottom:126px!important}
+}
+@media(max-width:360px){
+  #match-premium-hud .mph-batter{min-width:145px!important}
+  #match-premium-hud .mph-batter span{font-size:11px!important}
+  #match-ui .strike-zone{width:94px!important;height:136px!important}
+  #match-ui .pitch-control button{min-height:32px!important;font-size:8px!important}
+  #match-ui .match-action-pad{grid-template-columns:68px 1fr 68px!important}
+}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
 <div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
 <div class="menu">
