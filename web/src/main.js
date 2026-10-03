@@ -556,6 +556,13 @@ function renderOnlineLobby(){
     const v=mode==='HOST'?$('online-offer-input').value:$('online-answer').value;if(!v)return;
     try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(v);else{$('online-offer-input').focus();$('online-offer-input').select();document.execCommand('copy');}onlineSignalStatus('コードをコピーしました');}catch{onlineSignalStatus('コードを選択して手動でコピーしてください');}
   };
+  $('online-share').onclick=async()=>{
+    const v=mode==='HOST'?$('online-offer-input').value:$('online-answer').value;if(!v)return;
+    try{
+      if(navigator.share)await navigator.share({title:'BASEBALL 3D ONLINE MATCH',text:v});
+      else{await navigator.clipboard?.writeText(v);onlineSignalStatus('共有機能がないためコードをコピーしました');}
+    }catch{}
+  };
   $('online-apply').onclick=async()=>{try{if(mode!=='HOST')return;await acceptOnlineAnswer(onlineConnection,$('online-answer-input').value.trim());onlineSignalStatus('接続中…');}catch(err){onlineSignalStatus(err.message||String(err));}};
   $('online-back').onclick=()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineConnected=false;setMode('home');};
 }
