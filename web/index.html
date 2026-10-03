@@ -964,4 +964,84 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
   #match-ui .aim-area{width:132px!important;height:160px!important;top:47%!important}
   #match-ui .strike-zone{width:70px!important;height:102px!important}
 }
+</style><style id="prospi-like-match-ui-v3">
+/* Independent baseball-game presentation inspired by familiar mobile pitching/batting conventions. */
+#match-ui .match-view-switch{display:none!important}
+#match-ui .aim-area{
+  width:108px!important;height:146px!important;
+  left:50%!important;top:47%!important;
+  inset:auto!important;transform:translate(-50%,-50%)!important;
+  border:0!important;background:transparent!important;border-radius:0!important;
+  z-index:25!important;pointer-events:auto!important;touch-action:none!important;
+}
+#match-ui .aim-area:after{display:none!important}
+#match-ui .strike-zone{
+  width:96px!important;height:136px!important;
+  left:50%!important;top:50%!important;
+  border:1px solid #ffffffaa!important;
+  background:linear-gradient(180deg,#ffffff03,#ffffff00)!important;
+  box-shadow:0 0 0 1px #0008,0 3px 14px #0006!important;
+}
+#match-ui .strike-zone i{background:#ffffff20!important}
+#match-ui .aim-cursor{
+  width:24px!important;height:24px!important;
+  display:grid!important;place-items:center!important;
+  font-size:20px!important;line-height:1!important;
+  color:#f3cc53!important;opacity:.92!important;
+  text-shadow:0 2px 7px #000!important;
+  margin:-12px 0 0 -12px!important;
+}
+#match-ui .aim-help{
+  bottom:126px!important;
+  left:50%!important;
+  font-size:8px!important;
+  color:#d5dee7!important;
+  background:#02060cbb!important;
+  border:1px solid #ffffff1d!important;
+  border-radius:999px!important;
+  padding:4px 8px!important;
+}
+#match-ui .pitch-control{
+  left:8px!important;right:8px!important;bottom:75px!important;
+  grid-template-columns:repeat(4,1fr)!important;gap:4px!important;
+}
+#match-ui .pitch-control button{
+  min-height:36px!important;border-radius:7px!important;
+  background:linear-gradient(180deg,#142537ef,#040910f4)!important;
+  border:1px solid #ffffff25!important;
+  font-size:8px!important;font-weight:900!important;
+}
+#match-ui .pitch-control button.selected{
+  background:linear-gradient(180deg,#315873f5,#102536f5)!important;
+  border-color:#f2cc59!important;color:#fff!important;
+}
+#match-ui .match-action-pad{
+  left:8px!important;right:8px!important;bottom:7px!important;
+  grid-template-columns:72px 1fr 72px!important;gap:5px!important;
+}
+#match-ui .match-action-pad button{
+  min-height:55px!important;border-radius:8px!important;
+  font-size:11px!important;
+}
+#match-ui .match-action-pad .swing-main{
+  min-height:64px!important;
+  background:linear-gradient(180deg,#f0cc59,#8c620b)!important;
+  color:#161006!important;border-color:#ffe89a!important;
+}
+#match-ui .match-action-pad button[style*="display: none"]{display:none!important}
+#mph-speed{
+  bottom:123px!important;
+  font-size:12px!important;
+  font-variant-numeric:tabular-nums!important;
+}
+@media(max-width:520px){
+  #match-ui .aim-area{width:102px!important;height:140px!important;top:46%!important}
+  #match-ui .strike-zone{width:90px!important;height:128px!important}
+  #match-ui .pitch-control{bottom:73px!important}
+}
+@media(max-width:360px){
+  #match-ui .aim-area{width:94px!important;height:132px!important;top:45%!important}
+  #match-ui .strike-zone{width:84px!important;height:120px!important}
+  #match-ui .pitch-control{bottom:68px!important}
+}
 </style>
