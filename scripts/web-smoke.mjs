@@ -14,6 +14,7 @@ const checks = [
   ["match simulation import", js.includes("resolvePitch")],
   ["live state assignment", js.includes("match=applyOutcome(match,outcome)")],
   ["automatic AI pitching", js.includes("scheduleTopPitch(700)") && js.includes("count:[match.balls,match.strikes]")],
+  ["match result persistence", js.includes("recordMatchResult") && js.includes("save.matches") && js.includes("save.wins")],
   ["persistent save", js.includes("loadSave")],
 ];
 for (const [name, ok] of checks) {
