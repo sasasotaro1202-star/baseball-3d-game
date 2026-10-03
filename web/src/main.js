@@ -359,7 +359,20 @@ function updateAimUI(){
   const a=$('aim-cursor');if(a){a.style.left=(50+aimTarget.x*28)+'%';a.style.top=(50-aimTarget.y*28)+'%';}
 }
 function updateZoneUI(){const z=$('strike-zone');if(z)z.style.transform='translate(-50%,-50%) scale('+(1+Math.abs(aimTarget.x)*.05)+')';}
-function choosePitchManual(type){selectedPitch=PITCHES_FOR_UI[type]?type:'FASTBALL';matchEvent('選択 '+selectedPitch,'pitch');updatePremiumHUD();}
+function updatePitchControlUI(){
+  document.querySelectorAll('[data-pitch]').forEach(b=>{
+    const selected=b.dataset.pitch===selectedPitch;
+    b.classList.toggle('selected',selected);
+    const info=PITCHES[b.dataset.pitch];
+    if(info)b.textContent=(b.dataset.pitch==='FASTBALL'?'ストレート':b.dataset.pitch==='SLIDER'?'スライダー':b.dataset.pitch==='CURVEBALL'?'カーブ':'チェンジアップ')+' '+Math.round(info.speed||0);
+  });
+}
+function choosePitchManual(type){
+  selectedPitch=PITCHES_FOR_UI[type]?type:'FASTBALL';
+  updatePitchControlUI();
+  matchEvent('選択 '+selectedPitch,'pitch');
+  updatePremiumHUD();
+}
 function pitch(){
   if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM'))return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
@@ -377,7 +390,7 @@ function pitch(){
   }else{
     pitchTarget={x:aimTarget.x,y:aimTarget.y};
   }
-  window.__lastPitch=selectedPitch;
+  updatePitchControlUI();window.__lastPitch=selectedPitch;
   const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;window.__pitchVelocity=Math.round((pitchInfo.speed||90)*(0.97+Math.random()*.06));window.__pitchStart=performance.now();
   ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3});
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
