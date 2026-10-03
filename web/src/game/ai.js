@@ -6,7 +6,7 @@ export const AI_PROFILES={
 };
 export function choosePitch({count=[0,0],runnerThreat=0,profile=AI_PROFILES.pitcher,rng=Math.random}){
  const [balls,strikes]=count;
- const pressure=(strikes===2?.18:0)+(balls===3?.22:0)+runnerThreat*.15;
+ const pressure=(strikes===2 ? .18 : 0)+(balls===3?.22:0)+runnerThreat*.15;
  const roll=rng();
  if(strikes===2 && roll<.52) return 'FASTBALL';
  if(balls>=2 && roll<.35) return 'CHANGEUP';
