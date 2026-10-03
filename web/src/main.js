@@ -383,7 +383,7 @@ function pitch(){
 }
 function swing(){
   if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
-  const timing=Math.max(0,Math.min(1,t/1.0)), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
+  const timing=Math.max(0,Math.min(1,t/(ballPhysics?.duration||.9))), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
   const p=lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
   const outcome=resolvePitch({pitch:selectedPitch,timing,contact,power:(prof.power||.7)});
@@ -424,7 +424,7 @@ function pointerSwing(){swing();}
 function beginBattedBall(outcome,p,prof){
   const launchByOutcome={GROUND_OUT:4,SINGLE:10,DOUBLE:19,TRIPLE:27,HOME_RUN:26,FLY_OUT:28};
   const exitVelocity=70+(Number(prof.powerRisk||.5)*42)+(Number(prof.contactFocus||.5)*18);
-  const origin=[ball.position.x,Math.max(.75,ball.position.y),ball.position.z];
+  const origin=[pitchTarget.x,Math.max(.85,2.05+pitchTarget.y*.45),-7.85];
   ballPhysics=createBattedBallPhysics({
     origin,
     outcome,
