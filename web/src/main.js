@@ -399,8 +399,9 @@ function swing(){
   if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
   const timing=Math.max(0,Math.min(1,t/(ballPhysics?.duration||.9))), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
   const p=lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
+  const modePower=battingMode==='POWER'?1:.72;
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
-  const outcome=resolvePitch({pitch:selectedPitch,timing,contact,power:(prof.power||.7)});
+  const outcome=resolvePitch({pitch:selectedPitch,timing,contact,power:Math.min(1,(prof.power||.7)*modePower)});
   matchEvent(outcome,'result');
   if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome)){
     beginBattedBall(outcome,p,prof);
@@ -515,8 +516,17 @@ function resetMatchView(){
   if(!ov){ov=document.createElement('div');ov.id='match-intro';ov.innerHTML='<div class="match-intro-kicker">BASEBALL 3D</div><strong>PLAY BALL</strong><span>1回表 · STARTING LINEUP</span>';document.body.appendChild(ov);}
   ov.classList.remove('hide');setTimeout(()=>ov.classList.add('hide'),1150);
 }
+let battingMode='CONTACT';
+function setBattingMode(mode){
+  battingMode=mode==='POWER'?'POWER':'CONTACT';
+  $('bat-contact-mode')?.classList.toggle('selected',battingMode==='CONTACT');
+  $('bat-power-mode')?.classList.toggle('selected',battingMode==='POWER');
+  const pill=$('bat-mode-pill');if(pill)pill.dataset.mode=battingMode;
+}
 function updateMatchHUD(){
   const batting=match.half==='TOP';
+  matchUI.classList.toggle('batting-phase',batting);
+  matchUI.classList.toggle('pitching-phase',!batting);
   const batter=lineupPlayer(0);
   $('matchhud').textContent=match.inning+'回'+(batting?'表':'裏')+'　'+match.score.away+' - '+match.score.home;
   $('inning-label').textContent=match.inning+'回'+(batting?'表':'裏');
@@ -541,7 +551,7 @@ $('aim-area')?.addEventListener('pointermove',e=>{if(!aimDragging)return;if(aimP
 $('aim-area')?.addEventListener('pointerup',e=>{const tap=!aimPointerMoved;aimDragging=false;if(tap&&match.half==='TOP'&&pitchState==='pitch')pointerSwing();aimPointerStart=null;aimPointerMoved=false;$('aim-area').releasePointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointercancel',e=>{aimDragging=false;aimPointerStart=null;aimPointerMoved=false;});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
-$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();updateAimUI();updateZoneUI();
+$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();updateAimUI();updateZoneUI();setBattingMode('CONTACT');
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
 function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.16,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){
   const previous=ballPhysics;
