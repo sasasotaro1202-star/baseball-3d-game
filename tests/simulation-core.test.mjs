@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {createMatchState,applyOutcome,resolveContact,resolvePitch,REGULATION_INNINGS,stealBase,tagUp,advanceRunners,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from '../web/src/game/simulation.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {createMatchState,applyOutcome,resolveContact,resolvePitch,REGULATION_INNINGS,stealBase,tagUp,advanceRunners,resolveFieldingPlay,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from '../web/src/game/simulation.js';
 test('three outs rotate from top to bottom',()=>{let s=createMatchState();s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');assert.equal(s.half,'BOTTOM');assert.equal(s.inning,1);assert.equal(s.outs,0);});
 test('home run scores batter and clears bases',()=>{let s=createMatchState();s.runners=[{id:1,base:0,status:'LIVE'},{id:2,base:1,status:'LIVE'}];s.bases=[true,true,false];s=applyOutcome(s,'HOME_RUN');assert.equal(s.score.away,3);assert.deepEqual(s.bases,[false,false,false]);});
 test('tied game after the 9th inning enters extra innings without automatic runners',()=>{let s=createMatchState();for(let inning=0;inning<9;inning++){for(let i=0;i<3;i++)s=applyOutcome(s,'OUT');for(let i=0;i<3;i++)s=applyOutcome(s,'OUT');}assert.equal(s.inning,10);assert.equal(s.half,'TOP');assert.equal(s.outs,0);assert.deepEqual(s.bases,[false,false,false]);assert.equal(s.extraInnings,true);});
@@ -23,4 +23,23 @@ test('batted ball physics includes ballistic flight and controlled bounce',()=>{
  assert.ok(peak>1);
  assert.ok(s.position[1]>=s.radius);
  assert.ok(s.bounces>=0&&s.bounces<=s.maxBounces);
+});
+
+test('plate appearances advance the batting order after terminal outcomes',()=>{
+ let s=createMatchState();
+ s=applyOutcome(s,'STRIKE');s=applyOutcome(s,'STRIKE');s=applyOutcome(s,'STRIKEOUT');
+ assert.equal(s.batterIndex.away,1);
+ assert.equal(s.batters,1);
+});
+test('fielding can convert a single into an out on a strong throw',()=>{
+ const s=createMatchState();
+ const r=resolveFieldingPlay(s,{result:'SINGLE',distance:2,travelTime:.8,fielderReaction:95,fielderField:95,fielderCatch:95,fielderArm:99,throwDistance:15,batterSpeed:55,rng:()=>0});
+ assert.equal(r.finalOutcome,'OUT');
+ assert.equal(r.throwSuccess,true);
+});
+test('fielding catch miss turns a catchable fly ball into a live hit',()=>{
+ const s=createMatchState();
+ const r=resolveFieldingPlay(s,{result:'FLY_OUT',distance:25,travelTime:.6,fielderReaction:40,fielderField:40,fielderCatch:40,rng:()=>.99});
+ assert.equal(r.finalOutcome,'SINGLE');
+ assert.equal(r.catchSuccess,false);
 });
