@@ -18,4 +18,4 @@ export function chooseSwing({pitch,zone=.5,profile=AI_PROFILES.batter,rng=Math.r
  if(rng()<takeChance) return {action:'TAKE'};
  return {action:'SWING',timing:clamp(.42+zone*.16+(rng()-.5)*.12),contact:clamp(profile.contactFocus+(rng()-.5)*.2)};
 }
-function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function clamp(v,min=0,max=1){return Math.max(min,Math.min(max,v))}
