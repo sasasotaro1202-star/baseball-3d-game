@@ -329,12 +329,13 @@ function ensureMatchPresentation(){
 }
 function updatePremiumHUD(){
   const h=ensureMatchPresentation(), batting=match.half==='TOP';
-  const p=lineupPlayer(0), pc=p?cardModel(p,developmentFor(save,p.id)):null;
+  const p=batting?lineupPlayer(0):null, pc=p?cardModel(p,developmentFor(save,p.id)):null;
+  $('mph-away').textContent='YOU';$('mph-home').textContent='CPU';
   $('mph-away-score').textContent=match.score.away;$('mph-home-score').textContent=match.score.home;
   $('mph-count').textContent=match.inning+'回'+(batting?'表':'裏');
   $('mph-outs').textContent='●'.repeat(match.outs)+'○'.repeat(Math.max(0,3-match.outs));
-  $('mph-batter').textContent=batting?(p?.name||'打者'):'AI打者';
-  $('mph-rank').textContent=pc?.rank||'—';$('mph-ovr').textContent=pc?'OVR '+pc.overall:'OVR --';
+  $('mph-batter').textContent=batting?(p?.name||'打者'):'CPU打者';
+  $('mph-rank').textContent=pc?.rank||'—';$('mph-ovr').textContent=pc?'OVR '+pc.overall:'AI';
   $('mph-balls').textContent='B '+match.balls;$('mph-strikes').textContent='S '+match.strikes;
   $('mph-pitches').textContent='P '+(match.pitches||0);
   document.querySelectorAll('.mph-base i').forEach(x=>x.classList.toggle('on',false));
@@ -490,7 +491,7 @@ function recordMatchResult(){
 }
 function resetMatchView(){
   ensureMatchPresentation();
-  window.__pitchVelocity=0;window.__hitOutcome=null;fielderTarget=null;
+  pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;window.__pitchVelocity=0;window.__hitOutcome=null;fielderTarget=null;
   updatePremiumHUD();
   cameraMode='BATTER';
   camera.fov=52;camera.updateProjectionMatrix();
