@@ -14,7 +14,7 @@ export function choosePitch({count=[0,0],runnerThreat=0,profile=AI_PROFILES.pitc
  return roll<.5?'FASTBALL':'CURVEBALL';
 }
 export function chooseSwing({pitch,zone=.5,profile=AI_PROFILES.batter,rng=Math.random}){
- const takeChance=clamp(1-zone)*profile.selectivity;
+ const takeChance=clamp(1-zone,0,1)*profile.selectivity;
  if(rng()<takeChance) return {action:'TAKE'};
  return {action:'SWING',timing:clamp(.42+zone*.16+(rng()-.5)*.12),contact:clamp(profile.contactFocus+(rng()-.5)*.2)};
 }
