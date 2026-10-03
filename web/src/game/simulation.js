@@ -5,7 +5,7 @@ export const REGULATION_INNINGS=9;
 export const EXTRA_INNING_START_BASES=Object.freeze([false,false,false]);
 
 function runner(id,base,speed=70,reaction=70){return{id,base,speed,reaction,status:'LIVE',tagged:false,advanceIntent:'HOLD',startBase:base};}
-export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
+export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,batterIndex:{away:0,home:0},ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
 export function cloneState(s){return JSON.parse(JSON.stringify(s));}
 function offenseKey(s){return s.half==='TOP'?'away':'home';}
 function resetCount(s){s.balls=0;s.strikes=0;}
@@ -30,12 +30,20 @@ function doublePlay(s){const r2=s.runners.find(r=>r.status==='LIVE'&&r.base===1)
 export function stealBase(input,runnerId,targetBase=1){const s=cloneState(input);const r=s.runners.find(x=>x.id===runnerId&&x.status==='LIVE');if(!r||targetBase<=r.base)return{state:s,success:false};const chance=Math.max(.05,Math.min(.95,.45+(r.speed-70)*.012-(targetBase-r.base)*.04));const success=Math.random()<chance;if(success)r.base=targetBase;else{r.status='OUT';s.outs++;}syncBases(s);s.lastPlay={type:success?'STEAL_SUCCESS':'STEAL_OUT',runnerId,targetBase};return{state:rotateHalf(s),success};}
 export function tagUp(input,runnerId,targetBase=3,throwStrength=70){const s=cloneState(input);const r=s.runners.find(x=>x.id===runnerId&&x.status==='LIVE');if(!r)return{state:s,success:false};const chance=Math.max(.05,Math.min(.95,.55+(r.speed-70)*.01-(throwStrength-70)*.008));const success=Math.random()<chance;if(success)r.base=targetBase;else{r.status='OUT';s.outs++;}syncBases(s);s.lastPlay={type:success?'TAG_UP_SUCCESS':'TAG_UP_OUT',runnerId,targetBase};return{state:rotateHalf(s),success};}
 export function advanceRunners(input,{result='SINGLE',fielderPosition='NORMAL',batterSpeed=70,runnerReaction=70}={}){const s=cloneState(input);const defenseMod={INFIELD:.88,SHALLOW:.94,NORMAL:1,DEEP:1.12}[fielderPosition]||1;const risk=runnerReaction/100*defenseMod;if(result==='GROUND_OUT'){if(s.runners.some(r=>r.base===1)&&s.runners.some(r=>r.base===0)&&risk<.72)return doublePlay(s);s.outs++;s.lastOutcome='GROUND_OUT';return rotateHalf(s);}if(result==='FLY_OUT'){s.outs++;s.lastOutcome='FLY_OUT';return rotateHalf(s);}if(result==='SAC_BUNT')return sacrifice(s,false);if(result==='SAC_FLY')return sacrifice(s,true);if(result==='SINGLE')advanceOnSingle(s);else if(result==='DOUBLE')advanceOnDouble(s);else if(result==='TRIPLE')advanceOnTriple(s);else if(result==='HOME_RUN')homer(s);resetCount(s);syncBases(s);s.lastOutcome=result;s.lastPlay={type:result,fielderPosition};checkGameEndAfterScore(s);return s;}
+const clamp01=v=>Math.max(0,Math.min(1,Number(v)||0));
+function terminalPlateAppearance(outcome){return ['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT','SAC_BUNT','SAC_FLY','STRIKEOUT','WALK','OUT'].includes(outcome);}
+function advanceBatterIndex(s){
+  const side=offenseKey(s);
+  if(!s.batterIndex||typeof s.batterIndex!=='object')s.batterIndex={away:0,home:0};
+  s.batterIndex[side]=(Number(s.batterIndex[side])||0)+1;
+  s.batters=(Number(s.batters)||0)+1;
+}
 export function applyOutcome(input,outcome,options={}){const s=cloneState(input);s.pitches++;if(s.ended)return s;
-if(outcome==='BALL'){s.balls++;if(s.balls>=4){resetCount(s);walk(s);s.lastOutcome='WALK';checkGameEndAfterScore(s);}else s.lastOutcome='BALL';syncBases(s);return s;}
+if(outcome==='BALL'){s.balls++;if(s.balls>=4){resetCount(s);walk(s);s.lastOutcome='WALK';advanceBatterIndex(s);checkGameEndAfterScore(s);}else s.lastOutcome='BALL';syncBases(s);return s;}
 if(outcome==='FOUL'){s.strikes=Math.min(2,s.strikes+1);s.lastOutcome='FOUL';return s;}
-if(outcome==='STRIKE'){s.strikes++;if(s.strikes>=3){s.outs++;resetCount(s);s.lastOutcome='STRIKEOUT';return rotateHalf(s);}s.lastOutcome='STRIKE';return s;}
-if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT','SAC_BUNT','SAC_FLY'].includes(outcome))return advanceRunners(s,{result:outcome,...options});
-if(outcome==='OUT'){s.outs++;resetCount(s);s.lastOutcome='OUT';return rotateHalf(s);}
+if(outcome==='STRIKE'){s.strikes++;if(s.strikes>=3){s.outs++;resetCount(s);s.lastOutcome='STRIKEOUT';advanceBatterIndex(s);return rotateHalf(s);}s.lastOutcome='STRIKE';return s;}
+if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT','SAC_BUNT','SAC_FLY'].includes(outcome)){const next=advanceRunners(s,{result:outcome,...options});if(terminalPlateAppearance(outcome))advanceBatterIndex(next);return next;}
+if(outcome==='OUT'){s.outs++;resetCount(s);s.lastOutcome='OUT';advanceBatterIndex(s);return rotateHalf(s);}
 if(outcome==='DOUBLE_PLAY')return doublePlay(s);
 throw new Error('Unknown outcome: '+outcome);}
 export function resolveContact({timing=.5,power=.5,contact=.5,rng=Math.random,defensePosition='NORMAL'}={}){const q=Math.max(0,Math.min(1,.55*timing+.25*power+.20*contact)),x=rng();if(q>.86&&x<.20)return'HOME_RUN';if(q>.72&&x<.42)return'DOUBLE';if(q>.58&&x<.62)return'SINGLE';if(x<.18)return'GROUND_OUT';if(x<.30)return'FLY_OUT';if(x<.94)return'OUT';return'FOUL';}
@@ -96,4 +104,27 @@ export function stepBallPhysics(input,dt=.016){
 
 export function isFiniteBallPhysics(state){
   return Boolean(state&&!state.invalid&&finite3(state.position)&&finite3(state.velocity)&&finite3(state.acceleration)&&finite(state.time));
+}
+\nexport function resolveFieldingPlay(input,{result='SINGLE',distance=8,travelTime=1,fielderReaction=70,fielderField=70,fielderCatch=70,fielderArm=70,throwDistance=27,batterSpeed=70,rng=Math.random}={}) {
+  const s=cloneState(input);
+  const d=Math.max(0,Number(distance)||0),t=Math.max(.05,Number(travelTime)||.05);
+  const quality=clamp01((Number(fielderReaction||70)*.34+Number(fielderField||70)*.26+Number(fielderCatch||70)*.40)/100);
+  const arm=clamp01(Number(fielderArm||70)/100);
+  if(result==='HOME_RUN')return{state:s,finalOutcome:'HOME_RUN',catchSuccess:false,throwSuccess:false,event:'HOMERUN'};
+  const isAir=result==='FLY_OUT';
+  const catchChance=clamp01((isAir?.90:.80)-d/36+quality*.20+Math.min(t,1.8)*.035);
+  const catchSuccess=rng()<catchChance;
+  if(isAir)return{state:s,finalOutcome:catchSuccess?'FLY_OUT':'SINGLE',catchSuccess,throwSuccess:false,event:catchSuccess?'CLEAN_CATCH':'CATCH_MISS'};
+  const pickupChance=clamp01(.92-d/42+quality*.16);
+  const pickupSuccess=rng()<pickupChance;
+  if(result==='GROUND_OUT'){
+    return{state:s,finalOutcome:pickupSuccess?'OUT':'SINGLE',catchSuccess:pickupSuccess,throwSuccess:false,event:pickupSuccess?'GROUND_PICKUP':'FIELDING_ERROR'};
+  }
+  if(!pickupSuccess)return{state:s,finalOutcome:result,catchSuccess:false,throwSuccess:false,event:'FIELDING_MISS'};
+  const throwChance=clamp01(.92+arm*.10-Number(throwDistance||27)/65-(Number(batterSpeed||70)-70)*.006);
+  const throwSuccess=rng()<throwChance;
+  let finalOutcome=result;
+  if(result==='SINGLE'&&throwSuccess)finalOutcome='OUT';
+  else if(result==='DOUBLE'&&throwSuccess&&rng()<.45)finalOutcome='SINGLE';
+  return{state:s,finalOutcome,catchSuccess:true,throwSuccess,event:throwSuccess?'THROW_ON_TARGET':'THROW_ERROR'};
 }
