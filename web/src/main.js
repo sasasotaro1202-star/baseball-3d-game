@@ -552,7 +552,10 @@ function renderOnlineLobby(){
   $('online-create').onclick=async()=>{setHost();try{await startOnlineHost();}catch(err){onlineSignalStatus(err.message||String(err));}};
   $('online-join').onclick=()=>setJoin();
   $('online-action').onclick=async()=>{try{if(mode==='HOST')await startOnlineHost();else await startOnlineGuest();}catch(err){onlineSignalStatus(err.message||String(err));}};
-  $('online-copy').onclick=async()=>{const v=mode==='HOST'?$('online-offer-input').value:$('online-answer').value;if(v)await navigator.clipboard?.writeText(v);};
+  $('online-copy').onclick=async()=>{
+    const v=mode==='HOST'?$('online-offer-input').value:$('online-answer').value;if(!v)return;
+    try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(v);else{$('online-offer-input').focus();$('online-offer-input').select();document.execCommand('copy');}onlineSignalStatus('コードをコピーしました');}catch{onlineSignalStatus('コードを選択して手動でコピーしてください');}
+  };
   $('online-apply').onclick=async()=>{try{if(mode!=='HOST')return;await acceptOnlineAnswer(onlineConnection,$('online-answer-input').value.trim());onlineSignalStatus('接続中…');}catch(err){onlineSignalStatus(err.message||String(err));}};
   $('online-back').onclick=()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineConnected=false;setMode('home');};
 }
@@ -627,7 +630,8 @@ function resolveRemoteBatting(msg){
   const dx=Math.abs(Number(msg.aimX||0)-pitchTarget.x),dy=Math.abs(Number(msg.aimY||0)-pitchTarget.y);
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
   const powerMode=msg.mode==='POWER'?1:.72;
-  const outcome=resolvePitch({pitch:selectedPitch,timing:Number(msg.timing)||.5,contact,power:Math.min(1,(prof.power||.7)*powerMode)});
+  const timing=Number.isFinite(Number(msg.timing))?Number(msg.timing):.5;
+  const outcome=resolvePitch({pitch:selectedPitch,timing,contact,power:Math.min(1,(prof.power||.7)*powerMode)});
   if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome)){
     beginBattedBall(outcome,batter,prof);onlineSend({type:'ONLINE_CONTACT',outcome,physics:ballPhysics});
   }else finishPlay(outcome);
