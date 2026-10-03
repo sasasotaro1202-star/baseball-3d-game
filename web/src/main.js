@@ -139,22 +139,6 @@ function portraitMarkup(p,extra=''){
     (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="portrait-fallback" style="display:none"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>':
     '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
 }
-function renderRoster(){
-  const owned=resolveOwnedPlayers();
-  const render=()=>{const q=(document.getElementById('owned-search')?.value||'').trim().toLowerCase();const rank=document.getElementById('owned-rank')?.value||'ALL';const list=owned.filter(p=>(!q||p.name.toLowerCase().includes(q)||String(p.pos||'').toLowerCase().includes(q))&&(rank==='ALL'||p.rank===rank));const wrap=document.getElementById('owned-list');if(wrap){wrap.innerHTML=list.length?playerCardsFor(list):'<p class="small">条件に一致する所持選手はいません。</p>';bindPlayerCards();}};
-  const starters=owned.slice(0,9);
-  card.innerHTML=`<h2>オーダー</h2><p>所持選手 ${owned.length} 名 ・ スタメン ${starters.length} 名</p><div class="order-starting-grid">${starters.map((p,i)=>'<div class="lineup-player"><div class="lineup-number">'+(i+1)+'</div>'+portraitMarkup(p,'lineup-portrait')+'<strong>'+p.name+'</strong><small>'+p.pos+' · OVR '+cardModel(p,developmentFor(save,p.id)).overall+'</small></div>').join('')||'<p>スカウトで選手を獲得すると、ここに表示されます。</p>'}</div><h3 class="order-section-title">全所持選手</h3><div class="owned-toolbar"><input id="owned-search" type="search" placeholder="選手名・守備位置で検索"><select id="owned-rank"><option value="ALL">全ランク</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option><option>F</option></select></div><div id="owned-list" class="player-grid"></div><button class="action back" id="back">ホームへ戻る</button>`;
-  $('back').onclick=()=>setMode('home');document.getElementById('owned-search').oninput=render;document.getElementById('owned-rank').onchange=render;render();
-}function renderTraining(){
-  const players=resolveOwnedPlayers();
-  card.innerHTML='<h2>育成</h2><p>選手名鑑と同じ顔写真カードで、育成対象を一目で確認できます。</p><div class="player-grid training-grid">'+(players.map(p=>{
-    const d=developmentFor(save,p.id),c=cardModel(p,d),image=p.image||'';
-    const portrait=portraitMarkup(p,'training-portrait');
-    return '<div class="player-card training-player" data-player-id="'+p.id+'"><div class="player-portrait training-portrait">'+portrait+'<span class="training-level">LV '+d.level+'</span></div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+c.pos+' · XP '+d.xp+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">打撃</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
-  }).join('')||'<p>育成する選手がいません。</p>')+'</div><button class="action back" id="back">ホームへ戻る</button>';
-  $('back').onclick=()=>setMode('home');bindPlayerCards();
-  card.querySelectorAll('.train').forEach(b=>b.onclick=()=>{const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));const r=trainPlayer(save,p,b.dataset.focus);if(r.error){alert('コイン不足');return}save=r.state;persist();renderTraining();});
-}
 function renderCard(title,body){card.innerHTML='<h2>'+title+'</h2><p>'+body+'</p><button class="action back" id="back">ホームへ戻る</button>'; $('back').onclick=()=>setMode('home');}
 async function renderSettings(){
   const user=await getCloudUser();
@@ -421,7 +405,6 @@ function finishPlay(outcome){
   recordMatchResult();
   if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
-function resetMatchView(){cameraMode='BATTER';camera.position.set(0,7.5,18);camera.lookAt(0,2,-5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();}
 function aiBatterAtBat(){const batterPlayer=ALL_PLAYERS[4];const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',profile:aiProfile(batterPlayer,developmentFor(save,batterPlayer.id))});const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));const contact=decision.action==='TAKE'?0.08:decision.contact;const outcome=decision.action==='TAKE'?((Math.random()<.58)?'BALL':'STRIKE'):resolvePitch({pitch:window.__lastPitch||'FASTBALL',timing,contact,power:.75});finishPlay(outcome);if(!['BALL','STRIKE','STRIKEOUT'].includes(outcome)){window.__hitOutcome=outcome;pitchState='hit';t=0;setFielderTarget(outcome);}}
 function pointerSwing(){swing();}
 function setFielderTarget(outcome){
