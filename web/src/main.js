@@ -334,9 +334,10 @@ function ensureMatchPresentation(){
 }
 function updatePremiumHUD(){
   const h=ensureMatchPresentation(), batting=match.half==='TOP';
-  const p=batting?lineupPlayer(0):null, pc=p?cardModel(p,developmentFor(save,p.id)):null;
+  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):(batting?lineupPlayer(0):ALL_PLAYERS[4]);
+  const pc=p?cardModel(p,developmentFor(save,p.id)):null;
   $('mph-away').textContent=isOnlineMatch()?(onlineRole==='HOST'?'YOU':'RIVAL'):'YOU';
-  $('mph-home').textContent=isOnlineMatch()?(onlineRole==='GUEST'?'YOU':'RIVAL'):'CPU';
+  $('mph-home').textContent=isOnlineMatch()?(onlineRole==='GUEST'?'YOU':'CPU'):'CPU';
   $('mph-away-score').textContent=match.score.away;$('mph-home-score').textContent=match.score.home;
   $('mph-count').textContent=match.inning+'回'+(batting?'表':'裏');
   $('mph-outs').textContent='●'.repeat(match.outs)+'○'.repeat(Math.max(0,3-match.outs));
@@ -678,7 +679,7 @@ function updateMatchHUD(){
   $('count-label').textContent='B'+match.balls+' S'+match.strikes+' O'+match.outs;
   $('batter-name').textContent=batter?.name||'打者';
   $('pitch-readout').textContent=pitchState==='pitch'?selectedPitch:'READY';
-  $('pitch').querySelector('span').textContent='投球';
+  $('pitch').querySelector('span').textContent=isOnlineMatch()?'投球':'投球';
   $('pitch').style.display=isLocalPitcher()?'block':'none';
   $('take').style.display=batting?'block':'none';
   $('swing').style.display=batting?'block':'none';
