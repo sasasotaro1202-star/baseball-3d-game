@@ -1222,4 +1222,141 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
   #match-ui .match-action-pad button{min-height:49px!important}
   #match-ui .match-action-pad .swing-main{min-height:56px!important}
 }
+</style><style id="match-console-v7">
+/* Match screen: compact HUD, field-first composition, no dashboard-like cards. */
+#match-ui .atbat-card{
+  top:103px!important;left:8px!important;width:148px!important;
+  background:linear-gradient(90deg,#02070de8,#02070d9e)!important;
+  border:0!important;border-left:2px solid #f0c74f!important;
+  box-shadow:0 4px 12px #0008!important;border-radius:2px!important;
+}
+#match-ui .atbat-card>div:first-child:before{
+  content:'BATTER  01';
+  display:block;color:#7f8d9d;font-size:6px;letter-spacing:.12em;margin-bottom:2px;
+}
+#match-ui .pitch-readout{display:none!important}
+#match-premium-hud .mph-top{
+  top:6px!important;left:7px!important;right:7px!important;height:48px!important;
+  grid-template-columns:1fr 70px 1fr!important;border-radius:3px!important;
+  background:linear-gradient(180deg,#04090ef2,#010409ef)!important;
+  border:1px solid #ffffff20!important;box-shadow:0 4px 12px #000b!important;
+}
+#match-premium-hud .mph-team{
+  padding:0 8px!important;background:transparent!important;border:0!important;
+}
+#match-premium-hud .mph-team.mph-home{background:transparent!important}
+#match-premium-hud .mph-team b{
+  font-size:7px!important;color:#aeb9c5!important;letter-spacing:.12em!important;
+}
+#match-premium-hud .mph-team strong{
+  font-size:23px!important;font-variant-numeric:tabular-nums!important;
+}
+#match-premium-hud .mph-inning{background:transparent!important}
+#match-premium-hud .mph-inning small{
+  font-size:9px!important;color:#f1cd5b!important;font-weight:950!important;
+}
+#match-premium-hud .mph-inning b{
+  font-size:7px!important;color:#8994a0!important;letter-spacing:0!important;margin-top:2px!important;
+}
+#match-premium-hud .mph-count{
+  top:70px!important;right:8px!important;display:flex!important;gap:4px!important;
+}
+#match-premium-hud .mph-count b{
+  width:24px!important;min-width:24px!important;height:22px!important;
+  display:grid!important;place-items:center!important;padding:0!important;
+  border:1px solid #ffffff1c!important;border-radius:3px!important;
+  background:#02060cd9!important;font-size:7px!important;
+}
+#match-premium-hud .mph-count b:nth-child(1){border-color:#61a5e955!important}
+#match-premium-hud .mph-count b:nth-child(2){border-color:#8bbf7b55!important}
+#match-premium-hud .mph-count b:nth-child(3){border-color:#d9a15d55!important}
+#match-premium-hud .mph-base{
+  top:97px!important;right:8px!important;
+  transform:scale(.74)!important;transform-origin:top right!important;
+}
+#match-ui .match-view-switch,#match-ui .aim-help{display:none!important}
+#match-ui .aim-area{
+  width:96px!important;height:128px!important;
+  left:50%!important;top:48%!important;inset:auto!important;
+  transform:translate(-50%,-50%)!important;border:0!important;background:transparent!important;
+}
+#match-ui .strike-zone{
+  width:84px!important;height:118px!important;
+  border:1px solid #ffffff68!important;
+  background:transparent!important;box-shadow:0 0 0 1px #0008!important;
+}
+#match-ui .strike-zone i{background:#ffffff16!important}
+#match-ui .aim-cursor{
+  width:18px!important;height:18px!important;margin:-9px 0 0 -9px!important;
+  border:2px solid #fff!important;border-radius:50%!important;
+  background:#ffffff08!important;box-shadow:0 0 0 1px #000a,0 0 8px #0007!important;
+}
+#match-ui.batting-phase .aim-cursor{
+  width:20px!important;height:20px!important;margin:-10px 0 0 -10px!important;
+  border-color:#35d476!important;background:#35d47610!important;
+}
+#match-ui .pitch-control{
+  left:7px!important;right:7px!important;bottom:72px!important;
+  grid-template-columns:repeat(4,1fr)!important;gap:4px!important;
+}
+#match-ui .pitch-control button{
+  min-height:30px!important;border-radius:3px!important;
+  background:#02070de8!important;border:1px solid #ffffff1b!important;
+  font-size:8px!important;padding:2px!important;
+}
+#match-ui .pitch-control button.selected{
+  background:#123c29f2!important;border-color:#36cf74!important;
+}
+#match-ui .match-action-pad{
+  left:7px!important;right:7px!important;bottom:6px!important;
+  grid-template-columns:66px 1fr 66px!important;gap:5px!important;
+}
+#match-ui .match-action-pad button{
+  min-height:50px!important;border-radius:4px!important;
+  background:linear-gradient(#0a151ff4,#02060bef)!important;
+  border:1px solid #ffffff22!important;padding:4px!important;
+}
+#match-ui .match-action-pad .swing-main{
+  min-height:58px!important;border-radius:5px!important;
+  background:linear-gradient(#e8c653,#91650d)!important;
+  border-color:#ffe599!important;box-shadow:0 4px 13px #000b!important;
+}
+#match-ui .match-action-pad span{font-size:11px!important;font-weight:950!important}
+#match-ui .match-action-pad small{font-size:6px!important;opacity:.7!important}
+#match-ui #matchback{
+  top:61px!important;left:8px!important;right:auto!important;
+  padding:4px 7px!important;border-radius:3px!important;font-size:7px!important;
+  background:#02070dcc!important;border:1px solid #ffffff19!important;
+}
+#match-ui .bat-mode-pill{
+  left:auto!important;right:8px!important;bottom:62px!important;
+  transform:none!important;background:#02070df0!important;border:1px solid #ffffff1d!important;
+  box-shadow:0 3px 10px #0008!important;
+}
+#match-ui .bat-mode-pill button{
+  min-width:45px!important;height:23px!important;font-size:7px!important;
+}
+#match-ui .bat-mode-pill button.selected{background:#1d8a50!important}
+#mph-speed{
+  bottom:118px!important;font-size:10px!important;padding:3px 7px!important;
+  background:#02070dbb!important;border:0!important;
+}
+#mph-event{
+  top:42%!important;font-size:clamp(25px,8vw,52px)!important;
+  text-shadow:0 3px 18px #000!important;
+}
+@media(max-width:360px){
+  #match-premium-hud .mph-top{height:46px!important;grid-template-columns:1fr 60px 1fr!important}
+  #match-premium-hud .mph-team strong{font-size:21px!important}
+  #match-ui .atbat-card{top:96px!important;width:135px!important}
+  #match-premium-hud .mph-count{top:65px!important}
+  #match-premium-hud .mph-base{top:90px!important}
+  #match-ui .aim-area{width:90px!important;height:120px!important;top:46%!important}
+  #match-ui .strike-zone{width:78px!important;height:110px!important}
+  #match-ui .pitch-control{bottom:68px!important}
+  #match-ui .match-action-pad{grid-template-columns:61px 1fr 61px!important}
+  #match-ui .match-action-pad button{min-height:47px!important}
+  #match-ui .match-action-pad .swing-main{min-height:54px!important}
+  #match-ui .bat-mode-pill{bottom:59px!important}
+}
 </style>
