@@ -552,10 +552,11 @@ body{background:#050505}
 <div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b></div></div>
 <div class="aim-help" id="aim-help">投球時：画面をドラッグしてコース指定</div>
 <div class="pitch-control"><button type="button" data-pitch="FASTBALL">ストレート</button><button type="button" data-pitch="SLIDER">スライダー</button><button type="button" data-pitch="CURVEBALL">カーブ</button><button type="button" data-pitch="CHANGEUP">チェンジアップ</button></div>
+<div class="bat-mode-pill" id="bat-mode-pill"><button id="bat-contact-mode" type="button" class="selected">ミート</button><button id="bat-power-mode" type="button">強振</button></div>
 <div class="match-action-pad">
-<button id="take"><span>見送る</span><small>ボールを見る</small></button>
-<button id="swing" class="swing-main"><span>スイング</span><small>画面タップでも可</small></button>
-<button id="pitch"><span>投球</span><small>コース確定</small></button>
+<button id="take"><span>見送る</span><small>タイミングを待つ</small></button>
+<button id="swing" class="swing-main"><span>スイング</span><small>タップで打つ</small></button>
+<button id="pitch"><span>投球</span><small>タップで投げる</small></button>
 </div>
 <button id="matchback" class="danger" style="position:absolute;right:8px;top:48px;z-index:13;pointer-events:auto;border:1px solid #ffffff25;background:#050a11dd;color:#fff;border-radius:5px;padding:6px 8px;font-size:9px">終了</button>
 <div id="fielding-banner" class="fielding-banner">守備操作</div>
@@ -1043,5 +1044,68 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
   #match-ui .aim-area{width:94px!important;height:132px!important;top:45%!important}
   #match-ui .strike-zone{width:84px!important;height:120px!important}
   #match-ui .pitch-control{bottom:68px!important}
+}
+</style><style id="match-presentation-v4">
+/* Independent clean-room baseball match presentation: batting and pitching have different visual hierarchies. */
+#match-ui .bat-mode-pill{
+  display:none;position:absolute;left:50%;bottom:77px;transform:translateX(-50%);
+  z-index:58;pointer-events:auto;padding:3px;border:1px solid #ffffff25;border-radius:999px;
+  background:#02070ce8;box-shadow:0 4px 12px #0009;
+}
+#match-ui .bat-mode-pill button{
+  min-width:54px;height:25px;border:0;border-radius:999px;background:transparent;color:#aebbc8;
+  font-size:8px;font-weight:950;
+}
+#match-ui .bat-mode-pill button.selected{background:#2b8f58;color:#fff;box-shadow:0 0 10px #2b8f5840}
+#match-ui.batting-phase .bat-mode-pill{display:flex}
+#match-ui.batting-phase .aim-area{
+  width:122px!important;height:160px!important;top:45%!important;
+}
+#match-ui.batting-phase .strike-zone{
+  width:102px!important;height:142px!important;
+  border-color:#ffffff7a!important;background:#ffffff02!important;
+}
+#match-ui.batting-phase .aim-cursor{
+  color:#43c979!important;opacity:1!important;font-size:21px!important;
+}
+#match-ui.batting-phase .aim-help{display:none!important}
+#match-ui.batting-phase .match-action-pad{
+  grid-template-columns:1fr!important;left:25%!important;right:25%!important;
+}
+#match-ui.batting-phase .match-action-pad #take,
+#match-ui.batting-phase .match-action-pad #pitch{display:none!important}
+#match-ui.batting-phase .match-action-pad #swing{width:100%!important}
+#match-ui.pitching-phase .bat-mode-pill{display:none!important}
+#match-ui.pitching-phase .aim-area{
+  width:108px!important;height:146px!important;top:46%!important;
+}
+#match-ui.pitching-phase .strike-zone{
+  width:92px!important;height:132px!important;
+}
+#match-ui.pitching-phase .aim-cursor{color:#fff!important}
+#match-ui .atbat-card{
+  top:73px!important;left:8px!important;right:auto!important;
+  width:max-content!important;min-width:155px!important;max-width:56vw!important;
+  padding:6px 9px!important;border-radius:6px!important;
+}
+#match-ui .atbat-card .small{font-size:8px!important}
+#match-ui .atbat-card strong{font-size:12px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#match-ui .pitch-readout b{font-size:10px!important}
+#match-ui .mph-batter{display:none!important}
+#match-ui .mph-count{top:72px!important;right:8px!important}
+#match-ui .mph-base{top:107px!important;right:8px!important;transform:scale(.9)!important;transform-origin:top right!important}
+#mph-event{top:44%!important;letter-spacing:.02em!important}
+#match-ui .pitch-control{bottom:76px!important}
+#match-ui #matchback{top:64px!important}
+@media(max-width:520px){
+  #match-ui.batting-phase .aim-area{width:112px!important;height:150px!important;top:44%!important}
+  #match-ui.batting-phase .strike-zone{width:94px!important;height:134px!important}
+  #match-ui .bat-mode-pill{bottom:73px!important}
+  #match-ui .match-action-pad{bottom:7px!important}
+}
+@media(max-width:360px){
+  #match-ui.batting-phase .aim-area{width:100px!important;height:138px!important}
+  #match-ui.batting-phase .strike-zone{width:86px!important;height:122px!important}
+  #match-ui .bat-mode-pill button{min-width:48px!important}
 }
 </style>
