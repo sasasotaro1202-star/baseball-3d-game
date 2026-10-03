@@ -5,6 +5,8 @@ const js = readFileSync("web/src/main.js", "utf8");
 const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
+  ["readable match HUD", html.includes('id="match-premium-hud"') && html.includes('id="away-score"') && html.includes('id="home-score"') && html.includes('match-readability-v6')],
+  ["single match score hierarchy", js.includes("$('mph-away').textContent='YOU'") && js.includes("$('mph-home').textContent='CPU'")],
   ["pitch control", html.includes('id="pitch"')],
   ["swing control", html.includes('id="swing"')],
   ["Three.js import map", html.includes('"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"')],
