@@ -914,4 +914,54 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
   }
   #match-ui .strike-zone{width:74px!important;height:106px!important}
 }
+</style><style id="aim-alignment-v2">
+/* Align the touch target exactly with the visible pitch-course control. */
+#match-ui .aim-area{
+  position:absolute!important;
+  width:156px!important;
+  height:188px!important;
+  left:50%!important;
+  top:48%!important;
+  right:auto!important;
+  bottom:auto!important;
+  inset:auto!important;
+  transform:translate(-50%,-50%)!important;
+  border:1px solid #ffffff16!important;
+  border-radius:10px!important;
+  background:radial-gradient(ellipse at center,#ffffff05 0,#ffffff00 62%)!important;
+  z-index:25!important;
+  pointer-events:auto!important;
+  touch-action:none!important;
+}
+#match-ui .aim-area:after{
+  content:'';
+  position:absolute;
+  inset:15px 25px;
+  border:1px solid #ffffff0b;
+  border-radius:4px;
+  pointer-events:none;
+}
+#match-ui .strike-zone{
+  width:84px!important;
+  height:120px!important;
+  left:50%!important;
+  top:50%!important;
+  border:1px solid #ffffff96!important;
+  background:#ffffff03!important;
+  box-shadow:0 0 0 1px #0009,0 5px 18px #0007!important;
+}
+#match-ui .aim-cursor{
+  font-size:22px!important;
+  opacity:.45!important;
+  text-shadow:0 2px 8px #000!important;
+}
+#match-ui .aim-help{bottom:126px!important}
+@media(max-width:520px){
+  #match-ui .aim-area{width:146px!important;height:176px!important;top:48%!important}
+  #match-ui .strike-zone{width:78px!important;height:112px!important}
+}
+@media(max-width:360px){
+  #match-ui .aim-area{width:132px!important;height:160px!important;top:47%!important}
+  #match-ui .strike-zone{width:70px!important;height:102px!important}
+}
 </style>
