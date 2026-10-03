@@ -379,10 +379,10 @@ function choosePitchManual(type){
   updatePremiumHUD();
 }
 function pitch(){
-  if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM'))return;
+  if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM')||!isLocalPitcher())return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
-  const pitcherPlayer=ALL_PLAYERS[0];
-  if(match.half==='TOP'){
+  const pitcherPlayer=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'home':'away',0):ALL_PLAYERS[0];
+  if(!isOnlineMatch()&&match.half==='TOP'){
     const decision=choosePitch({
       count:[match.balls,match.strikes],
       runnerThreat:(match.runners||[]).length/3,
@@ -396,26 +396,35 @@ function pitch(){
     pitchTarget={x:aimTarget.x,y:aimTarget.y};
   }
   updatePitchControlUI();window.__lastPitch=selectedPitch;
-  const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;window.__pitchVelocity=Math.round((pitchInfo.speed||90)*(0.97+Math.random()*.06));window.__pitchStart=performance.now();
+  const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;
+  window.__pitchVelocity=Math.round((pitchInfo.speed||90)*(0.97+Math.random()*.06));window.__pitchStart=performance.now();
+  const id=(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random());
   ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3});
+  if(isOnlineMatch()){onlinePendingPitchId=id;onlinePendingPitch={id,pitch:selectedPitch,target:pitchTarget,velocity:window.__pitchVelocity,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3};onlineSend({type:'ONLINE_PITCH',...onlinePendingPitch});}
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
 }
 function swing(){
-  if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
+  if(match.ended||!isLocalBatter()||pitchState!=='pitch')return;
   const timing=Math.max(0,Math.min(1,t/(ballPhysics?.duration||.9))), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
-  const p=lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
+  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
   const modePower=battingMode==='POWER'?1:.72;
+  if(isOnlineMatch()&&onlineRole==='GUEST'){
+    onlineSend({type:'ONLINE_SWING',pitchId:onlinePendingPitchId,timing,aimX:aimTarget.x,aimY:aimTarget.y,mode:battingMode});
+    return;
+  }
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
   const outcome=resolvePitch({pitch:selectedPitch,timing,contact,power:Math.min(1,(prof.power||.7)*modePower)});
   matchEvent(outcome,'result');
   if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome)){
     beginBattedBall(outcome,p,prof);
+    if(isOnlineMatch()&&onlineRole==='HOST')onlineSend({type:'ONLINE_CONTACT',outcome,physics:ballPhysics});
   }else{
     finishPlay(outcome);
   }
 }
 function take(){
-  if(match.ended||match.half!=='TOP'||pitchState!=='pitch')return;
+  if(match.ended||!isLocalBatter()||pitchState!=='pitch')return;
+  if(isOnlineMatch()&&onlineRole==='GUEST'){onlineSend({type:'ONLINE_TAKE',pitchId:onlinePendingPitchId});return;}
   const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
