@@ -4,7 +4,7 @@ export const AI_PROFILES={
   fielder:{reaction:.72,arm:.68,route:.76},
   runner:{stealRisk:.34,advanceRisk:.42}
 };
-export function choosePitch({count,runnerThreat=0,profile=AI_PROFILES.pitcher,rng=Math.random}){
+export function choosePitch({count=[0,0],runnerThreat=0,profile=AI_PROFILES.pitcher,rng=Math.random}){
  const [balls,strikes]=count;
  const pressure=(strikes===2?.18:0)+(balls===3?.22:0)+runnerThreat*.15;
  const roll=rng();
