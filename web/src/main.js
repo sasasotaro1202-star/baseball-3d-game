@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {ALL_PLAYERS} from './data/players.js';
 import {pullOnce,pullMany} from './game/gacha-service.js';
 import {GACHA_BANNERS} from './data/gacha.js';
-import {createMatchState,resolvePitch,applyOutcome,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
+import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
 import {loadSave,saveGame} from './game/save.js';
 import {modeLabel} from './game/ui.js';
 import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
@@ -334,7 +334,7 @@ function ensureMatchPresentation(){
 }
 function updatePremiumHUD(){
   const h=ensureMatchPresentation(), batting=match.half==='TOP';
-  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):(batting?lineupPlayer(0):ALL_PLAYERS[4]);
+  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):(batting?lineupPlayer(0):lineupPlayer(0));
   const pc=p?cardModel(p,developmentFor(save,p.id)):null;
   $('mph-away').textContent=isOnlineMatch()?(onlineRole==='HOST'?'YOU':'RIVAL'):'YOU';
   $('mph-home').textContent=isOnlineMatch()?(onlineRole==='GUEST'?'YOU':'CPU'):'CPU';
@@ -450,7 +450,7 @@ function finishPlay(outcome){
   if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
 function aiBatterAtBat(){
-  const batterPlayer=ALL_PLAYERS[4],prof=aiProfile(batterPlayer,developmentFor(save,batterPlayer.id));
+  const batterPlayer=lineupPlayer(0),prof=aiProfile(batterPlayer,developmentFor(save,batterPlayer.id));
   const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',zone:.55,profile:prof});
   const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));
   const contact=decision.action==='TAKE'?0.08:decision.contact;
@@ -462,6 +462,7 @@ function pointerSwing(){swing();}
 function beginBattedBall(outcome,p,prof){
   const launchByOutcome={GROUND_OUT:4,SINGLE:10,DOUBLE:19,TRIPLE:27,HOME_RUN:26,FLY_OUT:28};
   const exitVelocity=70+(Number(prof.powerRisk||.5)*42)+(Number(prof.contactFocus||.5)*18);
+  window.__fieldingIntent=outcome;
   const origin=[pitchTarget.x,Math.max(.85,2.05+pitchTarget.y*.45),-7.85];
   ballPhysics=createBattedBallPhysics({
     origin,
@@ -489,8 +490,14 @@ function setFielderTarget(outcome){
 
 /* Premium console-baseball presentation layer. Clean-room UI; no proprietary assets/code. */
 function lineupPlayer(index){
-  const ids=save.collection||[];
-  return ids.length?ALL_PLAYERS.find(p=>p.id===ids[index%ids.length])||ALL_PLAYERS[index%ALL_PLAYERS.length]:ALL_PLAYERS[index%ALL_PLAYERS.length];
+  const ids=(save.team?.lineup?.length?save.team.lineup:save.collection)||[];
+  const slot=Number(match.batterIndex?.away||0)+Number(index||0);
+  return ids.length?ALL_PLAYERS.find(p=>p.id===Number(ids[slot%ids.length]))||ALL_PLAYERS[slot%ALL_PLAYERS.length]:ALL_PLAYERS[slot%ALL_PLAYERS.length];
+}
+function fieldingPlayer(index){
+  const ids=(save.team?.lineup?.length?save.team.lineup:save.collection)||[];
+  const offset=4+(Number(index)||0);
+  return ids.length?ALL_PLAYERS.find(p=>p.id===Number(ids[offset%ids.length]))||ALL_PLAYERS[offset%ALL_PLAYERS.length]:ALL_PLAYERS[offset%ALL_PLAYERS.length];
 }
 function miniPlayer(p,label){
   const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'';
@@ -632,7 +639,7 @@ function startPitchFromNetwork(msg){
 }
 function resolveRemoteBatting(msg){
   if(!onlinePendingPitch||msg.pitchId!==onlinePendingPitchId)return;
-  const batter=onlineRosterPlayer('home',0),prof=localPlayerProfile(batter);
+  const batter=onlineRosterPlayer('home',Number(match.batterIndex?.home||0)),prof=localPlayerProfile(batter);
   if(msg.type==='ONLINE_TAKE'){finishPlay(Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55?'STRIKE':'BALL');return;}
   const dx=Math.abs(Number(msg.aimX||0)-pitchTarget.x),dy=Math.abs(Number(msg.aimY||0)-pitchTarget.y);
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
@@ -683,7 +690,7 @@ function updateMatchHUD(){
   const batting=isLocalBatter();
   matchUI.classList.toggle('batting-phase',batting);
   matchUI.classList.toggle('pitching-phase',!batting);
-  const batter=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):lineupPlayer(0);
+  const batter=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):lineupPlayer(0);
   $('matchhud').textContent=match.inning+'回'+(match.half==='TOP'?'表':'裏')+'　'+match.score.away+' - '+match.score.home;
   $('inning-label').textContent=match.inning+'回'+(match.half==='TOP'?'表':'裏');
   $('away-score').textContent=match.score.away;$('home-score').textContent=match.score.home;
@@ -740,7 +747,21 @@ function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchSta
         pendingOutcome=completed;
         ball.position.set(...ballPhysics.position);
       }else{
-        pendingOutcome=null;window.__hitOutcome=null;ballPhysics=null;finishPlay(completed);fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
+        const defender=fieldingPlayer(fielderIndex);
+        const d=Math.hypot((fielderTarget?.x??0)-(fieldingFrom?.x??0),(fielderTarget?.z??0)-(fieldingFrom?.z??0));
+        const finalResult=resolveFieldingPlay(match,{
+          result:completed,
+          distance:d,
+          travelTime:Math.max(.05,t),
+          fielderReaction:defender.reaction||defender.field||70,
+          fielderField:defender.field||70,
+          fielderCatch:defender.catch||defender.field||70,
+          fielderArm:defender.arm||defender.field||70,
+          throwDistance:completed==='SINGLE'?27:42,
+          batterSpeed:((lineupPlayer(0)?.speed)||70)
+        });
+        matchEvent(finalResult.event==='THROW_ON_TARGET'?'OUT AT BASE':finalResult.event==='CATCH_MISS'?'CATCH MISS':finalResult.event==='FIELDING_ERROR'?'ERROR':finalResult.event==='CLEAN_CATCH'?'CATCH':'IN PLAY','field');
+        pendingOutcome=null;window.__hitOutcome=null;window.__fieldingIntent=null;ballPhysics=null;finishPlay(finalResult.finalOutcome);fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
       }
     }
   }
