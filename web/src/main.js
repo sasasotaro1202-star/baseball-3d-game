@@ -335,7 +335,8 @@ function ensureMatchPresentation(){
 function updatePremiumHUD(){
   const h=ensureMatchPresentation(), batting=match.half==='TOP';
   const p=batting?lineupPlayer(0):null, pc=p?cardModel(p,developmentFor(save,p.id)):null;
-  $('mph-away').textContent='YOU';$('mph-home').textContent='CPU';
+  $('mph-away').textContent=isOnlineMatch()?(onlineRole==='HOST'?'YOU':'RIVAL'):'YOU';
+  $('mph-home').textContent=isOnlineMatch()?(onlineRole==='GUEST'?'YOU':'RIVAL'):'CPU';
   $('mph-away-score').textContent=match.score.away;$('mph-home-score').textContent=match.score.home;
   $('mph-count').textContent=match.inning+'回'+(batting?'表':'裏');
   $('mph-outs').textContent='●'.repeat(match.outs)+'○'.repeat(Math.max(0,3-match.outs));
@@ -610,7 +611,7 @@ function handleOnlineMessage(msg){
     match=msg.match||match;pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;fielderTarget=null;updateMatchHUD();updatePremiumHUD();if(match.ended)recordMatchResult();
   }
 }
-function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();}
+function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
 function startPitchFromNetwork(msg){
   selectedPitch=msg.pitch||'FASTBALL';pitchTarget={x:Number(msg.target?.x)||0,y:Number(msg.target?.y)||0};window.__lastPitch=selectedPitch;window.__pitchVelocity=Number(msg.velocity)||90;
   pitchState='pitch';t=0;onlinePendingPitchId=msg.id||null;onlinePendingPitch=msg;
@@ -639,9 +640,10 @@ function recordMatchResult(){
   if(!match.ended||matchResultRecorded)return;
   matchResultRecorded=true;
   save.matches=Math.max(0,Number(save.matches)||0)+1;
-  if(match.score.away>match.score.home)save.wins=Math.max(0,Number(save.wins)||0)+1;
+  const localWon=isOnlineMatch()?((onlineRole==='GUEST'&&match.score.home>match.score.away)||(onlineRole==='HOST'&&match.score.away>match.score.home)):match.score.away>match.score.home;
+  if(localWon)save.wins=Math.max(0,Number(save.wins)||0)+1;
   persist();
-  matchEvent(match.score.away===match.score.home?'試合終了':'試合終了 '+(match.score.away>match.score.home?'WIN':'LOSE'),'result');
+  matchEvent(match.score.away===match.score.home?'試合終了':'試合終了 '+(localWon?'WIN':'LOSE'),'result');
   $('swing').disabled=true;
   $('pitch').disabled=true;
 }
