@@ -9,6 +9,8 @@ const checks = [
   ["compact pitch aim pad", html.includes('id="compact-aim-pad-v1"') && html.includes('width:210px') && html.includes('height:235px')],
   ["ProSpi-like course control", html.includes('id="prospi-like-match-ui-v3"') && html.includes('width:108px!important;height:146px!important') && html.includes('id="strike-zone"')],
   ["selected pitch state", js.includes('updatePitchControlUI') && js.includes('classList.toggle(\'selected\',selected)')],
+  ["batting mode controls", html.includes('id="bat-mode-pill"') && html.includes('id="bat-contact-mode"') && html.includes('id="bat-power-mode"')],
+  ["phase-specific match UI", js.includes("matchUI.classList.toggle('batting-phase',batting)") && js.includes("matchUI.classList.toggle('pitching-phase',!batting)")],
   ["single match score hierarchy", js.includes("$('mph-away').textContent='YOU'") && js.includes("$('mph-home').textContent='CPU'")],
   ["pitch control", html.includes('id="pitch"')],
   ["swing control", html.includes('id="swing"')],
