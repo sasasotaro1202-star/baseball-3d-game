@@ -6,6 +6,7 @@ const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
   ["readable match HUD", html.includes('id="match-premium-hud"') && html.includes('id="away-score"') && html.includes('id="home-score"') && html.includes('match-readability-v6')],
+  ["compact pitch aim pad", html.includes('id="compact-aim-pad-v1"') && html.includes('width:210px') && html.includes('height:235px')],
   ["single match score hierarchy", js.includes("$('mph-away').textContent='YOU'") && js.includes("$('mph-home').textContent='CPU'")],
   ["pitch control", html.includes('id="pitch"')],
   ["swing control", html.includes('id="swing"')],
