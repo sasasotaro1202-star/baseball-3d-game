@@ -360,6 +360,11 @@ function matchEvent(text,kind='normal'){
   const e=document.getElementById('mph-event');if(!e)return;
   e.textContent=text;e.className='show '+kind;clearTimeout(window.__mphEventTimer);window.__mphEventTimer=setTimeout(()=>e.className='',900);
 }
+let topPitchTimer=null;
+function scheduleTopPitch(delay=650){
+  clearTimeout(topPitchTimer);
+  topPitchTimer=setTimeout(()=>{topPitchTimer=null;if(match.half==='TOP'&&!match.ended&&pitchState==='idle')pitch();},delay);
+}
 function updateAimFromPointer(e){
   const rect=$('aim-area')?.getBoundingClientRect();if(!rect)return;
   aimTarget.x=((e.clientX-rect.left)/rect.width-.5)*1.5;aimTarget.y=(.5-(e.clientY-rect.top)/rect.height)*1.5;
@@ -371,12 +376,23 @@ function updateAimUI(){
 function updateZoneUI(){const z=$('strike-zone');if(z)z.style.transform='translate(-50%,-50%) scale('+(1+Math.abs(aimTarget.x)*.05)+')';}
 function choosePitchManual(type){selectedPitch=PITCHES_FOR_UI[type]?type:'FASTBALL';matchEvent('選択 '+selectedPitch,'pitch');updatePremiumHUD();}
 function pitch(){
-  if(match.half!=='BOTTOM'||pitchState==='pitch')return;
+  if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM'))return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
   const pitcherPlayer=ALL_PLAYERS[0];
-  const decision=choosePitch({profile:aiProfile(pitcherPlayer,developmentFor(save,pitcherPlayer.id))});
-  selectedPitch=decision?.pitch||selectedPitch;
-  pitchTarget={x:aimTarget.x,y:aimTarget.y};window.__lastPitch=selectedPitch;
+  if(match.half==='TOP'){
+    const decision=choosePitch({
+      count:[match.balls,match.strikes],
+      runnerThreat:(match.runners||[]).length/3,
+      profile:aiProfile(pitcherPlayer,developmentFor(save,pitcherPlayer.id))
+    });
+    selectedPitch=typeof decision==='string'?decision:(decision?.pitch||selectedPitch);
+    const control=Math.max(40,Math.min(95,Number(pitcherPlayer.control||70)));
+    const spread=Math.max(.55,Math.min(1.05,1.15-(control-40)*.008));
+    pitchTarget={x:(Math.random()-.5)*spread,y:(Math.random()-.5)*spread};
+  }else{
+    pitchTarget={x:aimTarget.x,y:aimTarget.y};
+  }
+  window.__lastPitch=selectedPitch;
   const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;window.__pitchVelocity=Math.round((pitchInfo.speed||90)*(0.97+Math.random()*.06));window.__pitchStart=performance.now();
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
 }
@@ -394,7 +410,7 @@ function take(){
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
 function finishPlay(outcome){
-  pitchState='idle';t=0;applyOutcome(match,outcome);
+  pitchState='idle';t=0;match=applyOutcome(match,outcome);
   if(outcome==='HOME_RUN')matchEvent('ホームラン！','hr');
   else if(outcome==='TRIPLE')matchEvent('TRIPLE','hit');
   else if(outcome==='DOUBLE')matchEvent('DOUBLE','hit');
@@ -402,6 +418,7 @@ function finishPlay(outcome){
   else if(outcome==='STRIKE')matchEvent('STRIKE','strike');
   else if(outcome==='BALL')matchEvent('BALL','ball');
   updateMatchHUD();updatePremiumHUD();
+  if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
 function resetMatchView(){cameraMode='BATTER';camera.position.set(0,7.5,18);camera.lookAt(0,2,-5);aimTarget={x:0,y:0};updateAimUI();updateZoneUI();}
 function aiBatterAtBat(){const batterPlayer=ALL_PLAYERS[4];const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',profile:aiProfile(batterPlayer,developmentFor(save,batterPlayer.id))});const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));const contact=decision.action==='TAKE'?0.08:decision.contact;const outcome=decision.action==='TAKE'?((Math.random()<.58)?'BALL':'STRIKE'):resolvePitch({pitch:window.__lastPitch||'FASTBALL',timing,contact,power:.75});finishPlay(outcome);if(!['BALL','STRIKE','STRIKEOUT'].includes(outcome)){window.__hitOutcome=outcome;pitchState='hit';t=0;setFielderTarget(outcome);}}
@@ -471,10 +488,10 @@ function updateMatchHUD(){
 }
 const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();resetMatchView();updateMatchHUD();}}));
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.mode);if(b.dataset.mode==='match'){match=createMatchState();resetMatchView();updateMatchHUD();scheduleTopPitch(700);}}));
 $('aim-area')?.addEventListener('pointerdown',e=>{aimDragging=true;updateAimFromPointer(e);if(match.half==='TOP'&&pitchState==='pitch')pointerSwing();$('aim-area').setPointerCapture?.(e.pointerId);});$('aim-area')?.addEventListener('pointermove',e=>{if(aimDragging)updateAimFromPointer(e);});$('aim-area')?.addEventListener('pointerup',e=>{aimDragging=false;$('aim-area').releasePointerCapture?.(e.pointerId);});$('aim-area')?.addEventListener('pointercancel',()=>aimDragging=false);document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
 $('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('matchback').addEventListener('click',()=>setMode('home'));persist();updateProfileUI();updateAimUI();updateZoneUI();
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
-function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.16,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){t+=.018;const p=Math.min(t,1);const curve=Number(PITCH_CURVE[selectedPitch]||0);const x=pitchTarget.x*(p*p)+curve*Math.sin(Math.PI*p)*.28;const y=2.1+pitchTarget.y*(p*p)-.25*p+curve*Math.sin(Math.PI*p)*.12;ball.position.set(x,y,3-11*p);$('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0))+' km/h');if(p>=1){if(match.half==='BOTTOM'){aiBatterAtBat();}else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}}}else if(pitchState==='hit'){t+=.018;const p=Math.min(t,1);const o=window.__hitOutcome||'SINGLE';const arc=o==='GROUND_OUT'||o==='SINGLE'?1.2:o==='DOUBLE'?4:o==='TRIPLE'?7:o==='HOME_RUN'?13:5;const lateral=o==='DOUBLE'?-7:o==='TRIPLE'?10:o==='HOME_RUN'?0:4;ball.position.set(lateral*p,2.1+arc*Math.sin(Math.PI*p)+1.2*p,-8-(o==='HOME_RUN'?26:18)*p);if(p>=1){pitchState='idle';window.__hitOutcome=null;fielderTarget=null;ball.position.set(0,2.1,3);setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER')}}else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
+function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[0];const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.16,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2)}}if(pitchState==='pitch'){t+=.018;const p=Math.min(t,1);const curve=Number(PITCH_CURVE[selectedPitch]||0);const x=pitchTarget.x*(p*p)+curve*Math.sin(Math.PI*p)*.28;const y=2.1+pitchTarget.y*(p*p)-.25*p+curve*Math.sin(Math.PI*p)*.12;ball.position.set(x,y,3-11*p);$('mph-speed')&&($('mph-speed').textContent=Math.round((window.__pitchVelocity||0)*1.60934)+' km/h');if(p>=1){if(match.half==='BOTTOM'){aiBatterAtBat();}else{const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;finishPlay(inZone?'STRIKE':'BALL');}}}else if(pitchState==='hit'){t+=.018;const p=Math.min(t,1);const o=window.__hitOutcome||'SINGLE';const arc=o==='GROUND_OUT'||o==='SINGLE'?1.2:o==='DOUBLE'?4:o==='TRIPLE'?7:o==='HOME_RUN'?13:5;const lateral=o==='DOUBLE'?-7:o==='TRIPLE'?10:o==='HOME_RUN'?0:4;ball.position.set(lateral*p,2.1+arc*Math.sin(Math.PI*p)+1.2*p,-8-(o==='HOME_RUN'?26:18)*p);if(p>=1){pitchState='idle';window.__hitOutcome=null;fielderTarget=null;ball.position.set(0,2.1,3);setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350)}}else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
 window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-15-syntax-fix";
