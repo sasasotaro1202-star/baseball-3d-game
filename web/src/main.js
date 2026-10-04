@@ -798,11 +798,11 @@ function updateFieldingUI(){
   if(catchBtn){
     const waiting=pitchState==='fielding-wait';
     catchBtn.style.display=waiting?'block':'none';
-    catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':'処理';
+    catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':(fielderThrowTarget?'送球':'処理');
   }
 }
 function fieldingPadStart(e){
-  if(!isLocalFielder()||pitchState!=='hit')return;
+  if(!isLocalFielder()||(pitchState!=='hit'&&pitchState!=='fielding-wait'))return;
   fieldingPadPointer={id:e.pointerId,x:e.clientX,y:e.clientY};
   fielderManualInput=true;
   e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -811,11 +811,13 @@ function fieldingPadStart(e){
 function fieldingPadMove(e){
   if(!fieldingPadPointer||fieldingPadPointer.id!==e.pointerId)return;
   const dx=e.clientX-fieldingPadPointer.x,dy=e.clientY-fieldingPadPointer.y;
-  const len=Math.hypot(dx,dy)||1;
   const nx=Math.max(-1,Math.min(1,dx/52)),nz=Math.max(-1,Math.min(1,dy/52));
   const lead=fielders[fielderIndex];if(!lead)return;
   const moveScale=4.5;
-  fielderTarget={x:lead.position.x+nx*moveScale,z:lead.position.z+nz*moveScale};
+  fielderTarget={
+    x:Math.max(-24,Math.min(24,lead.position.x+nx*moveScale)),
+    z:Math.max(-6,Math.min(28,lead.position.z+nz*moveScale))
+  };
   updateFieldingUI();
 }
 function fieldingPadEnd(e){
@@ -838,26 +840,20 @@ function finishManualFielding(finalResult){
 function resolveManualFielding(action='throw'){
   if(!isLocalFielder()||pitchState!=='fielding-wait'||!pendingOutcome)return;
   const completed=pendingOutcome;
+  if(action==='catch'&&completed!=='FLY_OUT')return;
+  if(action==='throw'&&!fielderThrowTarget){
+    fielderThrowTarget=1;
+    document.querySelector('[data-throw-base="1"]')?.classList.add('selected');
+  }
   const result=resolveLiveFieldingOutcome(completed);
-  if(action==='catch'&&completed==='FLY_OUT'){
-    finishManualFielding(result);
-    return;
-  }
-  if(action==='throw'){
-    if(!fielderThrowTarget){
-      fielderThrowTarget=1;
-      document.querySelector('[data-throw-base="1"]')?.classList.add('selected');
-    }
-    const finalResult=resolveLiveFieldingOutcome(completed);
-    finishManualFielding(finalResult);
-  }
+  finishManualFielding(result);
 }
 function selectThrowBase(base){
   if(!isLocalFielder()||pitchState!=='fielding-wait')return;
   const b=Number(base);if(!Number.isInteger(b)||b<1||b>4)return;
   fielderThrowTarget=b;
   document.querySelectorAll('[data-throw-base]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.throwBase)===b));
-  resolveManualFielding('throw');
+  updateFieldingUI();
 }
 
 function updateBullpenButton(){
@@ -1146,7 +1142,7 @@ $('fielding-pad')?.addEventListener('pointercancel',fieldingPadEnd);
 $('fielding-catch')?.addEventListener('click',()=>resolveManualFielding('catch'));
 document.querySelectorAll('[data-throw-base]').forEach(b=>b.addEventListener('click',()=>selectThrowBase(b.dataset.throwBase)));$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setAIDifficulty(matchDifficulty);setBattingMode(save.settings?.battingModeDefault==='POWER'?'POWER':'CONTACT');
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
-function animate(){requestAnimationFrame(animate);const now=performance.now();const frameDt=Math.max(0,Math.min(.05,(now-lastFrameTime)/1000));lastFrameTime=now;updateRunnerVisuals();animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[fielderIndex];const defender=fieldingPlayer(fielderIndex);const reaction=Math.max(.75,Math.min(1.35,(Number(defender?.reaction||defender?.field||70)/70)));const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14*reaction,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2*reaction)}}else if(fielderAction!=='idle'&&performance.now()<fielderActionUntil){const lead=fielders[fielderIndex];animatePlayer(lead,fielderAction,.5)}else if(fielderAction!=='idle'){fielderAction='idle';}if(pitchState==='pitch'){
+function animate(){requestAnimationFrame(animate);const now=performance.now();const frameDt=Math.max(0,Math.min(.05,(now-lastFrameTime)/1000));lastFrameTime=now;updateRunnerVisuals();animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if((pitchState==='hit'||pitchState==='fielding-wait')&&fielderTarget){const lead=fielders[fielderIndex];const defender=fieldingPlayer(fielderIndex);const reaction=Math.max(.75,Math.min(1.35,(Number(defender?.reaction||defender?.field||70)/70)));const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14*reaction,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2*reaction)}}else if(fielderAction!=='idle'&&performance.now()<fielderActionUntil){const lead=fielders[fielderIndex];animatePlayer(lead,fielderAction,.5)}else if(fielderAction!=='idle'){fielderAction='idle';}if(pitchState==='pitch'){
   const previous=ballPhysics;
   ballPhysics=previous?stepBallPhysics(previous,frameDt):null;
   if(!ballPhysics||!isFiniteBallPhysics(ballPhysics)){window.__lastGameError='INVALID_PITCH_PHYSICS';ballPhysics=null;finishPlay('BALL');}
@@ -1215,9 +1211,12 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
       }
     }
   }
-}else if(cameraMode==='FIELDING'&&fielderTarget){
-  const lead=fielders[fielderIndex]||fielders[0],camTarget=new THREE.Vector3(lead.position.x+6.5,6.4,lead.position.z+7.5);
-  camera.position.lerp(camTarget,.07);camera.lookAt(lead.position.x,1.1,lead.position.z);
+}else if(cameraMode==='FIELDING'){
+  const lead=fielders[fielderIndex]||fielders[0];
+  if(lead){
+    const camTarget=new THREE.Vector3(lead.position.x+6.5,6.4,lead.position.z+7.5);
+    camera.position.lerp(camTarget,.07);camera.lookAt(lead.position.x,1.1,lead.position.z);
+  }
 }else if(cameraMode==='HOME_RUN'){
   camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)
 }renderer.render(scene,camera)}animate();
