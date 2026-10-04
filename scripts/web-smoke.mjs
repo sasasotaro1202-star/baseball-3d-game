@@ -5,6 +5,7 @@ const js = readFileSync("web/src/main.js", "utf8");
 const sim = readFileSync("web/src/game/simulation.js", "utf8");
 const online = readFileSync("web/src/game/online.js", "utf8");
 const ai = readFileSync("web/src/game/ai.js", "utf8");
+const aiRoster = readFileSync("web/src/game/ai-roster.js", "utf8");
 const save = readFileSync("web/src/game/save.js", "utf8");
 const presentation = readFileSync("web/src/game/presentation.js", "utf8");
 const checks = [
@@ -17,6 +18,7 @@ const checks = [
   ["batting mode controls", html.includes('id="bat-mode-pill"') && html.includes('id="bat-contact-mode"') && html.includes('id="bat-power-mode"')],
   ["field-first match console", html.includes('id="match-console-v7"') && html.includes('.mph-top') && html.includes('.strike-zone') && html.includes('.match-action-pad')],
   ["AI match entry", html.includes('data-mode="ai-match"') && html.includes('AI戦')],
+  ["stable AI roster IDs", aiRoster.includes("2002") && aiRoster.includes("2001") && js.includes("./game/ai-roster.js")],
   ["AI difficulty", html.includes('data-ai-difficulty="EASY"') && html.includes('data-ai-difficulty="NORMAL"') && html.includes('data-ai-difficulty="HARD"') && ai.includes('AI_DIFFICULTIES')],
   ["online match entry", html.includes('data-mode="online-lobby"') && html.includes('オンライン戦')],
   ["P2P transport", js.includes("from './game/online.js'") && js.includes('createOnlineHost') && js.includes('createOnlineGuest') && js.includes('ONLINE_STATE') && js.includes('ONLINE_FIELDING_RESULT') && online.includes('ONLINE_FIELDING_RESULT')],
