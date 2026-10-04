@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {ALL_PLAYERS} from './data/players.js';
 import {pullOnce,pullMany} from './game/gacha-service.js';
 import {GACHA_BANNERS} from './data/gacha.js';
-import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,isValidMatchState,advancePitcher,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
+import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,isValidMatchState,advancePitcher,substitutePitcher,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
 import {loadSave,saveGame} from './game/save.js';
 import {modeLabel} from './game/ui.js';
 import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
@@ -729,6 +729,25 @@ function selectThrowBase(base){
   fielderAction='throw';fielderActionUntil=performance.now()+240;
 }
 
+function updateBullpenButton(){
+  const b=$('bullpen');if(!b)return;
+  const side=match.half==='TOP'?'home':'away';
+  const ids=pitcherIdsForSide(side);
+  const current=Number(match.pitcherIndex?.[side]||0);
+  const show=Boolean(isLocalPitcher()&&pitchState==='idle'&&!match.ended&&ids.length>1&&current<ids.length-1);
+  b.style.display=show?'block':'none';
+  if(show)b.textContent='継投 '+(current+2)+'人目';
+}
+function performPitcherChange(){
+  const side=match.half==='TOP'?'home':'away';
+  if(!isLocalPitcher()||pitchState!=='idle'||match.ended)return;
+  const ids=pitcherIdsForSide(side),current=Number(match.pitcherIndex?.[side]||0);
+  if(current>=ids.length-1)return;
+  const result=substitutePitcher(match,side,current+1);
+  if(!result.success)return;
+  match=result.state;matchEvent('PITCHER CHANGE','change');updateMatchHUD();updatePremiumHUD();
+  if(isOnlineMatch())onlineRevision+=1,onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
+}
 function updateStealButton(){
   const b=$('steal');if(!b)return;
   const candidate=getStealCandidate();
@@ -938,6 +957,7 @@ function updateMatchHUD(){
   $('pitch').querySelector('span').textContent=isOnlineMatch()?'投球':'投球';
   $('pitch').style.display=isLocalPitcher()?'block':'none';
   updateStealButton();
+  updateBullpenButton();
   updateFieldingUI();
   $('take').style.display=batting?'block':'none';
   $('swing').style.display=batting?'block':'none';
@@ -960,7 +980,7 @@ $('aim-area')?.addEventListener('pointermove',e=>{if(!aimDragging)return;if(aimP
 $('aim-area')?.addEventListener('pointerup',e=>{const tap=!aimPointerMoved;aimDragging=false;if(tap&&isLocalBatter()&&pitchState==='pitch')pointerSwing();aimPointerStart=null;aimPointerMoved=false;$('aim-area').releasePointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointercancel',e=>{aimDragging=false;aimPointerStart=null;aimPointerMoved=false;});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
-$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('steal')?.addEventListener('click',performSteal);
+$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('steal')?.addEventListener('click',performSteal);$('bullpen')?.addEventListener('click',performPitcherChange);
 $('fielding-pad')?.addEventListener('pointerdown',fieldingPadStart);
 $('fielding-pad')?.addEventListener('pointermove',fieldingPadMove);
 $('fielding-pad')?.addEventListener('pointerup',fieldingPadEnd);
