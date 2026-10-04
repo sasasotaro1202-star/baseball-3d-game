@@ -211,21 +211,41 @@ async function renderSettings(){
   if(user) $('cloudLogout').onclick=async()=>{await signOutCloud();renderSettings();};
   else $('cloudLogin').onclick=async()=>{const email=$('cloudEmail').value.trim();if(!email)return;const {error}=await signInWithMagicLink(email);if(error)alert(error.message);else alert('ログインリンクをメールに送信しました。');};
 }
-function renderCollection(){
+function upgradedRenderCollection(){
   const owned=new Set(save.collection||[]);
   const total=ALL_PLAYERS.length;
-  const unlocked=[...owned].filter(id=>ALL_PLAYERS.some(p=>p.id===id)).length;
-  const cards=ALL_PLAYERS.map(p=>playerCardMarkup(p,{owned:owned.has(p.id),release:false,showAbilities:owned.has(p.id)})).join('');
-  card.innerHTML='<div class="collection-head">'+
-    '<div><span class="section-kicker">PLAYER ARCHIVE</span><h2>選手名鑑</h2><p>現役NPBを主軸に、NPBレジェンド・MLBの歴史的アイコン・海外組を収録。</p></div>'+
-    '<div class="collection-count"><strong>'+unlocked+'</strong><span>/ '+total+'</span><small>COLLECTED</small></div>'+
-  '</div><div class="collection-filter-row"><span>ALL</span><span>NPB ACTIVE</span><span>LEGENDS</span><span>MLB</span></div>'+
-  '<div class="sc-player-grid">'+cards+'</div><button class="action back" id="back">ホームへ戻る</button>';
+  const filters=[['ALL','ALL'],['NPB ACTIVE','NPB_ACTIVE'],['LEGENDS','LEGENDS'],['MLB','MLB']];
+  card.innerHTML=
+    '<div class="collection-head">'+
+      '<div><span class="section-kicker">PLAYER ARCHIVE</span><h2>選手名鑑</h2><p>現役NPBを主軸に、レジェンド・MLBを収録。</p></div>'+
+      '<div class="collection-count"><strong id="collection-owned-count">0</strong><span>/ '+total+'</span><small>COLLECTED</small></div>'+
+    '</div>'+
+    '<div class="collection-filter-row">'+filters.map((f,i)=>'<button type="button" class="collection-filter '+(i===0?'selected':'')+'" data-filter="'+f[1]+'">'+f[0]+'</button>').join('')+'</div>'+
+    '<div class="sc-player-grid" id="collection-grid"></div>'+
+    '<button type="button" class="action back" id="back">ホームへ戻る</button>';
+  const grid=$('collection-grid');
+  function matches(p,filter){
+    if(filter==='NPB_ACTIVE')return p.league==='NPB'&&p.status==='ACTIVE';
+    if(filter==='LEGENDS')return p.status==='LEGEND';
+    if(filter==='MLB')return p.league==='MLB';
+    return true;
+  }
+  function renderFiltered(filter){
+    const players=ALL_PLAYERS.filter(p=>matches(p,filter));
+    grid.innerHTML=players.map(p=>playerCardMarkup(p,{owned:owned.has(p.id),release:false,showAbilities:owned.has(p.id)})).join('');
+    $('collection-owned-count').textContent=players.filter(p=>owned.has(p.id)).length;
+    grid.querySelectorAll('.is-locked').forEach(b=>b.onclick=()=>setMode('gacha'));
+    bindPlayerCards();
+  }
+  card.querySelectorAll('.collection-filter').forEach(btn=>btn.onclick=()=>{
+    card.querySelectorAll('.collection-filter').forEach(x=>x.classList.toggle('selected',x===btn));
+    renderFiltered(btn.dataset.filter);
+  });
   $('back').onclick=()=>setMode('home');
-  card.querySelectorAll('.is-locked').forEach(b=>b.onclick=()=>setMode('gacha'));
-  bindPlayerCards();
+  renderFiltered('ALL');
 }
-function upgradedRenderGacha(){
+
+function renderGacha(){
   const escape=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const rankScore={S:6,A:5,B:4,C:3,D:2,F:1};
   const rankRate={S:'0.1%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'};
