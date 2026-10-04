@@ -241,7 +241,7 @@ async function renderSettings(){
   if(user) $('cloudLogout').onclick=async()=>{await signOutCloud();renderSettings();};
   else $('cloudLogin').onclick=async()=>{const email=$('cloudEmail').value.trim();if(!email)return;const {error}=await signInWithMagicLink(email);if(error)alert(error.message);else alert('ログインリンクをメールに送信しました。');};
 }
-function upgradedRenderCollection(){
+function renderCollection(){
   const owned=new Set(save.collection||[]);
   const total=ALL_PLAYERS.length;
   const filters=[['ALL','ALL'],['NPB ACTIVE','NPB_ACTIVE'],['LEGENDS','LEGENDS'],['MLB','MLB']];
