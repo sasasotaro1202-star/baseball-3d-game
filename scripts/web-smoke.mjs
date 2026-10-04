@@ -45,6 +45,7 @@ const checks = [
   ["match result persistence", js.includes("recordMatchResult") && js.includes("save.matches") && js.includes("save.wins")],
   ["persistent save", js.includes("loadSave")],
   ["premium UI v3", presentation.includes("premium-design-system-v3") && presentation.includes("premium-design-system-v3-hotfix")],
+  ["vector navigation icons", html.includes('id="ui-icon-vector-v1"') && html.includes('ui-icon-scout') && html.includes('ui-icon-order')],
   ["scout premium hierarchy", js.includes("gacha-banner-kpis") && js.includes("gacha-feature-meta") && js.includes("OVR ")],
 ];
 for (const [name, ok] of checks) {
