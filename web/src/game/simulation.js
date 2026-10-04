@@ -17,10 +17,14 @@ export function isValidMatchState(s){
   if(!Array.isArray(s.bases)||s.bases.length!==3||s.bases.some(v=>typeof v!=='boolean'))return false;
   if(!Array.isArray(s.runners)||s.runners.length>3)return false;
   const ids=new Set();
+  const occupancy=[false,false,false];
   for(const r of s.runners){
     if(!Number.isFinite(r.id)||ids.has(r.id)||!Number.isInteger(r.base)||r.base<0||r.base>2||r.status!=='LIVE')return false;
+    if(occupancy[r.base])return false;
+    occupancy[r.base]=true;
     ids.add(r.id);
   }
+  if(s.bases.some((v,i)=>v!==occupancy[i]))return false;
   if(!Number.isInteger(s.nextRunnerId)||s.nextRunnerId<1)return false;
   if(!Number.isInteger(s.batterIndex?.away)||s.batterIndex.away<0||!Number.isInteger(s.batterIndex?.home)||s.batterIndex.home<0)return false;
   if(!s.pitcherStamina||!Number.isFinite(s.pitcherStamina.away)||!Number.isFinite(s.pitcherStamina.home)||s.pitcherStamina.away<0||s.pitcherStamina.away>100||s.pitcherStamina.home<0||s.pitcherStamina.home>100)return false;
