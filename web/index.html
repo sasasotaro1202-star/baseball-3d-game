@@ -539,19 +539,198 @@ body{background:#050505}
   #match-ui .pitch-control button{min-height:32px!important;font-size:8px!important}
   #match-ui .match-action-pad{grid-template-columns:68px 1fr 68px!important}
 }
+</style><style id="premium-ui-v2">
+:root{
+  --ui-navy:#07111d;--ui-navy2:#0b1a2b;--ui-panel:#0d1c2c;--ui-panel2:#10243a;
+  --ui-line:rgba(255,255,255,.12);--ui-muted:#91a0b1;--ui-text:#f6f8fb;
+  --ui-accent:#d6b45b;--ui-accent2:#5bb7ff;--ui-green:#42d58a;
+}
+body{background:#040a11!important;color:var(--ui-text)}
+#game{background:radial-gradient(ellipse at 50% 28%,#1c3950 0,#0b1a28 42%,#04080d 100%)!important}
+.panel{padding:calc(env(safe-area-inset-top) + 7px) 8px calc(env(safe-area-inset-bottom) + 7px)!important}
+.top{
+  position:relative!important;height:40px!important;z-index:100!important;
+  border:1px solid rgba(255,255,255,.1)!important;border-radius:9px!important;
+  padding:0 8px!important;background:linear-gradient(180deg,#091521ec,#04090ee8)!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.3)!important;backdrop-filter:blur(10px)!important;
+}
+.brand{font-size:10px!important;letter-spacing:.18em!important;font-weight:950!important;color:#f1f5f9!important}
+.record{font-size:7px!important;color:#a9b6c4!important}
+.currency{font-variant-numeric:tabular-nums;border-radius:6px!important;padding:6px 8px!important;font-size:10px!important;background:linear-gradient(180deg,#172335,#09111b)!important;border:1px solid rgba(214,180,91,.42)!important;color:#f2d37d!important}
+.home{
+  display:block!important;overflow:hidden!important;padding:0!important;background:linear-gradient(180deg,transparent 0,#07111ddd 78%,#04080d 100%)!important;
+}
+.home-premium-shell{position:absolute;inset:46px 7px 66px;overflow:auto;pointer-events:auto;padding:8px 0 14px;scrollbar-width:none}
+.home-premium-shell::-webkit-scrollbar{display:none}
+.home-hero-card{
+  position:relative;min-height:390px;overflow:hidden;border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(145deg,#142b42 0,#091827 52%,#061018 100%);
+  box-shadow:0 15px 38px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.home-hero-glow{position:absolute;inset:-20% -10% auto;height:65%;background:radial-gradient(circle at 65% 25%,rgba(91,183,255,.23),transparent 38%),radial-gradient(circle at 32% 30%,rgba(214,180,91,.16),transparent 33%);pointer-events:none}
+.home-hero-diamond{position:absolute;right:-5px;bottom:38px;width:205px;height:205px;opacity:.62;transform:rotate(45deg);border:1px solid rgba(255,255,255,.12)}
+.home-hero-diamond i{position:absolute;inset:20%;border:1px solid rgba(255,255,255,.07)}
+.home-hero-diamond i:nth-child(2){inset:35%}.home-hero-diamond i:nth-child(3){inset:10%}.home-hero-diamond i:nth-child(4){inset:46%}
+.home-hero-diamond span{position:absolute;width:9px;height:9px;border-radius:2px;background:#d6b45b;left:calc(50% - 4px);top:-4px;box-shadow:0 0 18px rgba(214,180,91,.65)}
+.home-hero-content{position:relative;z-index:2;padding:17px}
+.home-kicker{display:flex;justify-content:space-between;align-items:center;font-size:8px;letter-spacing:.18em;color:#9fb0c0;font-weight:900}
+.home-kicker b{color:#e3c570;font-size:7px;letter-spacing:.1em}
+.home-hero-card h1{margin:15px 0 3px;font-size:38px;line-height:.94;letter-spacing:-.06em;font-weight:1000}
+.home-hero-card p{margin:0;color:#aab7c5;font-size:10px}
+.home-record-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:18px 0 10px;max-width:315px}
+.home-record-row>div{padding:8px 9px;border-radius:7px;background:rgba(2,8,14,.56);border:1px solid rgba(255,255,255,.08)}
+.home-record-row small{display:block;font-size:6px;color:#8191a2;letter-spacing:.12em}.home-record-row strong{display:block;margin-top:3px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-play-button{
+  width:min(315px,100%);height:55px;border:1px solid #edd17b;border-radius:9px;
+  background:linear-gradient(180deg,#e8cf70 0,#af872d 45%,#735514 100%);color:#171107;
+  box-shadow:0 8px 22px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.48);
+  display:flex;align-items:center;justify-content:space-between;padding:0 14px;text-align:left;
+}
+.hero-play-button span{display:grid;gap:2px}.hero-play-button b{font-size:16px}.hero-play-button small{font-size:7px;opacity:.72}.hero-play-button em{font-style:normal;font-size:20px}
+.home-quick-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(315px,100%);margin-top:7px}
+.home-quick-card{
+  min-height:61px;border:1px solid rgba(255,255,255,.11);border-radius:8px;padding:8px 9px;
+  background:linear-gradient(145deg,#0d1f30,#07111b);color:#fff;text-align:left;
+  display:grid;grid-template-columns:22px 1fr;grid-template-rows:auto auto;column-gap:7px;align-items:center;
+}
+.home-quick-card span{grid-row:1/-1;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:#153149;color:#8ecfff;font-size:12px}
+.home-quick-card.scout span{background:#3b3020;color:#efd273}
+.home-quick-card b{font-size:10px}.home-quick-card small{font-size:7px;color:#8493a2}
+.home-section-title{display:flex;align-items:end;justify-content:space-between;margin:14px 2px 6px}
+.home-section-title span{font-size:7px;letter-spacing:.16em;color:#738496}.home-section-title b{font-size:10px;color:#dbe3ea}
+.home-command-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.home-command-grid button{
+  min-height:72px;border:1px solid rgba(255,255,255,.1);border-radius:9px;
+  background:linear-gradient(180deg,#112238,#08131f);color:#fff;text-align:left;padding:9px;
+  box-shadow:0 6px 16px rgba(0,0,0,.2);display:grid;grid-template-columns:27px 1fr;grid-template-rows:auto auto;
+  column-gap:8px;align-items:center;
+}
+.command-icon{grid-row:1/-1;width:27px;height:27px;border-radius:7px;display:grid;place-items:center;background:#172f46;color:#8ecfff;font-size:12px}
+.home-command-grid b{font-size:10px}.home-command-grid small{font-size:7px;color:#8291a0}
+.home-difficulty{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:9px 0 2px;padding:9px;border-radius:9px;background:#07111bdd;border:1px solid rgba(255,255,255,.08)}
+.home-difficulty>div:first-child{display:grid;gap:2px}.home-difficulty span{font-size:9px}.home-difficulty b{font-size:6px;color:#758696;font-weight:600}
+.home-difficulty-buttons{display:flex;gap:3px}.home-difficulty button{
+  height:28px;padding:0 8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:#0b1622;color:#8998a8;font-size:7px;font-weight:900
+}
+.home-difficulty button.selected{background:#d4b45f;color:#171207;border-color:#efd787}
+.home-bottom-nav{
+  position:absolute;left:0;right:0;bottom:0;height:61px;padding:4px 4px calc(env(safe-area-inset-bottom) + 2px);
+  display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:linear-gradient(180deg,#0e1720f5,#03070bf8);
+  border-top:1px solid rgba(255,255,255,.12);box-shadow:0 -8px 24px rgba(0,0,0,.25);z-index:80;pointer-events:auto;backdrop-filter:blur(12px)
+}
+.home-bottom-nav button{border:0;border-radius:7px;background:transparent;color:#7f8d9c;display:grid;place-items:center;gap:1px;padding:3px 1px}
+.home-bottom-nav button span{font-size:15px;line-height:15px}.home-bottom-nav button b{font-size:6px;font-weight:850}
+.home-bottom-nav button.selected,.home-bottom-nav button:active{color:#efd176;background:rgba(214,180,91,.08)}
+.home .ai-difficulty-row,.home .menu,.home .hero,.home:after{display:none!important}
+
+#view{z-index:30!important;background:rgba(2,7,12,.98)!important}
+#view .card{
+  width:100%!important;height:100%!important;max-height:none!important;overflow:auto!important;
+  padding:calc(env(safe-area-inset-top) + 53px) 10px calc(env(safe-area-inset-bottom) + 18px)!important;
+  border:0!important;border-radius:0!important;background:linear-gradient(180deg,#0b1827 0,#050b12 80%)!important;
+  box-shadow:none!important;backdrop-filter:none!important
+}
+#view .card h2{font-size:24px!important;text-align:left!important;border:0!important;margin:0 2px 2px!important;color:#f4f7fb!important;text-shadow:none!important}
+#view .card>p{text-align:left!important;margin:3px 2px 10px!important;color:#7f8e9d!important;font-size:8px!important}
+#view .back{position:sticky!important;bottom:0!important;height:43px!important;margin-top:11px!important;border-radius:8px!important;background:#0c1b2b!important;border:1px solid rgba(255,255,255,.12)!important;color:#c9d4de!important}
+#view .player-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+#view .player-card{
+  border:1px solid rgba(255,255,255,.1)!important;border-radius:8px!important;padding:6px!important;
+  background:linear-gradient(160deg,#122234,#07101a)!important;box-shadow:0 5px 12px rgba(0,0,0,.18)!important
+}
+#view .player-portrait{height:148px!important;border-radius:5px!important;margin-bottom:6px!important}
+#view .player-head strong{font-size:10px!important}.player-head b{font-size:9px!important;color:#e9cb72!important}
+#view .mini-stats span{font-size:7px!important;background:#07111b!important;border:1px solid rgba(255,255,255,.05)}
+#view .ability-chip{font-size:6px!important;background:#102031!important}
+
+.scout-topbar{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:8px}
+.scout-topbar h2{margin:0!important}.scout-topbar small{font-size:7px;color:#708294}
+.scout-wallet{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:8px;background:linear-gradient(180deg,#122438,#09131e);border:1px solid rgba(214,180,91,.22);margin:6px 0 7px}
+.scout-wallet span{font-size:7px;color:#8191a0}.scout-wallet b{font-size:14px;color:#f1d173;font-variant-numeric:tabular-nums}.scout-wallet em{font-style:normal;font-size:7px;color:#8fa0ae}
+.scout-tabs{display:flex;gap:5px;overflow-x:auto;padding:2px 0 7px;scroll-snap-type:x proximity;scrollbar-width:none}.scout-tabs::-webkit-scrollbar{display:none}
+.scout-tab{flex:0 0 auto;min-width:92px;height:39px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:#0b1621;color:#8595a4;text-align:left;padding:5px 7px;scroll-snap-align:start}
+.scout-tab b{display:block;font-size:8px;color:#dce4eb}.scout-tab small{display:block;margin-top:2px;font-size:6px;color:#778797}.scout-tab.selected{background:linear-gradient(180deg,#16324b,#0b1826);border-color:#5c8eb6;box-shadow:inset 0 0 0 1px rgba(92,142,182,.12)}
+.scout-banner{
+  position:relative;overflow:hidden;min-height:206px;border-radius:11px;margin:2px 0 8px;
+  border:1px solid rgba(255,255,255,.13);background:linear-gradient(135deg,#173652,#08131e 63%,#081017);
+  box-shadow:0 10px 22px rgba(0,0,0,.26)
+}
+.scout-banner:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 88% 20%,rgba(214,180,91,.22),transparent 33%),linear-gradient(110deg,rgba(255,255,255,.05),transparent 45%);pointer-events:none}
+.scout-copy{position:relative;z-index:2;padding:13px 12px;width:44%}.scout-copy small{font-size:6px;color:#e1c76b;letter-spacing:.16em}.scout-copy h3{margin:4px 0 4px;font-size:22px;letter-spacing:-.03em}.scout-copy p{margin:0;color:#c0ccd7;font-size:8px;line-height:1.4}.scout-copy b{display:block;margin-top:8px;color:#7ed7ff;font-size:8px}
+.scout-featured-grid{position:absolute;right:8px;top:9px;bottom:9px;width:53%;display:grid;grid-template-columns:1.25fr .9fr;grid-template-rows:1fr 1fr;gap:5px}
+.scout-feature-card{position:relative;overflow:hidden;border-radius:7px;border:1px solid rgba(255,255,255,.12);background:#07101a}.scout-feature-card:first-child{grid-row:span 2}
+.scout-feature-card img,.scout-fallback{width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#274763,#0b1520)}
+.scout-feature-card:after{content:"";position:absolute;inset:auto 0 0;height:42%;background:linear-gradient(transparent,#02060ccc);pointer-events:none}
+.scout-feature-card strong{position:absolute;left:6px;right:4px;bottom:16px;z-index:3;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scout-feature-card small{position:absolute;left:6px;bottom:5px;z-index:3;font-size:6px;color:#d5e0e8}
+.scout-feature-card.limited{border-color:#d7b45b}.scout-no-pool{display:grid;place-items:center;color:#7f8f9f;font-size:8px}
+.scout-bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 0}
+.scout-bonus{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:#07121d}.scout-bonus small{display:block;font-size:6px;color:#708294}.scout-bonus b{display:block;margin-top:2px;font-size:9px;color:#eff4f8}
+.scout-actions{display:grid;grid-template-columns:.82fr 1.18fr;gap:5px;margin:7px 0 8px}.scout-actions button{height:55px;border-radius:8px;font-weight:950;text-align:left;padding:9px 11px}
+.scout-actions button small{display:block;font-size:6px;opacity:.65;margin-top:2px}
+.scout-one{background:linear-gradient(180deg,#122437,#07111a);border:1px solid rgba(255,255,255,.12);color:#f2f5f7}.scout-ten{background:linear-gradient(180deg,#e7cc6e,#a17827);border:1px solid #f0da8e;color:#171107;box-shadow:0 7px 18px rgba(0,0,0,.24)}
+.scout-rate-details{border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#07111bdd;padding:8px 9px;margin-top:4px}.scout-rate-details summary{font-size:8px;font-weight:900;color:#b6c2cf}.scout-rate-row{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:7px}.scout-rate-row span{text-align:center;padding:4px 1px;border-radius:4px;background:#0b1825;color:#aebac6;font-size:6px}.scout-rate-row span:first-child{color:#f0d275;border:1px solid rgba(214,180,91,.3)}
+.scout-results-head{display:flex;justify-content:space-between;align-items:center;margin:10px 2px 5px}.scout-results-head b{font-size:10px}.scout-results-head span{font-size:7px;color:#788897}
+.scout-result-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.scout-result-card{position:relative;overflow:hidden;min-width:0;border-radius:5px;border:1px solid rgba(255,255,255,.09);background:#09131e;padding:3px;text-align:center}.scout-result-card.rank-S{border-color:#e0bd5b;box-shadow:0 0 12px rgba(224,189,91,.1)}.scout-result-card.rank-A{border-color:#7da9d0}.scout-result-card img,.scout-result-card .scout-fallback{width:100%;height:62px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#0c1824}.scout-result-card strong{display:block;font-size:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}.scout-result-card small{display:block;font-size:5px;color:#8998a6}.scout-result-badge{position:absolute;top:3px;left:3px;z-index:2;padding:2px 3px;border-radius:3px;background:#05080cdd;color:#f0d275;font-size:6px;font-weight:1000}
+.gacha-pull-one,.gacha-pull-ten,.gacha-banner-card,.gacha-tabs,.gacha-balance,.banner-info,.gacha-results{display:none!important}
+
+.settings-list{gap:6px!important}.settings-row{background:#081522!important;border-color:rgba(255,255,255,.09)!important;border-radius:8px!important}.settings-row>span{font-size:9px!important}
+@media(max-width:390px){.home-hero-card{min-height:365px}.home-hero-card h1{font-size:34px}.home-hero-diamond{width:175px;height:175px}.home-premium-shell{inset:46px 5px 64px}.scout-banner{min-height:196px}.scout-copy{width:46%}.scout-copy h3{font-size:20px}}
+@media(max-width:360px){.home-record-row strong{font-size:10px}.home-command-grid button{min-height:68px}.scout-tab{min-width:84px}.scout-result-grid{gap:3px}.scout-result-card img,.scout-result-card .scout-fallback{height:55px}}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
-<div class="hero"><div class="hero-kicker">2026 SEASON · BASEBALL 3D</div><h1>HOME</h1><p>PLAY · BUILD · COLLECT</p><div class="hero-status"><span>TEAM POWER <b id="team-power">—</b></span><span>ROSTER <b id="roster-count">0</b></span><span>RECORD <b id="record">0勝 0試合</b></span></div></div>
-<div class="menu">
-<div class="match-mode-grid">
-<button class="match-mode-card ai-match-card" data-mode="ai-match"><strong>AI戦</strong><small>CPUと1試合</small><span>PLAY vs CPU</span></button>
-<button class="match-mode-card online-match-card" data-mode="online-lobby"><strong>オンライン戦</strong><small>1対1 P2Pルーム</small><span>ROOM MATCH</span></button>
-</div>
-<div class="ai-difficulty-row"><span>AI難易度</span><button type="button" data-ai-difficulty="EASY">EASY</button><button type="button" data-ai-difficulty="NORMAL" class="selected">STANDARD</button><button type="button" data-ai-difficulty="HARD">HARD</button></div>
-<div class="menu-secondary">
-<button data-mode="gacha">スカウト</button><button data-mode="roster">オーダー</button><button data-mode="training">育成</button>
-<button data-mode="collection">選手名鑑</button><button data-mode="settings">設定</button>
-</div>
-</div></div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden">
+  <div class="home-premium-shell">
+    <section class="home-hero-card">
+      <div class="home-hero-glow"></div>
+      <div class="home-hero-diamond" aria-hidden="true"><i></i><i></i><i></i><i></i><span></span></div>
+      <div class="home-hero-content">
+        <div class="home-kicker"><span>BASEBALL 3D</span><b>SEASON 2026</b></div>
+        <h1>PLAY BALL</h1>
+        <p>投球・打撃・守備まで、1球ごとに勝負。</p>
+        <div class="home-record-row">
+          <div><small>TEAM POWER</small><strong id="team-power">—</strong></div>
+          <div><small>PLAYERS</small><strong id="roster-count">0</strong></div>
+          <div><small>RECORD</small><strong id="record">0勝 0試合</strong></div>
+        </div>
+        <button class="hero-play-button" data-mode="ai-match" type="button">
+          <span><b>AI戦</b><small>1試合を開始</small></span><em>▶</em>
+        </button>
+        <div class="home-quick-row">
+          <button class="home-quick-card online" data-mode="online-lobby" type="button"><span>⚔</span><b>オンライン戦</b><small>1対1 P2P</small></button>
+          <button class="home-quick-card scout" data-mode="gacha" type="button"><span>✦</span><b>スカウト</b><small>注目選手を獲得</small></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-command">
+      <div class="home-section-title"><span>TEAM MANAGEMENT</span><b>チームを育てる</b></div>
+      <div class="home-command-grid">
+        <button data-mode="roster" type="button"><span class="command-icon">◆</span><b>オーダー</b><small>打順・守備・投手</small></button>
+        <button data-mode="training" type="button"><span class="command-icon">↑</span><b>育成</b><small>能力を伸ばす</small></button>
+        <button data-mode="collection" type="button"><span class="command-icon">◎</span><b>選手名鑑</b><small>獲得選手を確認</small></button>
+        <button data-mode="settings" type="button"><span class="command-icon">⚙</span><b>設定</b><small>操作・表示</small></button>
+      </div>
+    </section>
+
+    <section class="home-difficulty">
+      <div><span>CPU難易度</span><b>プレイスタイルを変更</b></div>
+      <div class="home-difficulty-buttons">
+        <button type="button" data-ai-difficulty="EASY">EASY</button>
+        <button type="button" data-ai-difficulty="NORMAL" class="selected">STANDARD</button>
+        <button type="button" data-ai-difficulty="HARD">HARD</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="home-bottom-nav" aria-label="メインメニュー">
+    <button type="button" class="selected" data-mode="home"><span>⌂</span><b>ホーム</b></button>
+    <button type="button" data-mode="ai-match"><span>⚾</span><b>試合</b></button>
+    <button type="button" data-mode="gacha"><span>✦</span><b>スカウト</b></button>
+    <button type="button" data-mode="roster"><span>◆</span><b>オーダー</b></button>
+    <button type="button" data-mode="training"><span>↑</span><b>育成</b></button>
+    <button type="button" data-mode="collection"><span>◎</span><b>選手</b></button>
+  </nav>
+</div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden">
 <div class="match-topbar"><div class="score-pill" id="inning-label">1回表</div><div class="score-pill scoreboard"><span>A <b id="away-score">0</b> - <b id="home-score">0</b> H</span></div><div class="score-pill" id="count-label">B0 S0 O0</div></div>
 <div id="matchhud" class="matchhud">1回表　0 - 0</div>
 <div class="match-view-switch"><button type="button" data-view="BATTER" class="selected">打者視点</button><button type="button" data-view="PITCHER">投手視点</button></div><div id="aim-area" class="aim-area"><div id="strike-zone" class="strike-zone"><i></i><i></i><i></i><i></i></div><div id="trajectory" class="trajectory"></div><div id="aim-cursor" class="aim-cursor">＋</div></div>
