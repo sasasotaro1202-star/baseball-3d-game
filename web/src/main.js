@@ -69,7 +69,7 @@ let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhy
 
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
 let matchMode='AI'; let matchDifficulty=save.settings?.aiDifficulty||'NORMAL'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
-let onlineRevision=0;let onlineSessionStarted=false;let onlineActionSentForPitch=false;
+let onlineRevision=0;let onlineSessionStarted=false;let onlineActionSentForPitch=false;let onlineStealPending=false;
 let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.now();let stealTargetBase=1;
 const $=id=>document.getElementById(id); const homeUI=$('home'),viewUI=$('view'),card=$('card'),matchUI=$('match-ui'),currency=$('currency');
 function updateProfileUI(){const count=save.collection.length;const power=save.collection.reduce((sum,id)=>{const p=ALL_PLAYERS.find(x=>x.id===id);return sum+(p?Math.round(((p.power||70)+(p.contact||70)+(p.field||70)+(p.control||70))/4):0)},0);$('record').textContent=`${save.wins}勝 ${save.matches}試合`;$('roster-count').textContent=count;$('team-power').textContent=count?Math.round(power/count):'—';}
@@ -404,7 +404,7 @@ function choosePitchManual(type){
 function pitch(){
   const aiPitchAuthority=matchMode==='AI'&&match.half==='TOP';
   if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM')||(!isLocalPitcher()&&!aiPitchAuthority))return;
-  pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
+  pitchState='pitch';t=0;onlineActionSentForPitch=false;window.__pitchCount=(window.__pitchCount||0)+1;
   const pitcherPlayer=pitcherPlayerForSide(match.half==='TOP'?'home':'away');
   if(!isOnlineMatch()&&match.half==='TOP'){
     const decision=choosePitch({
@@ -457,10 +457,15 @@ function take(){
   const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
-function finishPlay(outcome){
+function finishPlay(outcome,options={}){
   if(isOnlineMatch()&&onlineRole==='GUEST')return;
-  pitchState='idle';t=0;match=applyOutcome(match,outcome);
-  if(!isValidMatchState(match)){window.__lastGameError='INVALID_MATCH_STATE';match=createMatchState();return;}
+  pitchState='idle';t=0;match=applyOutcome(match,outcome,options);
+  if(!isValidMatchState(match)){
+    window.__lastGameError='INVALID_MATCH_STATE';
+    match={...match,ended:true,lastOutcome:'INVALID_MATCH_STATE'};
+    matchEvent('MATCH ERROR','error');
+    return;
+  }
   if(outcome==='HOME_RUN')matchEvent('ホームラン！','hr');
   else if(outcome==='TRIPLE')matchEvent('TRIPLE','hit');
   else if(outcome==='DOUBLE')matchEvent('DOUBLE','hit');
@@ -637,7 +642,7 @@ function performSteal(){
   match=result.state;
   matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');
   updateMatchHUD();updatePremiumHUD();
-  if(isOnlineMatch())onlineRevision+=1,onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
+  if(isOnlineMatch()){onlineStealPending=false;onlineRevision+=1;onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});}
   if(match.half==='TOP'&&!match.ended&&matchMode==='AI')scheduleTopPitch(450);
   if(isOnlineMatch()&&isLocalPitcher()&&!match.ended)setTimeout(()=>pitch(),450);
 }
@@ -674,7 +679,7 @@ function renderOnlineLobby(){
 }
 async function startOnlineHost(){
   if(!isOnlineSupported())throw new Error('このブラウザはオンライン対戦に対応していません');
-  matchMode='ONLINE';onlineRole='HOST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;
+  matchMode='ONLINE';onlineRole='HOST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;onlineStealPending=false;
   onlineSignalStatus('部屋を作成中…');
   onlineConnection=await createOnlineHost({
     onOpen(){onlineConnected=true;onlineSignalStatus('相手を待っています。回答コードを入力してください');},
@@ -690,7 +695,7 @@ async function startOnlineHost(){
 async function startOnlineGuest(){
   if(!isOnlineSupported())throw new Error('このブラウザはオンライン対戦に対応していません');
   const offer=$('online-offer-input').value.trim();if(!offer)throw new Error('ホストの接続コードを入力してください');
-  matchMode='ONLINE';onlineRole='GUEST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;
+  matchMode='ONLINE';onlineRole='GUEST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;onlineStealPending=false;
   onlineSignalStatus('参加コードを作成中…');
   onlineConnection=await createOnlineGuest(offer,{
     onOpen(){onlineConnected=true;onlineSignalStatus('接続しました。ホストの開始を待っています');onlineSend({type:'ONLINE_READY',collection:encodeTeamForOnline()});},
@@ -718,7 +723,7 @@ function handleOnlineMessage(msg){
       resolveRemoteBatting(msg);
     }else if(msg.type==='ONLINE_STEAL'&&isLocalPitcher()&&pitchState==='idle'){
       const result=stealBase(match,msg.runnerId,msg.targetBase);
-      match=result.state;onlineRevision+=1;onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
+      match=result.state;onlineStealPending=false;onlineRevision+=1;onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
       matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');updateMatchHUD();updatePremiumHUD();
       if(!match.ended)setTimeout(()=>pitch(),450);
     }
@@ -741,7 +746,7 @@ function handleOnlineMessage(msg){
 function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
 function startPitchFromNetwork(msg){
   selectedPitch=msg.pitch||'FASTBALL';pitchTarget={x:Number(msg.target?.x)||0,y:Number(msg.target?.y)||0};window.__lastPitch=selectedPitch;window.__pitchVelocity=Number(msg.velocity)||90;
-  pitchState='pitch';t=0;onlinePendingPitchId=msg.id||null;onlinePendingPitch=msg;
+  pitchState='pitch';t=0;onlineActionSentForPitch=false;onlinePendingPitchId=msg.id||null;onlinePendingPitch=msg;
   const info=PITCHES[selectedPitch]||PITCHES.FASTBALL;
   ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:Number(msg.breakX)||0,breakY:Number(msg.breakY)||0});
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
@@ -893,7 +898,9 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
         });
         fielderAction=finalResult.throwSuccess?'throw':finalResult.catchSuccess?'catch':'idle';fielderActionUntil=performance.now()+280;
         matchEvent(finalResult.event==='THROW_ON_TARGET'?'OUT AT BASE':finalResult.event==='CATCH_MISS'?'CATCH MISS':finalResult.event==='FIELDING_ERROR'?'ERROR':finalResult.event==='CLEAN_CATCH'?'CATCH':'IN PLAY','field');
-        pendingOutcome=null;window.__hitOutcome=null;window.__fieldingIntent=null;ballPhysics=null;finishPlay(finalResult.finalOutcome);fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
+        pendingOutcome=null;window.__hitOutcome=null;window.__fieldingIntent=null;ballPhysics=null;
+        const batterSpeed=Number(lineupPlayer(0)?.speed)||70;
+        finishPlay(finalResult.finalOutcome,{batterSpeed,runnerReaction:Number(lineupPlayer(0)?.vision)||70});fielderTarget=null;ball.position.set(0,2.1,3);if(!match.ended)setMatchCamera(cameraMode==='PITCHER'?'PITCHER':'BATTER');if(match.half==='TOP'&&!match.ended)scheduleTopPitch(350);
       }
     }
   }
