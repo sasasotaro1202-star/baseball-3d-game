@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {ALL_PLAYERS} from './data/players.js';
 import {pullOnce,pullMany} from './game/gacha-service.js';
 import {GACHA_BANNERS} from './data/gacha.js';
-import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,isValidMatchState,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
+import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,isValidMatchState,advancePitcher,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
 import {loadSave,saveGame} from './game/save.js';
 import {modeLabel} from './game/ui.js';
 import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
@@ -485,7 +485,11 @@ function take(){
 }
 function finishPlay(outcome,options={}){
   if(isOnlineMatch()&&onlineRole==='GUEST')return;
+  const pitchingSideBefore=match.half==='TOP'?'home':'away';
   pitchState='idle';t=0;match=applyOutcome(match,outcome,options);
+  const sub=advancePitcher(match,pitchingSideBefore,pitcherIdsForSide(pitchingSideBefore).length,8);
+  match=sub.state;
+  if(sub.changed)matchEvent('投手交代','change');
   if(!isValidMatchState(match)){
     window.__lastGameError='INVALID_MATCH_STATE';
     match={...match,ended:true,lastOutcome:'INVALID_MATCH_STATE'};
@@ -562,9 +566,22 @@ function lineupPlayer(index){
   const id=ids.length?ids[slot]:side==='home'?AI_TEAM_LINEUP[0]:ALL_PLAYERS[0]?.id;
   return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
 }
+function pitcherIdsForSide(side){
+  if(matchMode==='AI'&&side==='home')return AI_TEAM_PITCHERS;
+  if(isOnlineMatch()){
+    const roster=rosterIdsForSide(side);
+    const pitchers=roster.filter(id=>ALL_PLAYERS.find(p=>Number(p.id)===Number(id))?.pos?.includes('P'));
+    return pitchers.length?pitchers:roster.slice(0,3);
+  }
+  if(save.team?.pitchers?.length)return save.team.pitchers;
+  const roster=rosterIdsForSide(side);
+  const pitchers=roster.filter(id=>ALL_PLAYERS.find(p=>Number(p.id)===Number(id))?.pos?.includes('P'));
+  return pitchers.length?pitchers:roster.slice(0,3);
+}
 function pitcherPlayerForSide(side){
-  const ids=isOnlineMatch()?rosterIdsForSide(side):(matchMode==='AI'&&side==='home'?AI_TEAM_PITCHERS:(save.team?.pitchers?.length?save.team.pitchers:rosterIdsForSide(side)));
-  const id=ids[0];
+  const ids=pitcherIdsForSide(side);
+  const idx=Math.min(Math.max(0,Number(match.pitcherIndex?.[side]||0)),Math.max(0,ids.length-1));
+  const id=ids[idx];
   return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
 }
 function fieldingPlayer(index){
