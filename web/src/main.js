@@ -168,7 +168,22 @@ function portraitMarkup(p,extra=''){
 function renderCard(title,body){card.innerHTML='<h2>'+title+'</h2><p>'+body+'</p><button class="action back" id="back">ホームへ戻る</button>'; $('back').onclick=()=>setMode('home');}
 async function renderSettings(){
   const user=await getCloudUser();
-  card.innerHTML='<h2>設定</h2><p>ローカル保存に加えて、Supabaseクラウドセーブを利用できます。</p><p class="small">'+(user?'クラウド: 接続中':'クラウド: 未ログイン')+'</p>'+(user?'<button class="action" id="cloudLogout">クラウドからログアウト</button>':'<div class="row"><input id="cloudEmail" type="email" placeholder="メールアドレス" style="flex:2;padding:14px;border-radius:14px;border:1px solid #ffffff25;background:#101d2d;color:#fff"><button class="action" id="cloudLogin">ログインリンク</button></div>')+'<button class="action back" id="back">ホームへ戻る</button>';
+  const settings={quickPitch:true,battingModeDefault:'CONTACT',cursorSpeed:1,...(save.settings||{})};
+  card.innerHTML='<h2>試合設定</h2>'+
+    '<div class="settings-list">'+
+    '<label class="settings-row"><span>クイック投球</span><input id="set-quick-pitch" type="checkbox" '+(settings.quickPitch?'checked':'')+'></label>'+
+    '<div class="settings-row"><span>初期打撃モード</span><div class="settings-segment"><button type="button" id="set-contact" class="'+(settings.battingModeDefault==='CONTACT'?'selected':'')+'">ミート</button><button type="button" id="set-power" class="'+(settings.battingModeDefault==='POWER'?'selected':'')+'">強振</button></div></div>'+
+    '<label class="settings-row"><span>カーソル速度 <b id="set-cursor-value">'+Number(settings.cursorSpeed).toFixed(1)+'</b></span><input id="set-cursor-speed" type="range" min="0.5" max="1.5" step="0.1" value="'+Number(settings.cursorSpeed).toFixed(1)+'"></label>'+
+    '</div>'+
+    '<h3 class="settings-subtitle">クラウドセーブ</h3><p class="small">ローカル保存を優先し、ログイン中はクラウドへ同期します。</p>'+
+    '<p class="small">'+(user?'クラウド: 接続中':'クラウド: 未ログイン')+'</p>'+
+    (user?'<button class="action" id="cloudLogout">クラウドからログアウト</button>':'<div class="row"><input id="cloudEmail" type="email" placeholder="メールアドレス" style="flex:2;padding:14px;border-radius:14px;border:1px solid #ffffff25;background:#101d2d;color:#fff"><button class="action" id="cloudLogin">ログインリンク</button></div>')+
+    '<button class="action back" id="back">ホームへ戻る</button>';
+  const writeSettings=next=>{save.settings={...settings,...next};persist();};
+  $('set-quick-pitch').onchange=e=>writeSettings({quickPitch:e.target.checked});
+  const refreshMode=mode=>{writeSettings({battingModeDefault:mode});$('set-contact').classList.toggle('selected',mode==='CONTACT');$('set-power').classList.toggle('selected',mode==='POWER');};
+  $('set-contact').onclick=()=>refreshMode('CONTACT');$('set-power').onclick=()=>refreshMode('POWER');
+  $('set-cursor-speed').oninput=e=>{const v=Number(e.target.value);$('set-cursor-value').textContent=v.toFixed(1);writeSettings({cursorSpeed:v});};
   $('back').onclick=()=>setMode('home');
   if(user) $('cloudLogout').onclick=async()=>{await signOutCloud();renderSettings();};
   else $('cloudLogin').onclick=async()=>{const email=$('cloudEmail').value.trim();if(!email)return;const {error}=await signInWithMagicLink(email);if(error)alert(error.message);else alert('ログインリンクをメールに送信しました。');};
@@ -378,11 +393,14 @@ function matchEvent(text,kind='normal'){
 let topPitchTimer=null;
 function scheduleTopPitch(delay=650){
   clearTimeout(topPitchTimer);
-  topPitchTimer=setTimeout(()=>{topPitchTimer=null;if(match.half==='TOP'&&!match.ended&&pitchState==='idle')pitch();},delay);
+  const multiplier=save.settings?.quickPitch===false?1:.62;
+  topPitchTimer=setTimeout(()=>{topPitchTimer=null;if(match.half==='TOP'&&!match.ended&&pitchState==='idle')pitch();},Math.max(180,Math.round(delay*multiplier)));
 }
 function updateAimFromPointer(e){
   const rect=$('aim-area')?.getBoundingClientRect();if(!rect)return;
-  aimTarget.x=((e.clientX-rect.left)/rect.width-.5)*1.5;aimTarget.y=(.5-(e.clientY-rect.top)/rect.height)*1.5;
+  const speed=Math.max(.5,Math.min(1.5,Number(save.settings?.cursorSpeed)||1));
+  aimTarget.x=Math.max(-1.5,Math.min(1.5,((e.clientX-rect.left)/rect.width-.5)*1.5*speed));
+  aimTarget.y=Math.max(-1.5,Math.min(1.5,(.5-(e.clientY-rect.top)/rect.height)*1.5*speed));
   updateAimUI();
 }
 function updateAimUI(){
@@ -643,7 +661,7 @@ function setAIDifficulty(level){
 }
 function startAIMatch(){
   matchMode='AI';if(!AI_DIFFICULTIES[matchDifficulty])matchDifficulty='NORMAL';onlineRole=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;onlineConnection?.close?.();onlineConnection=null;onlineConnected=false;onlinePendingPitchId=null;onlinePendingPitch=null;
-  match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;setMode('match');resetMatchView();updateMatchHUD();scheduleTopPitch(700);
+  match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;setMode('match');resetMatchView();setBattingMode(save.settings?.battingModeDefault==='POWER'?'POWER':'CONTACT');updateMatchHUD();scheduleTopPitch(700);
 }
 function getStealCandidate(){
   const candidates=(match.runners||[]).filter(r=>r.status==='LIVE'&&Number(r.base)>=0&&Number(r.base)<2).sort((a,b)=>Number(b.base)-Number(a.base));
@@ -769,7 +787,7 @@ function handleOnlineMessage(msg){
     onlineRevision=revision;match=msg.match;pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;fielderTarget=null;updateMatchHUD();updatePremiumHUD();if(match.ended)recordMatchResult();
   }
 }
-function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
+function startOnlineMatchView(){setMode('match');resetMatchView();setBattingMode(save.settings?.battingModeDefault==='POWER'?'POWER':'CONTACT');$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
 function startPitchFromNetwork(msg){
   const safe=sanitizeNetworkPitch(msg);
   selectedPitch=safe.pitch;pitchTarget=safe.target;window.__lastPitch=selectedPitch;window.__pitchVelocity=safe.velocity;
@@ -939,4 +957,10 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
   camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)
 }renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
-window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-playable-modes-v15";
+window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-playable-modes-v15";<style id="settings-gameplay-v1">
+.settings-list{display:grid;gap:7px;margin:10px 0 16px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid #ffffff14;border-radius:7px;background:#06101a}
+.settings-row>span{font-size:10px;color:#ccd5dc}.settings-row b{color:#e4c45d}
+.settings-segment{display:flex;gap:3px}.settings-segment button{border:1px solid #ffffff16;background:#0b1622;color:#aab6c0;border-radius:5px;padding:6px 10px;font-size:8px}.settings-segment button.selected{background:#d1b14d;color:#15110a;border-color:#e4c969}
+#steal{touch-action:manipulation}
+</style>
