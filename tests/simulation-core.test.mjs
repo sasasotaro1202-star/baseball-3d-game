@@ -63,3 +63,12 @@ test('fielding difficulty changes catch probability deterministically',()=>{
  assert.equal(easy.catchSuccess,false);
  assert.equal(hard.catchSuccess,true);
 });
+
+test('GameState invariant validator rejects impossible states',()=>{
+ const s=createMatchState();
+ assert.equal(isValidMatchState(s),true);
+ assert.equal(isValidMatchState({...s,outs:4}),false);
+ assert.equal(isValidMatchState({...s,balls:4}),false);
+ assert.equal(isValidMatchState({...s,score:{home:-1,away:0}}),false);
+ assert.equal(isValidMatchState({...s,bases:[true,false,false],runners:[]}),false);
+});
