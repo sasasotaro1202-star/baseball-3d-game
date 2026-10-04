@@ -6,6 +6,7 @@ const sim = readFileSync("web/src/game/simulation.js", "utf8");
 const online = readFileSync("web/src/game/online.js", "utf8");
 const ai = readFileSync("web/src/game/ai.js", "utf8");
 const save = readFileSync("web/src/game/save.js", "utf8");
+const presentation = readFileSync("web/src/game/presentation.js", "utf8");
 const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
@@ -43,6 +44,8 @@ const checks = [
   ["automatic AI pitching", js.includes("scheduleTopPitch(700)") && js.includes("count:[match.balls,match.strikes]")],
   ["match result persistence", js.includes("recordMatchResult") && js.includes("save.matches") && js.includes("save.wins")],
   ["persistent save", js.includes("loadSave")],
+  ["premium UI v3", presentation.includes("premium-design-system-v3") && presentation.includes("premium-design-system-v3-hotfix")],
+  ["scout premium hierarchy", js.includes("gacha-banner-kpis") && js.includes("gacha-feature-meta") && js.includes("OVR ")],
 ];
 for (const [name, ok] of checks) {
   if (!ok) throw new Error("Smoke check failed: " + name);
