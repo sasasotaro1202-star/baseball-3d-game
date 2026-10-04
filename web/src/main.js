@@ -185,7 +185,7 @@ function portraitMarkup(p,extra=''){
   const image=p.image||'';
   const initials=p.name.split(' ').map(x=>x[0]).join('').slice(0,3);
   return '<div class="player-portrait '+extra+'"><span class="rank-badge">'+(p.rank||'—')+'</span>'+
-    (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'flex\\'"><div class="portrait-fallback" style="display:none"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>':
+    (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async">':
     '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
 }
 function portraitMarkup(p,extra=''){
