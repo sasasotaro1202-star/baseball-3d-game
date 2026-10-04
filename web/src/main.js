@@ -96,7 +96,8 @@ function addPremiumStadiumDressing(){
 addPremiumStadiumDressing();
 let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhysics=null;let pendingOutcome=null;
 
-let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
+let save=loadSave(); let match=createMatchState();
+const PITCHES_FOR_UI=PITCHES; let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
 let matchMode='AI'; let matchDifficulty=save.settings?.aiDifficulty||'NORMAL'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
 let onlineRevision=0;let onlineSessionStarted=false;let onlineActionSentForPitch=false;let onlineStealPending=false;
 let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.now();let stealTargetBase=1;
@@ -486,7 +487,7 @@ function updatePitchControlUI(){
     const selected=b.dataset.pitch===selectedPitch;
     b.classList.toggle('selected',selected);
     const info=PITCHES[b.dataset.pitch];
-    if(info)b.textContent=(b.dataset.pitch==='FASTBALL'?'ストレート':b.dataset.pitch==='SLIDER'?'スライダー':b.dataset.pitch==='CURVEBALL'?'カーブ':'チェンジアップ')+' '+Math.round(info.speed||0);
+    if(info)b.innerHTML='<b>'+({FASTBALL:'ストレート',SLIDER:'スライダー',CURVEBALL:'カーブ',FORK:'フォーク',CHANGEUP:'チェンジアップ'}[b.dataset.pitch]||b.dataset.pitch)+'</b><small>'+Math.round(info.speed||0)+'</small>';
   });
 }
 function choosePitchManual(type){

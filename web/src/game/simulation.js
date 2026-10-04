@@ -1,5 +1,5 @@
 export const PITCHES=Object.freeze({
- FASTBALL:{speed:96,break:0.08},SLIDER:{speed:84,break:0.62},CURVEBALL:{speed:76,break:0.88},CHANGEUP:{speed:82,break:0.35}
+ FASTBALL:{speed:96,break:0.08},SLIDER:{speed:84,break:0.62},CURVEBALL:{speed:76,break:0.88},CHANGEUP:{speed:82,break:0.35},FORK:{speed:87,break:0.74}
 });
 export const REGULATION_INNINGS=9;
 export const EXTRA_INNING_START_BASES=Object.freeze([false,false,false]);

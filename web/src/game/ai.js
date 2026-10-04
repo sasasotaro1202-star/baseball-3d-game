@@ -15,6 +15,7 @@ export function choosePitch({count=[0,0],runnerThreat=0,profile=AI_PROFILES.pitc
  const roll=rng();const aggression=Math.max(.05,Math.min(.95,profile.aggression+d.decisionBias+pressure*.2));
  if(strikes===2&&roll<.52+aggression*.08)return'FASTBALL';
  if(balls>=2&&roll<.35+Math.max(0,d.decisionBias)*.25)return'CHANGEUP';
+ if(roll<.62)return'FORK';
  if(roll<aggression)return'SLIDER';
  return roll<.5?'FASTBALL':'CURVEBALL';
 }

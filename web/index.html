@@ -763,6 +763,24 @@ body{background:#040a11!important;color:var(--ui-text)}
 .ui-icon-settings:before{left:4px;top:4px;width:14px;height:14px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 0 4px transparent}
 .ui-icon-settings:after{left:8px;top:8px;width:6px;height:6px;border:1.5px solid currentColor;border-radius:50%}
 .ui-icon-settings{filter:drop-shadow(0 0 5px rgba(105,188,240,.18))}
+</style>
+<style id="reference-gameplay-pass-v1">
+body.premium-ui .pitch-control{width:min(196px,54vw)!important;height:154px!important;left:50%!important;right:auto!important;bottom:70px!important;transform:translateX(-50%)!important;display:block!important;z-index:14!important;pointer-events:none!important}
+body.premium-ui .pitch-control button{position:absolute!important;width:84px!important;height:38px!important;min-height:38px!important;padding:3px 6px!important;border-radius:8px!important;display:grid!important;grid-template-columns:1fr auto!important;align-items:center!important;gap:4px!important;background:linear-gradient(180deg,#111c28f5,#050a11f8)!important;border:1px solid #ffffff30!important;box-shadow:0 4px 12px #0009!important;pointer-events:auto!important}
+body.premium-ui .pitch-control button b{font-size:8px!important;line-height:1.1!important}.pitch-control button small{font-size:8px!important;color:#d8e0e8!important}
+body.premium-ui .pitch-control button:nth-child(1){left:56px;top:0}body.premium-ui .pitch-control button:nth-child(2){left:0;top:45px}body.premium-ui .pitch-control button:nth-child(3){left:112px;top:45px}body.premium-ui .pitch-control button:nth-child(4){left:56px;top:94px}body.premium-ui .pitch-control button:nth-child(5){left:0;top:94px}
+body.premium-ui .pitch-control button.selected{background:linear-gradient(180deg,#4c3d1b,#211a0c)!important;border-color:#e6ca70!important}
+body.premium-ui .match-action-pad{grid-template-columns:72px 1fr 72px!important}body.premium-ui .match-action-pad .swing-main{border-color:#e8c45e!important;box-shadow:0 5px 18px #000b,0 0 0 1px #765d25 inset!important}
+body.premium-ui #match-ui .strike-zone{width:96px!important;height:132px!important;background:linear-gradient(180deg,#ffffff08,#ffffff03)!important;border:2px solid #f5f6f7aa!important;box-shadow:0 0 0 1px #000,0 0 18px #0009!important}body.premium-ui #match-ui .strike-zone i{background:#fff3!important}
+body.premium-ui #match-ui .atbat-card{width:176px!important;left:9px!important;top:111px!important;background:linear-gradient(180deg,#06101be8,#03080ddd)!important}
+body.premium-ui #match-ui .atbat-card:before{content:"BATTER";display:block;font-size:7px;letter-spacing:.18em;color:#c9a947;margin-bottom:2px}
+body.premium-ui #match-ui .match-topbar .score-pill:first-child:before{content:"INNING";display:block;font-size:7px;color:#8494a5;letter-spacing:.14em;margin-bottom:1px}
+body.premium-ui .sc-player-card{overflow:hidden!important;background:linear-gradient(160deg,#14283a 0%,#08121c 67%,#05090e 100%)!important;border:1px solid #d8b85f55!important;box-shadow:0 12px 30px #000b!important}
+body.premium-ui .sc-player-card .sc-card-ribbon{background:linear-gradient(90deg,#1b2c3c,#0d1822)!important;border-bottom:1px solid #dfbf6450!important}
+body.premium-ui .sc-player-card .sc-card-portrait{position:relative!important;background:radial-gradient(circle at 50% 28%,#3e5c72 0,#122233 45%,#050a10 100%)!important}.sc-card-portrait:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#fff0 55%,#0009 100%),radial-gradient(circle at 50% 10%,#ffffff18 0,#fff0 34%)}
+body.premium-ui .order-field{background:radial-gradient(circle at 50% 42%,#63a75a 0,#2f7140 39%,#103521 78%,#07110a 100%)!important;border:1px solid #e0d28b55!important}
+body.premium-ui .premium-lineup-slot{border:1px solid #d9bf6b55!important;background:linear-gradient(145deg,#102438,#050c14)!important}
+@media(max-width:390px){body.premium-ui .pitch-control{width:180px!important;height:148px!important}body.premium-ui .pitch-control button{width:77px!important;height:34px!important}body.premium-ui .pitch-control button:nth-child(1){left:51px}body.premium-ui .pitch-control button:nth-child(2){left:0;top:43px}body.premium-ui .pitch-control button:nth-child(3){left:103px;top:43px}body.premium-ui .pitch-control button:nth-child(4){left:51px;top:87px}body.premium-ui .pitch-control button:nth-child(5){left:0;top:87px}}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
   <div class="home-premium-shell">
     <section class="home-hero-card">
@@ -821,7 +839,7 @@ body{background:#040a11!important;color:var(--ui-text)}
 <div class="match-view-switch"><button type="button" data-view="BATTER" class="selected">打者視点</button><button type="button" data-view="PITCHER">投手視点</button></div><div id="aim-area" class="aim-area"><div id="strike-zone" class="strike-zone"><i></i><i></i><i></i><i></i></div><div id="trajectory" class="trajectory"></div><div id="aim-cursor" class="aim-cursor">＋</div></div>
 <div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b><small id="pitcher-stamina">ST 100</small></div></div>
 <div class="aim-help" id="aim-help">投球時：画面をドラッグしてコース指定</div>
-<div class="pitch-control"><button type="button" data-pitch="FASTBALL">ストレート</button><button type="button" data-pitch="SLIDER">スライダー</button><button type="button" data-pitch="CURVEBALL">カーブ</button><button type="button" data-pitch="CHANGEUP">チェンジアップ</button></div>
+<div class="pitch-control" aria-label="球種"><button type="button" data-pitch="FASTBALL"><b>ストレート</b><small>96</small></button><button type="button" data-pitch="SLIDER"><b>スライダー</b><small>84</small></button><button type="button" data-pitch="CURVEBALL"><b>カーブ</b><small>76</small></button><button type="button" data-pitch="FORK"><b>フォーク</b><small>87</small></button><button type="button" data-pitch="CHANGEUP"><b>チェンジアップ</b><small>82</small></button></div>
 <div class="bat-mode-pill" id="bat-mode-pill"><button id="bat-contact-mode" type="button" class="selected">ミート</button><button id="bat-power-mode" type="button">強振</button></div><button id="steal" class="steal-button" type="button">盗塁</button>
 <div class="match-action-pad">
 <button id="take"><span>見送る</span><small>タイミングを待つ</small></button>

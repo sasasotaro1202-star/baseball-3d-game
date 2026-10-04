@@ -18,3 +18,10 @@ test('training changes the same player stats used by card and AI',()=>{
   assert.equal(developmentFor(r.state,1).stats.contact,1);
   assert.ok(cardModel(player,developmentFor(r.state,1)).stats.contact>75);
 });
+
+test('model config carries role and stable visual profile data',()=>{
+  const m=modelConfig({id:2002,pos:'OF',power:86,build:'athletic',batting:'right'});
+  assert.equal(m.profile.role,'batter');
+  assert.equal(m.profile.visualSeed,2002);
+  assert.ok(m.profile.jerseyNumber>0&&m.profile.jerseyNumber<=99);
+});
