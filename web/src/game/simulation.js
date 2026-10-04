@@ -7,6 +7,25 @@ export const EXTRA_INNING_START_BASES=Object.freeze([false,false,false]);
 function runner(id,base,speed=70,reaction=70){return{id,base,speed,reaction,status:'LIVE',tagged:false,advanceIntent:'HOLD',startBase:base};}
 export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,batterIndex:{away:0,home:0},ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
 export function cloneState(s){return JSON.parse(JSON.stringify(s));}
+export function isValidMatchState(s){
+  if(!s||!Number.isInteger(s.inning)||s.inning<1||s.inning>1000)return false;
+  if(s.half!=='TOP'&&s.half!=='BOTTOM')return false;
+  if(!Number.isInteger(s.outs)||s.outs<0||s.outs>3)return false;
+  if(!Number.isInteger(s.balls)||s.balls<0||s.balls>3)return false;
+  if(!Number.isInteger(s.strikes)||s.strikes<0||s.strikes>2)return false;
+  if(!s.score||!Number.isFinite(s.score.home)||!Number.isFinite(s.score.away)||s.score.home<0||s.score.away<0)return false;
+  if(!Array.isArray(s.bases)||s.bases.length!==3||s.bases.some(v=>typeof v!=='boolean'))return false;
+  if(!Array.isArray(s.runners)||s.runners.length>3)return false;
+  const ids=new Set();
+  for(const r of s.runners){
+    if(!Number.isFinite(r.id)||ids.has(r.id)||!Number.isInteger(r.base)||r.base<0||r.base>2||r.status!=='LIVE')return false;
+    ids.add(r.id);
+  }
+  if(!Number.isInteger(s.nextRunnerId)||s.nextRunnerId<1)return false;
+  if(!Number.isInteger(s.batterIndex?.away)||s.batterIndex.away<0||!Number.isInteger(s.batterIndex?.home)||s.batterIndex.home<0)return false;
+  return typeof s.ended==='boolean';
+}
+
 function offenseKey(s){return s.half==='TOP'?'away':'home';}
 function resetCount(s){s.balls=0;s.strikes=0;}
 function isExtra(s){return s.inning>REGULATION_INNINGS;}
