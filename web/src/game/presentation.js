@@ -174,6 +174,20 @@ function installPremiumDesignSystem(){
     body.premium-ui .back{margin-top:2px}
 
     body.premium-ui .sc-player-grid{gap:7px!important}
+    body.premium-ui .collection-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:8px}
+    body.premium-ui .collection-head h2{font-size:27px;line-height:1;margin:4px 0 5px;letter-spacing:-.03em}
+    body.premium-ui .collection-head p{margin:0;color:#8796a3;font-size:8px;line-height:1.45;max-width:260px}
+    body.premium-ui .collection-count{min-width:72px;padding:8px;border:1px solid #ffffff12;border-radius:8px;background:#07111be8;text-align:right}
+    body.premium-ui .collection-count strong{display:block;font-size:22px;line-height:1;color:#f1d77e}
+    body.premium-ui .collection-count span{font-size:8px;color:#7f8d99}
+    body.premium-ui .collection-count small{display:block;margin-top:3px;color:#71808d;font-size:5px;letter-spacing:.14em}
+    body.premium-ui .collection-filter-row{display:flex;gap:5px;overflow:auto;padding:0 0 6px;scrollbar-width:none}
+    body.premium-ui .collection-filter-row::-webkit-scrollbar{display:none}
+    body.premium-ui .collection-filter{
+      flex:0 0 auto;height:28px;padding:0 10px;border-radius:5px;border:1px solid #ffffff12;
+      background:#07111b;color:#8f9daa;font-size:7px;font-weight:850;letter-spacing:.04em
+    }
+    body.premium-ui .collection-filter.selected{background:#c5a54f;color:#181309;border-color:#e1c773}
     body.premium-ui .sc-player-card{
       border-radius:9px!important;border:1px solid #ffffff14!important;background:linear-gradient(180deg,#122131,#071019)!important;
       box-shadow:0 9px 20px #0007!important;overflow:hidden!important
