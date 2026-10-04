@@ -438,7 +438,7 @@ function swing(){
   if(isOnlineMatch()&&onlineRole==='GUEST'){
     if(onlineActionSentForPitch)return;
     onlineActionSentForPitch=true;
-    onlineSend({type:'ONLINE_SWING',pitchId:onlinePendingPitchId,timing,aimX:aimTarget.x,aimY:aimTarget.y,mode:battingMode});
+    onlineSend({type:'ONLINE_SWING',pitchId:onlinePendingPitchId,timing:clampNetworkNumber(timing,0,1,.5),aimX:clampNetworkNumber(aimTarget.x,-1.5,1.5,0),aimY:clampNetworkNumber(aimTarget.y,-1.5,1.5,0),mode:battingMode==='POWER'?'POWER':'CONTACT'});
     return;
   }
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
@@ -590,6 +590,25 @@ function isLocalPitcher(){
   if(!isOnlineMatch())return match.half==='BOTTOM';
   return match.half==='TOP'?onlineRole==='GUEST':onlineRole==='HOST';
 }
+function sanitizeRoster(ids){
+  const allowed=new Set(ALL_PLAYERS.map(p=>Number(p.id)));
+  return [...new Set((Array.isArray(ids)?ids:[]).map(Number).filter(id=>Number.isFinite(id)&&allowed.has(id)))].slice(0,14);
+}
+function clampNetworkNumber(v,min,max,fallback){
+  const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+}
+function sanitizeNetworkPitch(msg){
+  const pitch=Object.prototype.hasOwnProperty.call(PITCHES,msg?.pitch)?msg.pitch:'FASTBALL';
+  return {
+    id:String(msg?.id||''),
+    pitch,
+    target:{x:clampNetworkNumber(msg?.target?.x,-1.5,1.5,0),y:clampNetworkNumber(msg?.target?.y,-1.5,1.5,0)},
+    velocity:clampNetworkNumber(msg?.velocity,65,110,PITCHES[pitch].speed),
+    breakX:clampNetworkNumber(msg?.breakX,-1.5,1.5,0),
+    breakY:clampNetworkNumber(msg?.breakY,-1.5,1.5,0)
+  };
+}
+
 function onlineSend(message){onlineConnection?.send?.({v:1,...message});}
 function onlineRosterPlayer(side,index=0){
   const ids=onlineRosters?.[side]?.length?onlineRosters[side]:(side==='away'?encodeTeamForOnline():(onlineRemoteRoster.length?onlineRemoteRoster:encodeTeamForOnline()));
@@ -698,7 +717,7 @@ async function startOnlineGuest(){
   matchMode='ONLINE';onlineRole='GUEST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;onlineStealPending=false;
   onlineSignalStatus('参加コードを作成中…');
   onlineConnection=await createOnlineGuest(offer,{
-    onOpen(){onlineConnected=true;onlineSignalStatus('接続しました。ホストの開始を待っています');onlineSend({type:'ONLINE_READY',collection:encodeTeamForOnline()});},
+    onOpen(){onlineConnected=true;onlineSignalStatus('接続しました。ホストの開始を待っています');onlineSend({type:'ONLINE_READY',collection:sanitizeRoster(encodeTeamForOnline())});},
     onClose(){onlineConnected=false;onlineSignalStatus('接続が終了しました');},
     onConnectionState:s=>onlineSignalStatus('接続: '+s),
     onMessage:handleOnlineMessage,
@@ -710,8 +729,8 @@ function handleOnlineMessage(msg){
   if(!msg||typeof msg.type!=='string')return;
   if(onlineRole==='HOST'){
     if(msg.type==='ONLINE_READY'&&!onlineSessionStarted){
-      onlineRemoteRoster=Array.isArray(msg.collection)?msg.collection:[];
-      onlineRosters={away:encodeTeamForOnline(),home:onlineRemoteRoster};
+      onlineRemoteRoster=sanitizeRoster(msg.collection);
+      onlineRosters={away:sanitizeRoster(encodeTeamForOnline()),home:sanitizeRoster(onlineRemoteRoster)};
       onlineSessionStarted=true;onlineRevision=0;
       onlineSend({type:'ONLINE_START',match,revision:onlineRevision,rosters:onlineRosters});
       startOnlineMatchView();
@@ -731,7 +750,7 @@ function handleOnlineMessage(msg){
   }
   if(msg.type==='ONLINE_START'){
     if(!isValidMatchState(msg.match))return;
-    matchMode='ONLINE';onlineRosters=msg.rosters||{away:[],home:[]};match=msg.match;onlineRevision=Number(msg.revision)||0;onlineSessionStarted=true;startOnlineMatchView();onlineSend({type:'ONLINE_READY_ACK',revision:onlineRevision});
+    matchMode='ONLINE';onlineRosters={away:sanitizeRoster(msg.rosters?.away),home:sanitizeRoster(msg.rosters?.home)};match=msg.match;onlineRevision=Number(msg.revision)||0;onlineSessionStarted=true;startOnlineMatchView();onlineSend({type:'ONLINE_READY_ACK',revision:onlineRevision});
   }else if(msg.type==='ONLINE_PITCH'&&match.half==='BOTTOM'&&pitchState==='idle'){
     startPitchFromNetwork(msg);
   }else if(msg.type==='ONLINE_CONTACT'){
@@ -745,17 +764,19 @@ function handleOnlineMessage(msg){
 }
 function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
 function startPitchFromNetwork(msg){
-  selectedPitch=msg.pitch||'FASTBALL';pitchTarget={x:Number(msg.target?.x)||0,y:Number(msg.target?.y)||0};window.__lastPitch=selectedPitch;window.__pitchVelocity=Number(msg.velocity)||90;
-  pitchState='pitch';t=0;onlineActionSentForPitch=false;onlinePendingPitchId=msg.id||null;onlinePendingPitch=msg;
+  const safe=sanitizeNetworkPitch(msg);
+  selectedPitch=safe.pitch;pitchTarget=safe.target;window.__lastPitch=selectedPitch;window.__pitchVelocity=safe.velocity;
+  pitchState='pitch';t=0;onlineActionSentForPitch=false;onlinePendingPitchId=safe.id;onlinePendingPitch=safe;
   const info=PITCHES[selectedPitch]||PITCHES.FASTBALL;
-  ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:Number(msg.breakX)||0,breakY:Number(msg.breakY)||0});
+  ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:safe.breakX,breakY:safe.breakY});
   updateMatchHUD();updatePremiumHUD();matchEvent(selectedPitch,'pitch');
 }
 function resolveRemoteBatting(msg){
   if(!onlinePendingPitch||msg.pitchId!==onlinePendingPitchId)return;
   const batter=onlineRosterPlayer('home',Number(match.batterIndex?.home||0)),prof=localPlayerProfile(batter);
   if(msg.type==='ONLINE_TAKE'){finishPlay(Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55?'STRIKE':'BALL');return;}
-  const dx=Math.abs(Number(msg.aimX||0)-pitchTarget.x),dy=Math.abs(Number(msg.aimY||0)-pitchTarget.y);
+  const aimX=clampNetworkNumber(msg.aimX,-1.5,1.5,0),aimY=clampNetworkNumber(msg.aimY,-1.5,1.5,0);
+  const dx=Math.abs(aimX-pitchTarget.x),dy=Math.abs(aimY-pitchTarget.y);
   const contact=Math.max(.05,Math.min(.98,(prof.contact||.65)*(1-(dx+dy)*.35)));
   const powerMode=msg.mode==='POWER'?1:.72;
   const timing=Number.isFinite(Number(msg.timing))?Number(msg.timing):.5;
