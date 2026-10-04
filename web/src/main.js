@@ -170,7 +170,7 @@ function showAbilityDetails(playerId,abilityId){
   modal.classList.add('show'); modal.querySelector('#ability-close').onclick=()=>modal.classList.remove('show');
 }
 function bindPlayerCards(){
-  card.querySelectorAll('[data-player-id]').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));
+  card.querySelectorAll('[data-player-id]:not(.is-locked)').forEach(b=>b.onclick=()=>showPlayer3D(b.dataset.playerId));
   card.querySelectorAll('.ability-info').forEach(b=>b.onclick=e=>{e.stopPropagation();showAbilityDetails(b.closest('[data-player-id]')?.dataset.playerId,b.dataset.ability);});
   card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});
 }
