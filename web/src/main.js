@@ -436,7 +436,8 @@ function pitch(){
       difficulty:matchDifficulty
     });
     selectedPitch=typeof decision==='string'?decision:(decision?.pitch||selectedPitch);
-    const control=Math.max(40,Math.min(95,Number(pitcherPlayer.control||70)));
+    const pitcherProfile=gameplayProfile(pitcherPlayer);
+    const control=Math.max(40,Math.min(95,Number(pitcherPlayer.control||70)+(pitcherProfile.aggression-.6)*12));
     const pitcherSide=match.half==='TOP'?'home':'away';
     const stamina=Math.max(0,Math.min(100,Number(match.pitcherStamina?.[pitcherSide]??100)));
     const spread=Math.max(.55,Math.min(1.28,1.15-(control-40)*.008+(100-stamina)*.0017));
@@ -484,10 +485,18 @@ function take(){
   const inZone=Math.abs(pitchTarget.x)<.55&&Math.abs(pitchTarget.y)<.55;
   finishPlay(inZone?'STRIKE':'BALL');pitchState='idle';ball.position.set(0,2.1,3);
 }
+function pitcherFatigueCost(pitcher){
+  const ids=new Set((pitcher?.abilities||[]).map(x=>x[0]));
+  if(ids.has('stamina')||ids.has('durability'))return .72;
+  if(ids.has('consistency'))return .86;
+  return 1;
+}
 function finishPlay(outcome,options={}){
   if(isOnlineMatch()&&onlineRole==='GUEST')return;
   const pitchingSideBefore=match.half==='TOP'?'home':'away';
-  pitchState='idle';t=0;match=applyOutcome(match,outcome,options);
+  const pitcherBefore=pitcherPlayerForSide(pitchingSideBefore);
+  const fatigue={...options,fatigueCost:Number(options.fatigueCost)||pitcherFatigueCost(pitcherBefore)};
+  pitchState='idle';t=0;match=applyOutcome(match,outcome,fatigue);
   const sub=advancePitcher(match,pitchingSideBefore,pitcherIdsForSide(pitchingSideBefore).length,8);
   match=sub.state;
   if(sub.changed)matchEvent('投手交代','change');
