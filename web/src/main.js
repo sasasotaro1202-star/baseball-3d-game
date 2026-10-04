@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {ALL_PLAYERS} from './data/players.js';
 import {pullOnce,pullMany} from './game/gacha-service.js';
 import {GACHA_BANNERS} from './data/gacha.js';
-import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
+import {createMatchState,resolvePitch,applyOutcome,resolveFieldingPlay,isValidMatchState,PITCHES,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from './game/simulation.js';
 import {loadSave,saveGame} from './game/save.js';
 import {modeLabel} from './game/ui.js';
 import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
@@ -460,6 +460,7 @@ function take(){
 function finishPlay(outcome){
   if(isOnlineMatch()&&onlineRole==='GUEST')return;
   pitchState='idle';t=0;match=applyOutcome(match,outcome);
+  if(!isValidMatchState(match)){window.__lastGameError='INVALID_MATCH_STATE';match=createMatchState();return;}
   if(outcome==='HOME_RUN')matchEvent('ホームラン！','hr');
   else if(outcome==='TRIPLE')matchEvent('TRIPLE','hit');
   else if(outcome==='DOUBLE')matchEvent('DOUBLE','hit');
@@ -687,7 +688,8 @@ function handleOnlineMessage(msg){
     return;
   }
   if(msg.type==='ONLINE_START'){
-    matchMode='ONLINE';onlineRosters=msg.rosters||{away:[],home:[]};match=msg.match||createMatchState();onlineRevision=Number(msg.revision)||0;onlineSessionStarted=true;startOnlineMatchView();onlineSend({type:'ONLINE_READY_ACK',revision:onlineRevision});
+    if(!isValidMatchState(msg.match))return;
+    matchMode='ONLINE';onlineRosters=msg.rosters||{away:[],home:[]};match=msg.match;onlineRevision=Number(msg.revision)||0;onlineSessionStarted=true;startOnlineMatchView();onlineSend({type:'ONLINE_READY_ACK',revision:onlineRevision});
   }else if(msg.type==='ONLINE_PITCH'&&match.half==='BOTTOM'&&pitchState==='idle'){
     startPitchFromNetwork(msg);
   }else if(msg.type==='ONLINE_CONTACT'){
@@ -695,7 +697,8 @@ function handleOnlineMessage(msg){
   }else if(msg.type==='ONLINE_STATE'){
     const revision=Number(msg.revision)||0;
     if(revision<=onlineRevision)return;
-    onlineRevision=revision;match=msg.match||match;pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;fielderTarget=null;updateMatchHUD();updatePremiumHUD();if(match.ended)recordMatchResult();
+    if(!isValidMatchState(msg.match))return;
+    onlineRevision=revision;match=msg.match;pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;fielderTarget=null;updateMatchHUD();updatePremiumHUD();if(match.ended)recordMatchResult();
   }
 }
 function startOnlineMatchView(){setMode('match');resetMatchView();$('swing').disabled=false;$('pitch').disabled=false;updateMatchHUD();updatePremiumHUD();matchEvent('ONLINE MATCH','result');}
