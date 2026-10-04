@@ -1071,7 +1071,7 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
       }
     }
   }
-}}else if(cameraMode==='FIELDING'&&fielderTarget){
+}else if(cameraMode==='FIELDING'&&fielderTarget){
   const lead=fielders[fielderIndex]||fielders[0],camTarget=new THREE.Vector3(lead.position.x+6.5,6.4,lead.position.z+7.5);
   camera.position.lerp(camTarget,.07);camera.lookAt(lead.position.x,1.1,lead.position.z);
 }else if(cameraMode==='HOME_RUN'){
