@@ -309,10 +309,12 @@ function renderGacha(){
 
   function featuredCard(p,index){
     const initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
+    const featuredCardModel=cardModel(p,developmentFor(save,p.id));
+    const tag=p.limited?'LIMITED':(p.featuredTag||'FEATURED');
     return '<button type="button" class="gacha-feature-card '+(p.limited?'limited':'')+'" data-player-id="'+escape(p.id)+'">'+
       (p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
       '<span class="gacha-feature-rank">'+escape(p.rank||'—')+'</span>'+
-      '<strong>'+escape(p.name)+'</strong><small>'+(p.limited?'LIMITED':'FEATURED')+' · '+escape(p.pos||'PLAYER')+'</small>'+
+      '<div class="gacha-feature-meta"><strong>'+escape(p.name)+'</strong><b>OVR '+escape(featuredCardModel.overall)+'</b><small>'+escape(tag)+' · '+escape(p.teamCode||'NPB')+' · '+escape(p.pos||'PLAYER')+'</small></div>'+
     '</button>';
   }
 
@@ -327,9 +329,9 @@ function renderGacha(){
       '<div class="rate-row">'+Object.entries(rankRate).map(([rank,rate])=>'<span><b>'+rank+'</b> '+rate+'</span>').join('')+'</div>'+
       '<div class="banner-note">排出対象 '+pool.length+'名 · 10連はBランク以上1枚確定</div>';
     $('gacha-banner-card').innerHTML=
-      '<div class="gacha-banner-copy"><small>SCOUT BANNER</small><h3>'+escape(b.name)+'</h3><p>'+escape(b.subtitle)+'</p><b>'+escape(b.rateBonus)+'</b></div>'+
+      '<div class="gacha-banner-copy"><small>SCOUT BANNER · '+escape(b.kind)+'</small><h3>'+escape(b.name)+'</h3><p>'+escape(b.subtitle)+'</p><b>'+escape(b.rateBonus)+'</b><div class="gacha-banner-kpis"><span><em>対象</em><strong>'+pool.length+'</strong></span><span><em>S</em><strong>0.1%</strong></span><span><em>10連</em><strong>B以上</strong></span></div></div>'+
       '<div class="gacha-featured">'+(featured.length?featured.map(featuredCard).join(''):'<div class="gacha-no-pool">対象選手を準備中</div>')+'</div>'+
-      '<div class="gacha-banner-footer"><span>LIMITED</span><i></i><span>NPB / BASEBALL 3D</span></div>';
+      '<div class="gacha-banner-footer"><span>PICK UP</span><i></i><span>BASEBALL 3D · '+escape(b.id)+'</span></div>';
     tabs.forEach((btn,index)=>btn.classList.toggle('selected',btn.dataset.banner===bannerId));
     card.querySelectorAll('.gacha-feature-card').forEach(btn=>btn.onclick=()=>showPlayer3D(btn.dataset.playerId));
   }
@@ -353,7 +355,7 @@ function renderGacha(){
         '<span class="result-badge">'+escape(x.result.rank)+'</span>'+
         (player.image?'<img src="'+escape(player.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
         '<strong>'+escape(player.name)+'</strong>'+
-        '<small>'+escape(player.pos||'PLAYER')+(x.result.limited?' · LIMITED':'')+'</small>'+
+        '<small>OVR '+escape(cardModel(player,developmentFor(save,player.id)).overall)+' · '+escape(player.teamCode||'NPB')+' · '+escape(player.pos||'PLAYER')+(x.result.limited?' · LIMITED':'')+'</small>'+
         (x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':index===0&&bonusApplied?'<em>10連保証枠</em>':'')+
       '</button>';
     }).join('');
