@@ -5,6 +5,7 @@ const js = readFileSync("web/src/main.js", "utf8");
 const sim = readFileSync("web/src/game/simulation.js", "utf8");
 const online = readFileSync("web/src/game/online.js", "utf8");
 const ai = readFileSync("web/src/game/ai.js", "utf8");
+const save = readFileSync("web/src/game/save.js", "utf8");
 const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
@@ -27,7 +28,7 @@ const checks = [
   ["steal control", html.includes('id="steal"') && js.includes('function performSteal')],
   ["pitcher stamina and rotation", sim.includes('pitcherStamina') && sim.includes('pitcherIndex') && sim.includes('advancePitcher')],
   ["GameState validator", sim.includes('isValidMatchState')],
-  ["save versioning", js.includes('SAVE_VERSION') && html.includes('settings-gameplay-v1')],
+  ["save versioning", save.includes('SAVE_VERSION=2') && save.includes('function migrate') && html.includes('settings-gameplay-v1')],
   ["phase-specific match UI", js.includes("matchUI.classList.toggle('batting-phase',batting)") && js.includes("matchUI.classList.toggle('pitching-phase',!batting)")],
   ["match score hierarchy", html.includes('id="away-score"') && html.includes('id="home-score"') && html.includes('id="count-label"')],
   ["pitch control", html.includes('id="pitch"')],
@@ -37,7 +38,7 @@ const checks = [
   ["mobile manifest", html.includes('rel="manifest"')],
   ["runtime readiness flag", js.includes("window.__gameReady = true")],
   ["match simulation import", js.includes("resolvePitch")],
-  ["live state assignment", js.includes("match=applyOutcome(match,outcome)")],
+  ["live state assignment", js.includes("match=applyOutcome(match,outcome,options)")],
   ["automatic AI pitching", js.includes("scheduleTopPitch(700)") && js.includes("count:[match.balls,match.strikes]")],
   ["match result persistence", js.includes("recordMatchResult") && js.includes("save.matches") && js.includes("save.wins")],
   ["persistent save", js.includes("loadSave")],
