@@ -232,145 +232,154 @@ function renderCollection(){
   card.querySelectorAll('.is-locked').forEach(b=>b.onclick=()=>setMode('gacha'));
   bindPlayerCards();
 }
-function renderGacha(){
+function upgradedRenderGacha(){
   const escape=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const rankRate=(rank)=>({S:'0.1%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'}[rank]||'-');
-  let bannerId=GACHA_BANNERS[0].id,busy=false;
-
-  card.innerHTML=`
-    <h2 class="gacha-title">スカウト</h2>
-    <div class="gacha-balance"><span>所持コイン</span><b id="gacha-coins">${save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP')}</b><span>1回 250</span><span>10連 2,500</span></div>
-    <div class="gacha-tabs" id="gacha-tabs">
-      ${GACHA_BANNERS.map((b,i)=>`<button type="button" class="gacha-tab ${i===0?'selected':''}" data-banner="${escape(b.id)}"><b>${escape(b.name)}</b><small>${escape(b.subtitle)}</small><em>${escape(b.kind)}</em></button>`).join('')}
-    </div>
-    <section class="gacha-banner-card" id="gacha-banner-card"></section>
-    <div class="gacha-actions">
-      <button type="button" class="gacha-pull-one" id="pull">1回スカウト<span>250 コイン</span></button>
-      <button type="button" class="gacha-pull-ten" id="pull10">10連スカウト<span>2,500 コイン</span></button>
-    </div>
-    <div id="banner-info" class="banner-info"></div>
-    <section class="gacha-results" id="gacha-results">
-      <div class="gacha-empty"><b>SCOUT READY</b><small>スカウトを選択して選手を獲得</small></div>
-    </section>
-    <button type="button" class="action back" id="back">ホームへ</button>
-  `;
+  const rankScore={S:6,A:5,B:4,C:3,D:2,F:1};
+  const rankRate={S:'0.1%',A:'8%',B:'15%',C:'22%',D:'25%',F:'29.5%'};
+  let bannerId=GACHA_BANNERS[0].id,busy=false,lastResults=[];
+  card.innerHTML=
+    '<div class="gacha-shell">'+
+      '<div class="gacha-topline">'+
+        '<div><span class="gacha-kicker">SCOUT / PLAYER ACQUISITION</span><h2 class="gacha-title">スカウト</h2></div>'+
+        '<div class="gacha-balance"><span>COINS</span><b id="gacha-coins">'+(save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP'))+'</b></div>'+
+      '</div>'+
+      '<div class="gacha-tabs" id="gacha-tabs">'+
+        GACHA_BANNERS.map((b,i)=>'<button type="button" class="gacha-tab '+(i===0?'selected':'')+'" data-banner="'+escape(b.id)+'"><b>'+escape(b.name)+'</b><small>'+escape(b.subtitle)+'</small><em>'+escape(b.kind)+'</em></button>').join('')+
+      '</div>'+
+      '<section class="gacha-banner-card" id="gacha-banner-card"></section>'+
+      '<div class="gacha-actions">'+
+        '<button type="button" class="gacha-pull-one" id="pull"><b>1回スカウト</b><span>250 コイン</span></button>'+
+        '<button type="button" class="gacha-pull-ten" id="pull10"><b>10連スカウト</b><span>2,500 コイン · B以上1枚確定</span></button>'+
+      '</div>'+
+      '<div id="banner-info" class="banner-info"></div>'+
+      '<section class="gacha-results" id="gacha-results">'+
+        '<div class="gacha-empty"><b>SCOUT READY</b><small>バナーを選んで選手を獲得</small></div>'+
+      '</section>'+
+      '<button type="button" class="action back" id="back">ホームへ戻る</button>'+
+    '</div>';
 
   const tabs=card.querySelectorAll('.gacha-tab');
   const coinsEl=$('gacha-coins');
   const resultEl=$('gacha-results');
-  const updateBalance=()=>{coinsEl.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');};
   const getBanner=()=>GACHA_BANNERS.find(x=>x.id===bannerId)||GACHA_BANNERS[0];
+  const updateBalance=()=>{coinsEl.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');};
+
+  function featuredCard(p,index){
+    const initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
+    return '<button type="button" class="gacha-feature-card '+(p.limited?'limited':'')+'" data-player-id="'+escape(p.id)+'">'+
+      (p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="gacha-fallback" aria-hidden="true"><b>'+escape(initials)+'</b></div>':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+      '<span class="gacha-feature-rank">'+escape(p.rank||'—')+'</span>'+
+      '<strong>'+escape(p.name)+'</strong><small>'+(p.limited?'LIMITED':'FEATURED')+' · '+escape(p.pos||'PLAYER')+'</small>'+
+    '</button>';
+  }
 
   function renderBanner(){
     const b=getBanner();
     const pool=ALL_PLAYERS.filter(b.filter);
-    const featured=pool.filter(p=>p.limited).slice(0,2);
-    const normal=pool.filter(p=>!p.limited).slice(0,3);
-    const picks=[...featured,...normal].slice(0,3);
-    $('banner-info').innerHTML=`
-      <div class="banner-info-head"><b>${escape(b.name)}</b><span>${escape(b.kind)}</span></div>
-      <strong>${escape(b.subtitle)}</strong>
-      <small>${escape(b.rateBonus)}</small>
-      <div class="rate-row"><span>S 0.1%</span><span>A 8%</span><span>B 15%</span><span>C 22%</span><span>D 25%</span><span>F 29.5%</span></div>
-      <div class="banner-note">MOB・低ランク選手も多く登場。Sランクは極めて低確率。</div>
-    `;
-    $('gacha-banner-card').innerHTML=`
-      <div class="gacha-banner-copy"><small>SCOUT BANNER</small><h3>${escape(b.name)}</h3><p>${escape(b.subtitle)}</p><b>${escape(b.rateBonus)}</b></div>
-      <div class="gacha-featured">${picks.length?picks.map(p=>`<div class="gacha-feature-card ${p.limited?'limited':''}">${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>'}<strong>${escape(p.name)}</strong><small>${escape(p.rank)} · ${p.limited?'LIMITED':'STANDARD'}</small></div>`).join(''):'<div class="gacha-no-pool">対象選手を準備中</div>'}</div>
-    `;
+    const featured=[...pool.filter(p=>p.limited),...pool.filter(p=>!p.limited)].slice(0,3);
+    $('banner-info').innerHTML=
+      '<div class="banner-info-head"><b>'+escape(b.name)+'</b><span>'+escape(b.kind)+'</span></div>'+
+      '<strong>'+escape(b.subtitle)+'</strong>'+
+      '<small>'+escape(b.rateBonus)+'</small>'+
+      '<div class="rate-row">'+Object.entries(rankRate).map(([rank,rate])=>'<span><b>'+rank+'</b> '+rate+'</span>').join('')+'</div>'+
+      '<div class="banner-note">排出対象 '+pool.length+'名 · 10連はBランク以上1枚確定</div>';
+    $('gacha-banner-card').innerHTML=
+      '<div class="gacha-banner-copy"><small>SCOUT BANNER</small><h3>'+escape(b.name)+'</h3><p>'+escape(b.subtitle)+'</p><b>'+escape(b.rateBonus)+'</b></div>'+
+      '<div class="gacha-featured">'+(featured.length?featured.map(featuredCard).join(''):'<div class="gacha-no-pool">対象選手を準備中</div>')+'</div>'+
+      '<div class="gacha-banner-footer"><span>LIMITED</span><i></i><span>NPB / BASEBALL 3D</span></div>';
+    tabs.forEach((btn,index)=>btn.classList.toggle('selected',btn.dataset.banner===bannerId));
+    card.querySelectorAll('.gacha-feature-card').forEach(btn=>btn.onclick=()=>showPlayer3D(btn.dataset.playerId));
   }
 
   function renderResults(results,bonusApplied=false){
-    if(!results?.length)return;
-    const sorted=[...results].sort((a,b)=>{
-      const score={S:6,A:5,B:4,C:3,D:2,F:1};
-      return (score[b.result.rank]||0)-(score[a.result.rank]||0);
-    });
-    resultEl.innerHTML=`
-      <div class="results-head"><b>${results.length}連結果</b><small>新規 ${results.filter(x=>!x.duplicate).length} / 重複 ${results.filter(x=>x.duplicate).length}${bonusApplied?' · Bランク以上ボーナス':''}</small></div>
-      <div class="gacha-result-grid">${sorted.map((x,i)=>{const p=x.result.player;return `<div class="gacha-result-card rank-${escape(x.result.rank)} ${x.result.limited?'limited':''}">
-        <div class="result-badge">${escape(x.result.rank)}</div>
-        ${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>'}
-        <strong>${escape(p.name)}</strong>
-        <small>${escape(x.result.rarity)}${x.result.limited?' · LIMITED':''}</small>
-        ${x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':''}
-      </div>`}).join('')}</div>
-    `;
+    lastResults=Array.isArray(results)?results:[];
+    if(!lastResults.length){
+      resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT READY</b><small>まだ獲得結果はありません</small></div>';
+      return;
+    }
+    const sorted=[...lastResults].sort((a,b)=>(rankScore[b.result.rank]||0)-(rankScore[a.result.rank]||0));
+    const best=sorted[0];
+    const p=best.result.player;
+    const resultCount=sorted.length;
+    const newCount=sorted.filter(x=>!x.duplicate).length;
+    const dupCount=resultCount-newCount;
+    const hero=playerCardMarkup(p,{owned:true,release:false,showAbilities:true});
+    const mini=sorted.slice(0,10).map((x,index)=>{
+      const player=x.result.player,initials=String(player.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
+      return '<button type="button" class="gacha-result-card rank-'+escape(x.result.rank)+' '+(x.result.limited?'limited':'')+'" data-player-id="'+escape(player.id)+'">'+
+        '<span class="result-badge">'+escape(x.result.rank)+'</span>'+
+        (player.image?'<img src="'+escape(player.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="gacha-fallback" aria-hidden="true"><b>'+escape(initials)+'</b></div>':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+        '<strong>'+escape(player.name)+'</strong>'+
+        '<small>'+escape(player.pos||'PLAYER')+(x.result.limited?' · LIMITED':'')+'</small>'+
+        (x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':index===0&&bonusApplied?'<em>10連保証枠</em>':'')+
+      '</button>';
+    }).join('');
+    resultEl.innerHTML=
+      '<div class="results-head"><div><b>'+resultCount+'連 結果</b><small>新規 '+newCount+' · 重複 '+dupCount+(bonusApplied?' · B以上確定':'')+'</small></div><span>RESULTS</span></div>'+
+      '<div class="gacha-result-feature">'+
+        '<div class="gacha-result-feature-art">'+(p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>')+'</div>'+
+        '<div class="gacha-result-feature-copy"><small>BEST RESULT · '+escape(best.result.rank)+' RANK</small><strong>'+escape(p.name)+'</strong><span>'+escape(p.pos||'PLAYER')+' · OVR '+(cardModel(p,developmentFor(save,p.id)).overall||'—')+'</span><button type="button" id="result-detail">選手詳細</button></div>'+
+      '</div>'+
+      '<div class="gacha-result-grid">'+mini+'</div>';
+    $('result-detail').onclick=()=>showPlayer3D(p.id);
+    resultEl.querySelectorAll('.gacha-result-card').forEach(btn=>btn.onclick=()=>showPlayer3D(btn.dataset.playerId));
   }
 
-  renderBanner();
   tabs.forEach(btn=>btn.onclick=()=>{
     if(busy)return;
     bannerId=btn.dataset.banner;
-    tabs.forEach(x=>x.classList.toggle('selected',x===btn));
     renderBanner();
-    resultEl.innerHTML='<div class="gacha-empty"><b>'+escape(getBanner().name)+'</b><small>このガチャの結果がここに表示されます</small></div>';
+    resultEl.innerHTML='<div class="gacha-empty"><b>'+escape(getBanner().name)+'</b><small>このバナーの結果がここに表示されます</small></div>';
   });
 
   async function runPull(count){
     if(busy)return;
     const cost=250*count;
-    const normalizeSave=()=>{
-      const currency=Number.isFinite(Number(save.currency))?Number(save.currency):1000;
-      save={...save,currency,collection:Array.isArray(save.collection)?save.collection:[],progress:(save.progress&&typeof save.progress==='object')?save.progress:{},team:Array.isArray(save.team)?save.team:[]};
-    };
-    normalizeSave();
-    if(!save.unlimitedCoins && save.currency<cost){
-      resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+save.currency.toLocaleString('ja-JP')+'</small></div>';
+    if(!save.unlimitedCoins && Number(save.currency||0)<cost){
+      resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+Number(save.currency||0).toLocaleString('ja-JP')+'</small></div>';
       return;
     }
     busy=true;
     const one=$('pull'),ten=$('pull10');
     one.disabled=true;ten.disabled=true;
     one.classList.add('loading');ten.classList.add('loading');
-    one.querySelector('span').textContent='処理中…';ten.querySelector('span').textContent='処理中…';
     try{
-      resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT PROCESSING</b><small>選手抽選を実行しています…</small></div>';
-      const r=count===1
-        ? pullOnce(save,ALL_PLAYERS,Math.random,bannerId)
-        : pullMany(save,ALL_PLAYERS,count,Math.random,bannerId);
-      if(!r || r.error) throw new Error(r?.error||'SCOUT_RESULT_INVALID');
-      if(!r.state) throw new Error('SCOUT_STATE_INVALID');
+      resultEl.innerHTML='<div class="gacha-empty"><b>SCOUT PROCESSING</b><small>抽選結果を確定しています…</small></div>';
+      const r=count===1?pullOnce(save,ALL_PLAYERS,Math.random,bannerId):pullMany(save,ALL_PLAYERS,count,Math.random,bannerId);
+      if(!r||r.error||!r.state)throw new Error(r?.error||'SCOUT_STATE_INVALID');
       save=r.state;
       persist();
       updateBalance();
-      const results=count===1
-        ? [{result:r.result,duplicate:!!r.duplicate,duplicateReward:r.duplicateReward||0}]
-        : (Array.isArray(r.results)?r.results:[]);
-      if(!results.length || !results.every(x=>x?.result?.player)) throw new Error('SCOUT_RESULT_EMPTY');
+      const results=count===1?[{result:r.result,duplicate:!!r.duplicate,duplicateReward:r.duplicateReward||0}]:Array.isArray(r.results)?r.results:[];
+      if(!results.length||!results.every(x=>x?.result?.player))throw new Error('SCOUT_RESULT_EMPTY');
       renderResults(results,Boolean(r.bonusApplied));
-      const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
-      if(best?.result?.player){
-        try{
-          const bestCard=cardModel(best.result.player,developmentFor(save,best.result.player.id));
-          await playGachaReveal({
-            rarity:best.result.rarity,
-            name:best.result.player.name,
-            image:best.result.player.image,
-            rank:best.result.rank,
-            limited:best.result.limited,
-            duplicate:best.duplicate,
-            banner:bannerId,
-            cardType:best.result.player.cardType,
-            limitedTheme:best.result.player.limitedTheme,
-            overall:bestCard.overall,
-            position:best.result.player.pos,
-            stats:bestCard.stats
-          });
-        }catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
-      }
+      const best=results.slice().sort((a,b)=>(rankScore[b.result.rank]||0)-(rankScore[a.result.rank]||0))[0];
+      try{
+        const bestCard=cardModel(best.result.player,developmentFor(save,best.result.player.id));
+        await playGachaReveal({
+          rarity:best.result.rarity,
+          name:best.result.player.name,
+          image:best.result.player.image,
+          rank:best.result.rank,
+          limited:best.result.limited,
+          duplicate:best.duplicate,
+          banner:bannerId,
+          cardType:best.result.player.cardType,
+          limitedTheme:best.result.player.limitedTheme,
+          overall:bestCard.overall,
+          position:best.result.player.pos,
+          stats:bestCard.stats
+        });
+      }catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
     }catch(err){
       console.error('SCOUT_ERROR',err);
-      const detail=String(err?.message||err||'UNKNOWN_ERROR');
-      resultEl.innerHTML='<div class="gacha-error"><b>スカウト処理エラー</b><small>'+escape(detail)+'</small></div>';
+      resultEl.innerHTML='<div class="gacha-error"><b>スカウト処理エラー</b><small>'+escape(String(err?.message||err||'UNKNOWN_ERROR'))+'</small></div>';
     }finally{
-      busy=false;
-      one.disabled=false;ten.disabled=false;
-      one.classList.remove('loading');ten.classList.remove('loading');
-      one.querySelector('span').textContent='250 コイン';ten.querySelector('span').textContent='2,500 コイン';
+      busy=false;one.disabled=false;ten.disabled=false;one.classList.remove('loading');ten.classList.remove('loading');
+      one.querySelector('span').textContent='250 コイン';ten.querySelector('span').textContent='2,500 コイン · B以上1枚確定';
     }
   }
-
+  renderBanner();
   $('pull').onclick=()=>runPull(1);
   $('pull10').onclick=()=>runPull(10);
   $('back').onclick=()=>setMode('home');
