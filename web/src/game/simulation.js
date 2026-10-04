@@ -105,7 +105,7 @@ export function stepBallPhysics(input,dt=.016){
 export function isFiniteBallPhysics(state){
   return Boolean(state&&!state.invalid&&finite3(state.position)&&finite3(state.velocity)&&finite3(state.acceleration)&&finite(state.time));
 }
-\nexport function resolveFieldingPlay(input,{result='SINGLE',distance=8,travelTime=1,fielderReaction=70,fielderField=70,fielderCatch=70,fielderArm=70,throwDistance=27,batterSpeed=70,rng=Math.random}={}) {
+export function resolveFieldingPlay(input,{result='SINGLE',distance=8,travelTime=1,fielderReaction=70,fielderField=70,fielderCatch=70,fielderArm=70,throwDistance=27,batterSpeed=70,rng=Math.random}={}) {
   const s=cloneState(input);
   const d=Math.max(0,Number(distance)||0),t=Math.max(.05,Number(travelTime)||.05);
   const quality=clamp01((Number(fielderReaction||70)*.34+Number(fielderField||70)*.26+Number(fielderCatch||70)*.40)/100);
