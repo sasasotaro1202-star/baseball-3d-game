@@ -132,6 +132,21 @@ function installPremiumDesignSystem(){
     body.premium-ui .rate-row span:first-child{color:#f1d16d;background:#201c10}
     body.premium-ui .banner-note{margin-top:6px;color:#7f8d98;font-size:6px;line-height:1.35}
     body.premium-ui .gacha-results{padding:0!important}
+    body.premium-ui .gacha-result-feature{
+      display:grid;grid-template-columns:90px 1fr;gap:10px;margin-top:8px;
+      border:1px solid #d7b45a44;border-radius:9px;overflow:hidden;
+      background:linear-gradient(135deg,#17283a,#08111a);box-shadow:0 9px 22px #0008
+    }
+    body.premium-ui .gacha-result-feature-art{min-height:112px;background:linear-gradient(145deg,#18334b,#081018)}
+    body.premium-ui .gacha-result-feature-art img,.gacha-result-feature-art .gacha-fallback{width:100%;height:100%;min-height:112px;object-fit:cover;display:grid;place-items:center}
+    body.premium-ui .gacha-result-feature-copy{display:flex;flex-direction:column;justify-content:center;padding:9px 9px 9px 0}
+    body.premium-ui .gacha-result-feature-copy small{font-size:6px;letter-spacing:.15em;color:#d8bd67;font-weight:900}
+    body.premium-ui .gacha-result-feature-copy strong{font-size:17px;margin-top:4px;line-height:1.05}
+    body.premium-ui .gacha-result-feature-copy span{font-size:7px;color:#95a4b1;margin-top:3px}
+    body.premium-ui .gacha-result-feature-copy button{
+      align-self:flex-start;margin-top:8px;padding:5px 8px;border-radius:5px;border:1px solid #ffffff18;
+      background:#0b1724;color:#e7edf2;font-size:7px;font-weight:900
+    }
     body.premium-ui .results-head{
       display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:3px 1px 6px;border-bottom:1px solid var(--ui-line)
     }
@@ -201,6 +216,9 @@ function installPremiumDesignSystem(){
     body.premium-ui #presentation .gacha-result-banner{filter:drop-shadow(0 10px 30px #000)}
     @media(max-width:390px){
       body.premium-ui .gacha-banner-card{min-height:216px}
+      body.premium-ui .gacha-result-feature{grid-template-columns:76px 1fr}
+      body.premium-ui .gacha-result-feature-art,.gacha-result-feature-art img,.gacha-result-feature-art .gacha-fallback{min-height:96px}
+      body.premium-ui .gacha-result-feature-copy strong{font-size:15px}
       body.premium-ui .gacha-feature-card{width:78px}
       body.premium-ui .gacha-feature-card img,.gacha-feature-card .gacha-fallback{height:88px}
       body.premium-ui .gacha-banner-copy{width:46%}
