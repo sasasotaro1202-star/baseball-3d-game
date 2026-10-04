@@ -268,23 +268,125 @@ function installPremiumDesignSystemV3Hotfix(){
 }
 installPremiumDesignSystemV3Hotfix();
 
+function installScoutPresentationV4(){
+  if(document.getElementById('scout-presentation-v4'))return;
+  const style=document.createElement('style');
+  style.id='scout-presentation-v4';
+  style.textContent=String.raw`
+    @keyframes scout-v4-orbit{from{transform:rotate(0deg) translateX(31vw) rotate(0deg)}to{transform:rotate(360deg) translateX(31vw) rotate(-360deg)}}
+    @keyframes scout-v4-charge{0%,100%{opacity:.12;transform:scale(.72)}45%{opacity:.9;transform:scale(1.14)}70%{opacity:.25;transform:scale(1.55)}}
+    @keyframes scout-v4-card-in{0%{opacity:0;transform:translateY(42px) scale(.76) rotateY(-22deg) rotateX(8deg)}62%{opacity:1;transform:translateY(-4px) scale(1.05) rotateY(5deg) rotateX(0)}100%{opacity:1;transform:translateY(0) scale(1) rotateY(0) rotateX(0)}}
+    @keyframes scout-v4-reveal{0%{transform:scale(.92) rotateY(-10deg);filter:brightness(.65)}35%{transform:scale(1.055) rotateY(4deg);filter:brightness(1.55)}100%{transform:scale(1) rotateY(0);filter:brightness(1)}}
+    @keyframes scout-v4-scan{0%{transform:translateY(-120%);opacity:0}12%{opacity:.7}42%{opacity:.12}100%{transform:translateY(120%);opacity:0}}
+    @keyframes scout-v4-shake{0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-5px,2px,0)}40%{transform:translate3d(5px,-2px,0)}60%{transform:translate3d(-3px,-1px,0)}80%{transform:translate3d(3px,1px,0)}}
+    #presentation .gacha-v4-orbit{position:absolute;left:50%;top:40%;width:4px;height:4px;border-radius:50%;background:#fff7c7;box-shadow:0 0 8px 2px #ffe38a,0 0 28px 8px #ffe38a55;opacity:0}
+    #presentation .gacha-v4-orbit:before,#presentation .gacha-v4-orbit:after{content:"";position:absolute;left:50%;top:50%;border:1px solid #ead28a44;border-radius:50%;transform:translate(-50%,-50%);width:56vw;height:56vw}
+    #presentation .gacha-v4-orbit:after{width:39vw;height:39vw;border-color:#6bc7ff28}
+    #presentation.gacha-opening .gacha-v4-orbit{opacity:1;animation:scout-v4-orbit 2.2s linear infinite}
+    #presentation .gacha-v4-energy{position:absolute;left:50%;top:43%;width:44vw;height:44vw;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff8cf18 0 9%,#f0d36b0e 17%,transparent 58%);filter:blur(2px);opacity:0;pointer-events:none}
+    #presentation.gacha-opening .gacha-v4-energy{animation:scout-v4-charge 1.9s ease-in-out infinite}
+    #presentation .gacha-v4-scanline{position:absolute;inset:-20% 0;background:linear-gradient(180deg,transparent 0 43%,#ffffff18 48%,#fff9d33b 50%,transparent 56%);opacity:0;pointer-events:none}
+    #presentation.gacha-opening .gacha-v4-scanline{opacity:1;animation:scout-v4-scan 1.7s .15s ease-in-out infinite}
+    #presentation.gacha-reveal .gacha-card-slot{animation:scout-v4-reveal .72s cubic-bezier(.18,.9,.22,1) both}
+    #presentation.gacha-opening .gacha-card-slot{animation:scout-v4-card-in 1.15s .1s cubic-bezier(.17,.84,.35,1) both}
+    #presentation.gacha-opening.s-rank .gacha-stage,#presentation.gacha-opening.limited .gacha-stage{filter:saturate(1.24) brightness(1.08)}
+    #presentation.gacha-opening.s-rank .gacha-v4-energy,#presentation.gacha-opening.limited .gacha-v4-energy{background:radial-gradient(circle,#fffbe21f 0 10%,#efc84f16 20%,#6bbcf016 34%,transparent 66%)}
+    #presentation.gacha-reveal.gacha-rank-s .gacha-card-slot{filter:drop-shadow(0 0 26px #ffe07855)}
+    #presentation.gacha-reveal.gacha-rank-s .gacha-v4-orbit:before{border-color:#f6d87870}
+    #presentation.gacha-reveal.gacha-rank-s{animation:scout-v4-shake .36s ease-in-out 1}
+    #presentation.gacha-reveal.gacha-limited-result .gacha-card-slot{filter:drop-shadow(0 0 34px #7dbfff66) drop-shadow(0 0 18px #ffe07855)}
+    #presentation.gacha-reveal .gacha-v4-scanline{opacity:.7;animation:scout-v4-scan 1.5s ease-in-out 1}
+    @media(prefers-reduced-motion:reduce){
+      #presentation.gacha-opening .gacha-v4-orbit,#presentation.gacha-opening .gacha-v4-energy,#presentation.gacha-opening .gacha-v4-scanline,#presentation.gacha-opening .gacha-card-slot,#presentation.gacha-reveal .gacha-card-slot{animation:none!important}
+    }
+  `;
+  document.head.appendChild(style);
+}
+installScoutPresentationV4();
+
 const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
-export function ensurePresentationLayer(){let el=document.getElementById('presentation');if(el)return el;el=document.createElement('div');el.id='presentation';el.innerHTML='<div class="gacha-stage"><div class="gacha-sky"></div><div class="gacha-lights"></div><div class="gacha-field"></div><div class="gacha-ball"></div><div class="gacha-card-slot"><div id="pres-card" class="pres-card"></div></div><div class="gacha-particles"></div></div><div class="pres-vignette"></div><div id="gacha-result-banner" class="gacha-result-banner"><div id="gacha-result-rank" class="gacha-result-rank"></div><div id="gacha-result-status" class="gacha-result-status"></div><div id="gacha-result-type" class="gacha-result-type"></div></div><div id="pres-kicker" class="pres-kicker"></div><div id="pres-title" class="pres-title"></div><div id="pres-sub" class="pres-sub"></div><div id="pres-flash" class="pres-flash"></div>';document.body.appendChild(el);return el;}
+export function ensurePresentationLayer(){
+  let el=document.getElementById('presentation');
+  if(el)return el;
+  el=document.createElement('div');
+  el.id='presentation';
+  el.innerHTML='<div class="gacha-stage"><div class="gacha-sky"></div><div class="gacha-lights"></div><div class="gacha-field"></div><div class="gacha-ball"></div><div class="gacha-v4-orbit"></div><div class="gacha-v4-energy"></div><div class="gacha-v4-scanline"></div><div class="gacha-card-slot"><div id="pres-card" class="pres-card"></div></div><div class="gacha-particles"></div></div><div class="pres-vignette"></div><div id="gacha-result-banner" class="gacha-result-banner"><div id="gacha-result-rank" class="gacha-result-rank"></div><div id="gacha-result-status" class="gacha-result-status"></div><div id="gacha-result-type" class="gacha-result-type"></div></div><div id="pres-kicker" class="pres-kicker"></div><div id="pres-title" class="pres-title"></div><div id="pres-sub" class="pres-sub"></div><div id="pres-flash" class="pres-flash"></div>';
+  document.body.appendChild(el);
+  return el;
+}
+
+let scoutAudioContext=null;
+let scoutNoiseBuffer=null;
+function scoutAudio(){
+  if(scoutAudioContext)return scoutAudioContext;
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return null;
+  try{
+    scoutAudioContext=new Ctx();
+    scoutNoiseBuffer=scoutAudioContext.createBuffer(1,Math.max(1,scoutAudioContext.sampleRate*.18),scoutAudioContext.sampleRate);
+    const data=scoutNoiseBuffer.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2);
+    return scoutAudioContext;
+  }catch{return null;}
+}
+function playScoutTone({freq=440,duration=.12,type='sine',gain=.04,slide=0,delay=0}={}){
+  const ctx=scoutAudio();if(!ctx)return;
+  const start=ctx.currentTime+delay;
+  try{
+    if(ctx.state==='suspended')void ctx.resume().catch(()=>{});
+    const osc=ctx.createOscillator(),amp=ctx.createGain();
+    osc.type=type;osc.frequency.setValueAtTime(Math.max(35,freq),start);
+    if(slide)osc.frequency.exponentialRampToValueAtTime(Math.max(35,freq+slide),start+duration);
+    amp.gain.setValueAtTime(.0001,start);
+    amp.gain.exponentialRampToValueAtTime(Math.max(.0001,gain),start+.018);
+    amp.gain.exponentialRampToValueAtTime(.0001,start+duration);
+    osc.connect(amp).connect(ctx.destination);osc.start(start);osc.stop(start+duration+.02);
+  }catch{}
+}
+function playScoutNoise({duration=.18,gain=.035,delay=0}={}){
+  const ctx=scoutAudio();if(!ctx||!scoutNoiseBuffer)return;
+  try{
+    if(ctx.state==='suspended')void ctx.resume().catch(()=>{});
+    const start=ctx.currentTime+delay,src=ctx.createBufferSource(),amp=ctx.createGain(),filter=ctx.createBiquadFilter();
+    src.buffer=scoutNoiseBuffer;filter.type='bandpass';filter.frequency.value=1600;filter.Q.value=.55;
+    amp.gain.setValueAtTime(.0001,start);amp.gain.exponentialRampToValueAtTime(gain,start+.018);amp.gain.exponentialRampToValueAtTime(.0001,start+duration);
+    src.connect(filter).connect(amp).connect(ctx.destination);src.start(start);src.stop(start+duration+.02);
+  }catch{}
+}
+function playScoutSequence(type,rank,limited){
+  playScoutTone({freq:92,duration:.42,type:'sine',gain:.05,slide:180});
+  playScoutTone({freq:184,duration:.22,type:'triangle',gain:.035,slide:70,delay:.32});
+  playScoutNoise({duration:.16,gain:.02,delay:.46});
+  const high=limited||rank==='S';
+  if(high){
+    playScoutTone({freq:392,duration:.26,type:'sine',gain:.045,slide:92,delay:.86});
+    playScoutTone({freq:523.25,duration:.32,type:'triangle',gain:.048,slide:90,delay:1.02});
+    playScoutTone({freq:783.99,duration:.55,type:'sine',gain:.06,delay:1.28});
+    playScoutNoise({duration:.28,gain:.022,delay:1.36});
+  }else{
+    playScoutTone({freq:330,duration:.16,type:'triangle',gain:.028,delay:.82});
+    playScoutTone({freq:440,duration:.22,type:'sine',gain:.03,delay:.98});
+  }
+}
 export function gachaRevealType(result){if(result?.duplicate)return'DUPLICATE';if(result?.limited&&result?.rank==='S')return'LIMITED_S';if(result?.rank==='S')return'S_GUARANTEED';if(result?.rank==='A')return'A_HIGH';if(result?.rarity==='LEGEND')return'LEGEND';if(result?.rarity==='STAR')return'STAR';if(result?.rarity==='PRO')return'PRO';return'ROOKIE';}
-export async function playGachaReveal({rarity,name,image,rank,limited,duplicate=false,banner,cardType,limitedTheme,overall,position,stats}){
+export async function playGachaReveal({rarity,name,image,rank,limited,duplicate=false,banner,cardType,limitedTheme,overall,position,stats,portrait}){
  const root=ensurePresentationLayer(),k=document.getElementById('pres-kicker'),t=document.getElementById('pres-title'),s=document.getElementById('pres-sub'),flash=document.getElementById('pres-flash'),pc=document.getElementById('pres-card');
  const type=gachaRevealType({rarity,name,image,rank,limited,duplicate,banner});
  const special=limited?'limited':rank==='S'?'s-rank':rank==='A'?'a-rank':rarity==='LEGEND'?'legend':rarity==='STAR'?'star':'normal';
  root.className='pres-show gacha-page gacha-opening '+type.toLowerCase()+' '+special+(limited?' limited-card ':'')+' '+String(cardType||'').toLowerCase();
  k.textContent='SCOUT';t.textContent='';s.textContent='PLAYER ACQUISITION';
  if(pc)pc.innerHTML='';
+ playScoutSequence(type,rank,limited);
  await wait(180);
  root.classList.add('gacha-stadium');
  await wait(limited?1800:rank==='S'?1900:type==='ROOKIE'?900:type==='PRO'?1150:1450);
  root.classList.remove('gacha-opening');root.classList.add('gacha-reveal');
- k.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):(type==='S_GUARANTEED'||type==='LIMITED_S'?'SPECIAL':'RESULT'); root.classList.add('gacha-rank-'+(rank==='S'?'s':rank==='A'?'a':rank==='B'?'b':'lower'));if(limited)root.classList.add('gacha-limited-result');const rb=document.getElementById('gacha-result-banner'),rr=document.getElementById('gacha-result-rank'),rs=document.getElementById('gacha-result-status'),rt=document.getElementById('gacha-result-type');if(rr)rr.textContent=(rank||rarity||'—')+' RANK';if(rs)rs.textContent=limited?'LIMITED':'NORMAL';if(rt)rt.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):'STANDARD CARD';
+ playScoutTone({freq:rank==='S'||limited?659.25:523.25,duration:.28,type:'sine',gain:.055,slide:110});
+ if(rank==='S'||limited)playScoutNoise({duration:.24,gain:.018,delay:.02});
+ k.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):(type==='S_GUARANTEED'||type==='LIMITED_S'?'SPECIAL':'RESULT'); root.classList.add('gacha-rank-'+(rank==='S'?'s':rank==='A'?'a':rank==='B'?'b':'lower'));if(limited)root.classList.add('gacha-limited-result');const rr=document.getElementById('gacha-result-rank'),rs=document.getElementById('gacha-result-status'),rt=document.getElementById('gacha-result-type');if(rr)rr.textContent=(rank||rarity||'—')+' RANK';if(rs)rs.textContent=limited?'LIMITED':'NORMAL';if(rt)rt.textContent=limited?(limitedTheme||cardType||'LIMITED CARD'):'STANDARD CARD';
  t.textContent=name||'PLAYER';s.textContent=(limited?'LIMITED CARD · ':'')+((rank||rarity||'').toString())+' · '+(banner||'SCOUT');
- if(pc)pc.innerHTML='<div class="pres-card-frame"><div class="pres-card-top"><span>'+((limitedTheme||cardType||'BASEBALL 3D'))+'</span><b>'+((rank||rarity||'—'))+'</b></div><div class="pres-card-art">'+(image?'<img src="'+image+'" alt="">':'<div class="no-card">PLAYER</div>')+'</div><div class="pres-card-info"><small>'+((position||'PLAYER')+' · OVR '+(overall??'—'))+'</small><strong>'+((name||'PLAYER'))+'</strong><div class="pres-stat-row">'+Object.entries(stats||{}).slice(0,4).map(([k,v])=>'<i><em>'+k.toUpperCase()+'</em><b>'+v+'</b></i>').join('')+'</div></div></div>';
+ const art=portrait||(image?'<img src="'+image+'" alt="">':'<div class="no-card">PLAYER</div>');
+ if(pc)pc.innerHTML='<div class="pres-card-frame"><div class="pres-card-top"><span>'+((limitedTheme||cardType||'BASEBALL 3D'))+'</span><b>'+((rank||rarity||'—'))+'</b></div><div class="pres-card-art">'+art+'</div><div class="pres-card-info"><small>'+((position||'PLAYER')+' · OVR '+(overall??'—'))+'</small><strong>'+((name||'PLAYER'))+'</strong><div class="pres-stat-row">'+Object.entries(stats||{}).slice(0,4).map(([k,v])=>'<i><em>'+k.toUpperCase()+'</em><b>'+v+'</b></i>').join('')+'</div></div></div>';
  flash.className='pres-flash active';setTimeout(()=>flash.className='pres-flash',limited||rank==='S'?520:260);
  await wait(limited?3000:rank==='S'?2800:type==='S_GUARANTEED'||type==='LIMITED_S'?2100:type==='LEGEND'?1800:1450);
  root.className='';return type;
