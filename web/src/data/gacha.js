@@ -1,23 +1,66 @@
 export const GACHA_BANNERS=Object.freeze([
-{id:'standard',name:'STANDARD',subtitle:'通常スカウト',kind:'通常',rateBonus:'全選手から幅広く登場',filter:p=>true},
-{id:'legends',name:'LEGENDS',subtitle:'歴代レジェンド',kind:'歴代',rateBonus:'高ランク選手を優先',filter:p=>p.rank==='S'||p.rank==='A'},
-{id:'limited',name:'LIMITED',subtitle:'限定強化スカウト',kind:'限定',rateBonus:'5系統の限定カード',filter:p=>p.limited},
-{id:'selection',name:'SELECTION',subtitle:'セレクション',kind:'限定',rateBonus:'SELECTION限定カード',filter:p=>p.cardType==='SELECTION'},
-{id:'anniversary',name:'ANNIVERSARY',subtitle:'アニバーサリー',kind:'限定',rateBonus:'ANNIVERSARY限定カード',filter:p=>p.cardType==='ANNIVERSARY'},
-{id:'best9',name:'BEST 9',subtitle:'ベストナイン',kind:'限定',rateBonus:'BEST 9限定カード',filter:p=>p.cardType==='BEST9'},
-{id:'legend-ob',name:'LEGEND OB',subtitle:'レジェンドOB',kind:'限定',rateBonus:'LEGEND OB限定カード',filter:p=>p.cardType==='LEGEND_OB'},
-{id:'awakened',name:'AWAKENED',subtitle:'覚醒選手',kind:'限定',rateBonus:'覚醒選手限定カード',filter:p=>p.cardType==='AWAKENED'},
-{id:'power',name:'POWER',subtitle:'長距離砲スカウト',kind:'打撃型',rateBonus:'パワー型を優先',filter:p=>(p.power||0)>=80},
-{id:'speed',name:'SPEED & DEFENSE',subtitle:'走守特化スカウト',kind:'走守型',rateBonus:'走力・守備型を優先',filter:p=>Math.max(p.speed||0,p.field||0)>=80},
-{id:'two-way',name:'TWO-WAY',subtitle:'二刀流・投手型スカウト',kind:'投手/二刀流',rateBonus:'投手能力を優先',filter:p=>p.pos?.includes('P')||p.abilities?.some(a=>a[0]==='two_way')}
+  {id:'npb-series',name:'NPB 2026 SERIES',subtitle:'現役NPBセレクション',kind:'現役',rateBonus:'NPB現役選手中心。球団・実績・能力値で構成',filter:p=>p.league==='NPB'&&p.status==='ACTIVE'},
+  {id:'npb-stars',name:'NPB STARS',subtitle:'NPBスターズ',kind:'注目',rateBonus:'Sランク・Aランクの現役NPB選手を重点',filter:p=>p.league==='NPB'&&p.status==='ACTIVE'&&(p.rank==='S'||p.rank==='A')},
+  {id:'npb-next',name:'NPB NEXT',subtitle:'若手・ブレイク候補',kind:'次世代',rateBonus:'B〜Cランク中心。若手・控え・ブレイク候補も登場',filter:p=>p.league==='NPB'&&p.status==='ACTIVE'&&(p.rank==='B'||p.rank==='C')},
+  {id:'npb-legends',name:'NPB LEGENDS',subtitle:'球史を代表するレジェンド',kind:'歴代',rateBonus:'王・長嶋・野村・落合など、NPB史を代表する選手',filter:p=>p.league==='NPB'&&p.status==='LEGEND'},
+  {id:'japan-mlb',name:'JAPAN MLB',subtitle:'MLBで戦う日本人選手',kind:'海外',rateBonus:'現役MLBの日本人選手を収録',filter:p=>p.league==='MLB'&&p.status==='ACTIVE'&&p.origin==='JAPAN'},
+  {id:'mlb-icons',name:'MLB ICONS',subtitle:'MLB史を代表するレジェンド',kind:'超限定',rateBonus:'MLBの歴史的アイコンのみ。通常枠には混在させない',filter:p=>p.league==='MLB'&&p.status==='LEGEND'},
+  {id:'selection',name:'SELECTION',subtitle:'注目選手セレクション',kind:'限定',rateBonus:'現役スターから厳選した強化カード',filter:p=>p.featuredTag&&['STAR','ACE','POWER','LEADOFF','GLOVE'].includes(p.featuredTag)},
+  {id:'moment',name:'STAR MOMENT',subtitle:'球場を沸かせる一枚',kind:'限定',rateBonus:'MOMENT限定カード',filter:p=>p.featuredTag==='MOMENT'},
+  {id:'two-way',name:'TWO-WAY ICON',subtitle:'投打二刀流',kind:'限定',rateBonus:'投手・二刀流を重点',filter:p=>p.pos?.includes('P')||p.abilities?.some(a=>a[0]==='two_way')},
+  {id:'power',name:'POWER',subtitle:'長距離砲スカウト',kind:'打撃型',rateBonus:'パワー80以上を重点',filter:p=>(p.power||0)>=80},
+  {id:'speed-defense',name:'SPEED & DEFENSE',subtitle:'走守特化スカウト',kind:'走守型',rateBonus:'走力・守備80以上を重点',filter:p=>Math.max(p.speed||0,p.field||0)>=80}
 ]);
-export const RANK_RATES={S:.001,A:.08,B:.15,C:.22,D:.25,F:.295};
-export const LIMITED_RATE=.06;
-export const RARITIES={LEGEND:{rate:.005},STAR:{rate:.025},PRO:{rate:.10},ROOKIE:{rate:.32},MOB:{rate:.55}};
-export function rollRank(rng=Math.random){const x=rng();let c=0;for(const [rank,rate] of Object.entries(RANK_RATES)){c+=rate;if(x<c)return rank}return'F'}
-export function rollLimited(rng=Math.random){return rng()<LIMITED_RATE}
-export function roll(rng=Math.random){const x=rng();let c=0;for(const [rarity,{rate}] of Object.entries(RARITIES)){c+=rate;if(x<c)return rarity}return'MOB'}
-function weightedPick(pool,rank,rng){const byRank=pool.filter(p=>p.rank===rank);const source=byRank.length?byRank:pool;return source[Math.floor(rng()*source.length)]}
-function mobPool(players){const p=players.filter(x=>x.rank==='F'||x.rank==='D'||x.rank==='C'||x.rarity==='MOB');return p.length?p:players}
-export function drawGuaranteedAtLeast(players,minRank='B',rng=Math.random,bannerId='standard'){const banner=GACHA_BANNERS.find(b=>b.id===bannerId)||GACHA_BANNERS[0];const score={S:4,A:3,B:2,C:1,D:0,F:-1};const min=score[minRank]??2;const pool=players.filter(p=>banner.filter(p));const eligible=pool.filter(p=>(score[p.rank]??-1)>=min);const source=eligible.length?eligible:players.filter(p=>(score[p.rank]??-1)>=min);if(!source.length)return draw(players,1,rng,bannerId)[0];const player=source[Math.floor(Math.max(0,Math.min(.999999,rng()))*source.length)];return{rarity:player.rarity||'PRO',rank:player.rank||minRank,limited:!!player.limited,player,banner:banner.id,guaranteed:true};}
-export function draw(players,count=1,rng=Math.random,bannerId='standard'){return Array.from({length:count},()=>{const banner=GACHA_BANNERS.find(b=>b.id===bannerId)||GACHA_BANNERS[0];const limited=rollLimited(rng);const rank=rollRank(rng);let pool=players.filter(p=>banner.filter(p));if(!pool.length)pool=players;const limitedPool=pool.filter(p=>p.limited&&p.rank===rank);const normalPool=pool.filter(p=>!p.limited&&p.rank===rank);let source=limited&&limitedPool.length?limitedPool:normalPool.length?normalPool:pool.filter(p=>p.rank===rank);if(!source.length)source=pool;const player=weightedPick(source,rank,rng);return{rarity:player.rarity||roll(rng),rank:player.rank||rank,limited:!!player.limited,player,banner:banner.id}})}
+
+export const RANK_RATES=Object.freeze({S:.001,A:.08,B:.15,C:.22,D:.25,F:.295});
+export const LIMITED_RATE=.04;
+export const RARITIES=Object.freeze({LEGEND:{rate:.005},STAR:{rate:.025},PRO:{rate:.10},ROOKIE:{rate:.32},MOB:{rate:.55}});
+
+export const RANK_SCORE=Object.freeze({S:6,A:5,B:4,C:3,D:2,F:1});
+export function bannerById(id='npb-series'){return GACHA_BANNERS.find(b=>b.id===id)||GACHA_BANNERS[0];}
+export function rollRank(rng=Math.random){
+  const x=Math.max(0,Math.min(.999999,rng()));let c=0;
+  for(const [rank,rate] of Object.entries(RANK_RATES)){c+=rate;if(x<c)return rank}
+  return'F';
+}
+export function rollLimited(rng=Math.random){return Math.max(0,Math.min(.999999,rng()))<LIMITED_RATE}
+export function roll(rng=Math.random){
+  const x=Math.max(0,Math.min(.999999,rng()));let c=0;
+  for(const [rarity,{rate}] of Object.entries(RARITIES)){c+=rate;if(x<c)return rarity}
+  return'MOB';
+}
+function weightedPick(pool,rank,rng){
+  if(!pool.length)return null;
+  const same=pool.filter(p=>p.rank===rank);
+  const source=same.length?same:pool;
+  const index=Math.floor(Math.max(0,Math.min(.999999,rng()))*source.length);
+  return source[index]||source[0];
+}
+export function drawGuaranteedAtLeast(players,minRank='B',rng=Math.random,bannerId='npb-series'){
+  const banner=bannerById(bannerId);
+  const pool=players.filter(p=>banner.filter(p));
+  const source=pool.filter(p=>(RANK_SCORE[p.rank]??0)>=(RANK_SCORE[minRank]??4));
+  const fallback=players.filter(p=>(RANK_SCORE[p.rank]??0)>=(RANK_SCORE[minRank]??4));
+  const player=(source.length?source:fallback)[Math.floor(Math.max(0,Math.min(.999999,rng()))*(source.length?source.length:fallback.length))];
+  if(!player)return null;
+  return {rarity:player.rarity||'PRO',rank:player.rank||minRank,limited:!!player.limited,player,banner:banner.id,guaranteed:true};
+}
+export function draw(players,count=1,rng=Math.random,bannerId='npb-series'){
+  const banner=bannerById(bannerId);
+  return Array.from({length:Math.max(1,Math.min(10,Number(count)||1))},()=>{
+    const pool=players.filter(p=>banner.filter(p));
+    const sourcePool=pool.length?pool:players;
+    const rolledRank=rollRank(rng);
+    const limitedHit=rollLimited(rng);
+    let candidates=sourcePool.filter(p=>p.rank===rolledRank);
+    if(limitedHit){
+      const limited=candidates.filter(p=>p.limited);
+      if(limited.length)candidates=limited;
+    }else{
+      const normal=candidates.filter(p=>!p.limited);
+      if(normal.length)candidates=normal;
+    }
+    const player=weightedPick(candidates.length?candidates:sourcePool,rolledRank,rng);
+    return {rarity:player?.rarity||roll(rng),rank:player?.rank||rolledRank,limited:!!player?.limited,player,banner:banner.id};
+  });
+}
