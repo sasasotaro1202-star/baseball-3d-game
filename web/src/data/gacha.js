@@ -17,7 +17,13 @@ export const LIMITED_RATE=.04;
 export const RARITIES=Object.freeze({LEGEND:{rate:.005},STAR:{rate:.025},PRO:{rate:.10},ROOKIE:{rate:.32},MOB:{rate:.55}});
 
 export const RANK_SCORE=Object.freeze({S:6,A:5,B:4,C:3,D:2,F:1});
-export function bannerById(id='npb-series'){return GACHA_BANNERS.find(b=>b.id===id)||GACHA_BANNERS[0];}
+const BANNER_ALIASES=Object.freeze({
+  standard:'npb-series',legends:'npb-legends',limited:'selection',power:'power','speed':'speed-defense','speed-defense':'speed-defense','two-way':'two-way',
+});
+export function bannerById(id='npb-series'){
+  const key=BANNER_ALIASES[id]||id;
+  return GACHA_BANNERS.find(b=>b.id===key)||GACHA_BANNERS[0];
+}
 export function rollRank(rng=Math.random){
   const x=Math.max(0,Math.min(.999999,rng()));let c=0;
   for(const [rank,rate] of Object.entries(RANK_RATES)){c+=rate;if(x<c)return rank}
