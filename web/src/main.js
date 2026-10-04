@@ -727,8 +727,6 @@ function selectThrowBase(base){
   fielderThrowTarget=b;
   document.querySelectorAll('[data-throw-base]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.throwBase)===b));
   fielderAction='throw';fielderActionUntil=performance.now()+240;
-  const dest=[[0,-8],[8,-8],[8,0],[0,0]][Math.min(3,b-1)];
-  fielderTarget={x:dest[0],z:dest[1]};
 }
 
 function updateStealButton(){
