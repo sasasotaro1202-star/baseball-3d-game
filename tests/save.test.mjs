@@ -26,3 +26,15 @@ test('corrupt save is backed up before fallback',()=>{
  assert.equal(loaded.version,SAVE_VERSION);
  assert.equal(x.getItem('baseball3d.save.v1.corrupt.last'),bad);
 });
+
+
+test('mixed-catalog player IDs migrate to stable current IDs while preserving legacy IDs',()=>{
+ const x=storage();
+ x.setItem('baseball3d.save.v1',JSON.stringify({version:2,collection:[9,10,1],team:{lineup:[9,1],pitchers:[18]}}));
+ const loaded=loadSave(x);
+ assert.equal(loaded.collection.includes(2009),true);
+ assert.equal(loaded.collection.includes(2010),true);
+ assert.equal(loaded.collection.includes(1),false);
+ assert.deepEqual(loaded.team.lineup,[2009,2001]);
+ assert.deepEqual(loaded.team.pitchers,[2018]);
+});
