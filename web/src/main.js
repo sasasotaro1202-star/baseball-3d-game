@@ -415,7 +415,9 @@ function pitch(){
     });
     selectedPitch=typeof decision==='string'?decision:(decision?.pitch||selectedPitch);
     const control=Math.max(40,Math.min(95,Number(pitcherPlayer.control||70)));
-    const spread=Math.max(.55,Math.min(1.05,1.15-(control-40)*.008));
+    const pitcherSide=match.half==='TOP'?'home':'away';
+    const stamina=Math.max(0,Math.min(100,Number(match.pitcherStamina?.[pitcherSide]??100)));
+    const spread=Math.max(.55,Math.min(1.28,1.15-(control-40)*.008+(100-stamina)*.0017));
     pitchTarget={x:(Math.random()-.5)*spread,y:(Math.random()-.5)*spread};
   }else{
     pitchTarget={x:aimTarget.x,y:aimTarget.y};
@@ -423,7 +425,10 @@ function pitch(){
   updatePitchControlUI();window.__lastPitch=selectedPitch;
   const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;
   const arm=Math.max(45,Math.min(99,Number(pitcherPlayer.arm||70)));
-  const velocityFactor=.91+(arm/99)*.10;
+  const pitcherSideForVelocity=match.half==='TOP'?'home':'away';
+  const stamina=Math.max(0,Math.min(100,Number(match.pitcherStamina?.[pitcherSideForVelocity]??100)));
+  const staminaFactor=.82+.18*(stamina/100);
+  const velocityFactor=(.91+(arm/99)*.10)*staminaFactor;
   window.__pitchVelocity=Math.round((pitchInfo.speed||90)*velocityFactor*(0.985+Math.random()*.03));window.__pitchStart=performance.now();
   const id=(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random());
   ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3});
