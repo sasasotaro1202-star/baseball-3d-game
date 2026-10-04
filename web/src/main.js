@@ -549,6 +549,7 @@ function setFielderTarget(outcome){
   let best=0,bestD=Infinity;
   fielders.forEach((p,i)=>{const d=Math.hypot(p.position.x-q.x,p.position.z-q.z);if(d<bestD){bestD=d;best=i;}});
   fielderIndex=best;fieldingFrom={x:fielders[fielderIndex].position.x,z:fielders[fielderIndex].position.z};
+  updateFieldingUI();
   matchEvent(outcome==='HOME_RUN'?'HOMERUN':outcome==='GROUND_OUT'?'FIELDING':outcome==='FLY_OUT'?'FLY BALL':'IN PLAY','field');
 }
 
