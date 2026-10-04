@@ -9,6 +9,7 @@ import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud}
 import {ensurePresentationLayer,playGachaReveal,playMatchEvent} from './game/presentation.js';
 import {createPlayerModel,animatePlayer} from './game/player-models.js';
 import {choosePitch,chooseSwing,AI_DIFFICULTIES} from './game/ai.js';
+import {AI_TEAM_LINEUP,AI_TEAM_PITCHERS} from './game/ai-roster.js';
 import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward,releasePlayer,triggerSpecialAbility} from './game/player-system.js';
 import {createOnlineHost,createOnlineGuest,acceptOnlineAnswer,isOnlineSupported} from './game/online.js';
 
@@ -27,8 +28,6 @@ const home=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.12,5),new THREE.Me
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,20,20),new THREE.MeshStandardMaterial({color:0xffffff}));ball.position.set(0,2.1,3);scene.add(ball);
 let pitcher=createPlayerModel(modelConfig(ALL_PLAYERS[0]));pitcher.position.set(0,0,3);pitcher.userData.identity.playerId=ALL_PLAYERS[0].id;scene.add(pitcher);
 let batter=createPlayerModel(modelConfig(ALL_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;batter.userData.identity.playerId=ALL_PLAYERS[4].id;scene.add(batter);
-const AI_TEAM_LINEUP=Object.freeze([2,3,4,7,8,9,10,11,12,13,14,15,16,17]);
-const AI_TEAM_PITCHERS=Object.freeze([1,18,19]);
 const FIELDER_STARTS=Object.freeze([[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]]);
 const fielders=FIELDER_STARTS.map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
 const catcher=createPlayerModel({uniform:0x163a66,scale:.86});catcher.position.set(0,0,-9.7);catcher.rotation.y=Math.PI;scene.add(catcher);
