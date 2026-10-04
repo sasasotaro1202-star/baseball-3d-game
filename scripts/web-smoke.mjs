@@ -40,7 +40,7 @@ const checks = [
   ["mobile manifest", html.includes('rel="manifest"')],
   ["runtime readiness flag", js.includes("window.__gameReady = true")],
   ["match simulation import", js.includes("resolvePitch")],
-  ["live state assignment", js.includes("match=applyOutcome(match,outcome,options)")],
+  ["live state assignment", js.includes("applyOutcome(match,outcome,") && js.includes("isValidMatchState(match)")],
   ["automatic AI pitching", js.includes("scheduleTopPitch(700)") && js.includes("count:[match.balls,match.strikes]")],
   ["match result persistence", js.includes("recordMatchResult") && js.includes("save.matches") && js.includes("save.wins")],
   ["persistent save", js.includes("loadSave")],
