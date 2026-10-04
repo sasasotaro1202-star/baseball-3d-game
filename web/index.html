@@ -1389,4 +1389,38 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
 .online-panel textarea{resize:vertical;min-height:74px}
 .online-status{min-height:30px;padding:8px 9px;border-radius:6px;background:#050b12;border:1px solid #ffffff16;color:#9eabb8;font-size:9px;line-height:1.4}
 @media(max-width:390px){.match-mode-card{min-height:104px}.match-mode-card strong{font-size:19px}.online-mode-grid{grid-template-columns:1fr}.menu-secondary{grid-template-columns:repeat(2,1fr)}}
+</style><style id="prospi-cleanroom-match-v9">
+/* Clean-room mobile baseball presentation: field-first, compact HUD, separated action zones. */
+#match-ui{background:transparent!important;pointer-events:none}
+#match-ui .match-topbar{top:6px!important;left:7px!important;right:7px!important;height:42px!important;display:grid;grid-template-columns:64px 1fr 94px;gap:4px;align-items:stretch}
+#match-ui .score-pill{background:linear-gradient(180deg,#081018eF,#02060beF)!important;border:1px solid #ffffff18!important;border-radius:6px!important;box-shadow:0 4px 14px #0008!important;backdrop-filter:blur(4px);font-size:10px!important}
+#match-ui .scoreboard{font-size:15px!important;font-weight:900!important;letter-spacing:.03em}
+#match-ui .matchhud{top:51px!important;left:50%!important;transform:translateX(-50%);padding:3px 8px!important;border-radius:999px!important;background:#02070bd9!important;border:1px solid #ffffff12!important;font-size:8px!important;opacity:.82}
+#match-ui .atbat-card{top:103px!important;left:8px!important;width:132px!important;padding:7px!important;border-radius:6px!important;background:linear-gradient(160deg,#06111cdd,#02070bd9)!important;border:1px solid #ffffff16!important;box-shadow:0 6px 15px #0008!important}
+#match-ui .atbat-card strong{font-size:10px!important;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#match-ui .atbat-card .small{font-size:7px!important;color:#82909d!important}
+#match-ui .pitch-readout{font-size:8px!important;margin-top:4px}
+#match-ui .aim-area{width:82px!important;height:114px!important;left:50%!important;top:49%!important;transform:translate(-50%,-50%)!important;background:transparent!important;border:0!important}
+#match-ui .strike-zone{width:74px!important;height:106px!important;border:1px solid #ffffff75!important;box-shadow:inset 0 0 0 1px #0005,0 0 0 9999px #00000003!important}
+#match-ui .aim-cursor{width:16px!important;height:16px!important;font-size:14px!important;font-weight:800;line-height:16px!important;border:1px solid #ffffffc7!important;background:#0a1118a8!important;box-shadow:0 0 0 2px #07101888!important}
+#match-ui .pitch-control{bottom:66px!important;left:50%!important;transform:translateX(-50%);width:min(92vw,360px)!important;height:31px!important;gap:4px!important}
+#match-ui .pitch-control button{height:31px!important;border-radius:6px!important;background:#07111bdd!important;border:1px solid #ffffff17!important;color:#dbe2e9!important;font-size:7px!important;font-weight:700!important;box-shadow:none!important}
+#match-ui .pitch-control button.selected{background:#17324b!important;border-color:#5f9fd0!important;color:#fff!important}
+#match-ui .match-action-pad{bottom:5px!important;left:7px!important;right:7px!important;height:55px!important;grid-template-columns:70px 1fr 70px!important;gap:7px!important}
+#match-ui .match-action-pad button{border-radius:9px!important;border:1px solid #ffffff1a!important;background:#050b12eb!important;box-shadow:0 5px 14px #0009!important}
+#match-ui .match-action-pad .swing-main{background:linear-gradient(180deg,#b48a2c,#6e5016)!important;border-color:#e1be5b!important;box-shadow:0 0 0 1px #0006,0 7px 17px #000b!important}
+#match-ui .match-action-pad span{font-size:13px!important;font-weight:950!important;letter-spacing:.04em}
+#match-ui .match-action-pad small{font-size:6px!important;opacity:.55!important}
+#match-ui .bat-mode-pill{right:8px!important;bottom:66px!important;border-radius:7px!important;background:#040a0fdc!important;border:1px solid #ffffff14!important;padding:3px!important}
+#match-ui .bat-mode-pill button{width:38px!important;height:24px!important;border:0!important;border-radius:5px!important;font-size:8px!important}
+#match-ui .bat-mode-pill button.selected{background:#d4b14e!important;color:#15110a!important}
+#match-ui #matchback{top:55px!important;right:7px!important;font-size:7px!important;padding:5px 7px!important;opacity:.82}
+#match-ui #mph-speed{bottom:127px!important;font-size:10px!important;font-weight:900!important;text-shadow:0 2px 8px #000}
+#match-ui #mph-event{top:44%!important;font-size:25px!important;font-weight:1000!important;text-shadow:0 3px 12px #000}
+#match-ui .fielding-banner{pointer-events:none!important}
+@media(max-width:390px){
+  #match-ui .match-topbar{grid-template-columns:58px 1fr 84px}
+  #match-ui .pitch-control{width:94vw!important}
+  #match-ui .match-action-pad{grid-template-columns:62px 1fr 62px!important}
+}
 </style>
