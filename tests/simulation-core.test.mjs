@@ -88,3 +88,14 @@ test('pitcher substitution does not occur before threshold or without bullpen',(
  const t=createMatchState();t.pitcherStamina.home=1;
  assert.equal(advancePitcher(t,'home',1,8).changed,false);
 });
+
+test('steal success and failure keep runner/base state valid',()=>{
+ let s=createMatchState();
+ s.runners=[{id:21,base:0,status:'LIVE',speed:99,reaction:99}];s.bases=[true,false,false];
+ const success=stealBase(s,21,1,{catcherArm:50,pitcherStamina:20,difficulty:'EASY',rng:()=>0});
+ assert.equal(success.success,true);assert.deepEqual(success.state.bases,[false,true,false]);assert.equal(isValidMatchState(success.state),true);
+ let t=createMatchState();
+ t.runners=[{id:22,base:0,status:'LIVE',speed:55,reaction:55}];t.bases=[true,false,false];
+ const fail=stealBase(t,22,1,{catcherArm:99,pitcherStamina:100,difficulty:'HARD',rng:()=>.99});
+ assert.equal(fail.success,false);assert.equal(fail.state.runners.length,0);assert.equal(fail.state.outs,1);assert.equal(isValidMatchState(fail.state),true);
+});
