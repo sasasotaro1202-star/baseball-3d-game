@@ -17,7 +17,7 @@ function base64ToBytes(value){
   return out;
 }
 function toBase64Url(value){
-  return bytesToBase64(new TextEncoder().encode(value)).replace(/+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  return bytesToBase64(new TextEncoder().encode(value)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 function fromBase64Url(value){
   const normalized=String(value||"").replace(/-/g,"+").replace(/_/g,"/");
