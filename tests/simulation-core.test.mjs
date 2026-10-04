@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {createMatchState,applyOutcome,resolveContact,resolvePitch,REGULATION_INNINGS,stealBase,tagUp,advanceRunners,resolveFieldingPlay,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from '../web/src/game/simulation.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {createMatchState,applyOutcome,resolveContact,resolvePitch,REGULATION_INNINGS,stealBase,tagUp,advanceRunners,resolveFieldingPlay,isValidMatchState,createPitchPhysics,createBattedBallPhysics,stepBallPhysics,isFiniteBallPhysics} from '../web/src/game/simulation.js';
 test('three outs rotate from top to bottom',()=>{let s=createMatchState();s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');s=applyOutcome(s,'OUT');assert.equal(s.half,'BOTTOM');assert.equal(s.inning,1);assert.equal(s.outs,0);});
 test('home run scores batter and clears bases',()=>{let s=createMatchState();s.runners=[{id:1,base:0,status:'LIVE'},{id:2,base:1,status:'LIVE'}];s.bases=[true,true,false];s=applyOutcome(s,'HOME_RUN');assert.equal(s.score.away,3);assert.deepEqual(s.bases,[false,false,false]);});
 test('tied game after the 9th inning enters extra innings without automatic runners',()=>{let s=createMatchState();for(let inning=0;inning<9;inning++){for(let i=0;i<3;i++)s=applyOutcome(s,'OUT');for(let i=0;i<3;i++)s=applyOutcome(s,'OUT');}assert.equal(s.inning,10);assert.equal(s.half,'TOP');assert.equal(s.outs,0);assert.deepEqual(s.bases,[false,false,false]);assert.equal(s.extraInnings,true);});
@@ -47,4 +47,19 @@ test('fielding catch miss turns a catchable fly ball into a live hit',()=>{
 test('runner speed changes advancement on singles',()=>{
  let fast=createMatchState();fast.runners=[{id:1,base:1,status:'LIVE',speed:95,reaction:90}];fast=applyOutcome(fast,'SINGLE');assert.deepEqual(fast.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,2]);
  let slow=createMatchState();slow.runners=[{id:1,base:1,status:'LIVE',speed:60,reaction:60}];slow=applyOutcome(slow,'SINGLE');assert.deepEqual(slow.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,1]);
+});
+
+test('match state invariant validator accepts a fresh legal state and rejects impossible state',()=>{
+ const s=createMatchState();
+ assert.equal(isValidMatchState(s),true);
+ assert.equal(isValidMatchState({...s,outs:4}),false);
+ assert.equal(isValidMatchState({...s,balls:4}),false);
+ assert.equal(isValidMatchState({...s,score:{home:-1,away:0}}),false);
+});
+test('fielding difficulty changes catch probability deterministically',()=>{
+ const s=createMatchState();
+ const easy=resolveFieldingPlay(s,{result:'FLY_OUT',distance:8,travelTime:1,fielderReaction:70,fielderField:70,fielderCatch:70,difficulty:'EASY',rng:()=>.85});
+ const hard=resolveFieldingPlay(s,{result:'FLY_OUT',distance:8,travelTime:1,fielderReaction:70,fielderField:70,fielderCatch:70,difficulty:'HARD',rng:()=>.85});
+ assert.equal(easy.catchSuccess,false);
+ assert.equal(hard.catchSuccess,true);
 });
