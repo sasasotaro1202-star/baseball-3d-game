@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {choosePitch,chooseSwing,AI_DIFFICULTIES} from '../web/src/game/ai.js';
 
 test('pitching AI is safe with explicit count and default count',()=>{
-  const legal=new Set(['FASTBALL','SLIDER','CURVEBALL','CHANGEUP']);
+  const legal=new Set(['FASTBALL','SLIDER','CURVEBALL','FORK','CHANGEUP']);
   assert.ok(legal.has(choosePitch({count:[0,0],rng:()=>0})));
   assert.ok(legal.has(choosePitch({count:[2,2],rng:()=>0})));
   assert.ok(legal.has(choosePitch({rng:()=>0.9})));

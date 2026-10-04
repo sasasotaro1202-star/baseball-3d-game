@@ -74,12 +74,12 @@ function migrate(input){
   next.version=SAVE_VERSION;
   next.currency=Number.isFinite(Number(source.currency))?Math.max(0,Number(source.currency)):base.currency;
   next.unlimitedCoins=Boolean(source.unlimitedCoins);
-  next.collection=[...new Set((Array.isArray(source.collection)?source.collection:[]).map(Number).filter(Number.isFinite))];
-  if(Array.isArray(source.team)) next.team=source.team;
-  else if(source.team&&typeof source.team==='object') next.team={...source.team};
+  next.collection=[...new Set((Array.isArray(compatible.collection)?compatible.collection:[]).map(Number).filter(Number.isFinite))];
+  if(Array.isArray(compatible.team)) next.team=compatible.team;
+  else if(compatible.team&&typeof compatible.team==='object') next.team={...compatible.team};
   else next.team={};
   next.settings=sanitizeSettings(source.settings);
-  next.progress={...base.progress,...(source.progress&&typeof source.progress==='object'?source.progress:{})};
+  next.progress={...base.progress,...(compatible.progress&&typeof compatible.progress==='object'?compatible.progress:{})};
   next.progress.matches=Math.max(0,Number(next.progress.matches)||0);
   next.progress.wins=Math.max(0,Number(next.progress.wins)||0);
   if(version<2) next.settings={...baseSettings(),...next.settings};
