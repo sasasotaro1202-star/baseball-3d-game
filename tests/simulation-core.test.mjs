@@ -72,3 +72,19 @@ test('GameState invariant validator rejects impossible states',()=>{
  assert.equal(isValidMatchState({...s,score:{home:-1,away:0}}),false);
  assert.equal(isValidMatchState({...s,bases:[true,false,false],runners:[]}),false);
 });
+
+test('pitcher substitution resets exhausted pitcher and advances pitcher index',()=>{
+ const s=createMatchState();
+ s.pitcherStamina.home=6;
+ const r=advancePitcher(s,'home',3,8);
+ assert.equal(r.changed,true);
+ assert.equal(r.state.pitcherIndex.home,1);
+ assert.equal(r.state.pitcherStamina.home,100);
+});
+test('pitcher substitution does not occur before threshold or without bullpen',()=>{
+ const s=createMatchState();
+ s.pitcherStamina.home=20;
+ assert.equal(advancePitcher(s,'home',3,8).changed,false);
+ const t=createMatchState();t.pitcherStamina.home=1;
+ assert.equal(advancePitcher(t,'home',1,8).changed,false);
+});
