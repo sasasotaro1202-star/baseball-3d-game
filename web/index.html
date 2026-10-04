@@ -546,6 +546,7 @@ body{background:#050505}
 <button class="match-mode-card ai-match-card" data-mode="ai-match"><strong>AI戦</strong><small>CPUと1試合</small><span>PLAY vs CPU</span></button>
 <button class="match-mode-card online-match-card" data-mode="online-lobby"><strong>オンライン戦</strong><small>1対1 P2Pルーム</small><span>ROOM MATCH</span></button>
 </div>
+<div class="ai-difficulty-row"><span>AI難易度</span><button type="button" data-ai-difficulty="EASY">EASY</button><button type="button" data-ai-difficulty="NORMAL" class="selected">STANDARD</button><button type="button" data-ai-difficulty="HARD">HARD</button></div>
 <div class="menu-secondary">
 <button data-mode="gacha">スカウト</button><button data-mode="roster">オーダー</button><button data-mode="training">育成</button>
 <button data-mode="collection">選手名鑑</button><button data-mode="settings">設定</button>
@@ -1423,4 +1424,15 @@ setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__f
   #match-ui .pitch-control{width:94vw!important}
   #match-ui .match-action-pad{grid-template-columns:62px 1fr 62px!important}
 }
+</style><style id="ai-difficulty-ui-v2">
+.ai-difficulty-row{display:flex;align-items:center;gap:4px;padding:7px 2px 11px;color:#8493a1;font-size:8px}
+.ai-difficulty-row span{margin-right:auto;letter-spacing:.08em}
+.ai-difficulty-row button{height:27px;padding:0 9px;border-radius:5px;border:1px solid #ffffff14;background:#09111a;color:#97a6b3;font-size:7px;font-weight:800}
+.ai-difficulty-row button.selected{background:#163d2a;color:#fff;border-color:#4cba78}
 </style>
+<script>
+document.querySelectorAll('[data-ai-difficulty]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('[data-ai-difficulty]').forEach(x=>x.classList.remove('selected'));
+ b.classList.add('selected');
+}));
+</script>
