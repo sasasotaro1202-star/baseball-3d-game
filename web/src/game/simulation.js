@@ -5,7 +5,7 @@ export const REGULATION_INNINGS=9;
 export const EXTRA_INNING_START_BASES=Object.freeze([false,false,false]);
 
 function runner(id,base,speed=70,reaction=70){return{id,base,speed,reaction,status:'LIVE',tagged:false,advanceIntent:'HOLD',startBase:base};}
-export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,batterIndex:{away:0,home:0},ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
+export function createMatchState(){return{inning:1,half:'TOP',outs:0,balls:0,strikes:0,score:{home:0,away:0},bases:[false,false,false],runners:[],nextRunnerId:1,pitches:0,batters:0,batterIndex:{away:0,home:0},pitcherStamina:{home:100,away:100},ended:false,lastOutcome:'READY',regulationInnings:REGULATION_INNINGS,extraInnings:false,defense:{pitcherId:null,fielders:[]},lastPlay:null};}
 export function cloneState(s){return JSON.parse(JSON.stringify(s));}
 export function isValidMatchState(s){
   if(!s||!Number.isInteger(s.inning)||s.inning<1||s.inning>1000)return false;
@@ -78,6 +78,10 @@ function advanceBatterIndex(s){
   s.batters=(Number(s.batters)||0)+1;
 }
 export function applyOutcome(input,outcome,options={}){const s=cloneState(input);s.pitches++;if(s.ended)return s;
+  if(!s.pitcherStamina)s.pitcherStamina={home:100,away:100};
+  const pitchingSide=s.half==='TOP'?'home':'away';
+  const fatigueCost=Math.max(.65,Math.min(2.4,Number(options.fatigueCost)||1));
+  s.pitcherStamina[pitchingSide]=Math.max(0,Math.min(100,Number(s.pitcherStamina[pitchingSide]??100)-fatigueCost));
 if(outcome==='BALL'){s.balls++;if(s.balls>=4){resetCount(s);walk(s);s.lastOutcome='WALK';advanceBatterIndex(s);checkGameEndAfterScore(s);}else s.lastOutcome='BALL';syncBases(s);return s;}
 if(outcome==='FOUL'){s.strikes=Math.min(2,s.strikes+1);s.lastOutcome='FOUL';return s;}
 if(outcome==='STRIKE'){s.strikes++;if(s.strikes>=3){s.outs++;resetCount(s);s.lastOutcome='STRIKEOUT';advanceBatterIndex(s);return rotateHalf(s);}s.lastOutcome='STRIKE';return s;}
