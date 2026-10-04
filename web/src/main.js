@@ -402,7 +402,8 @@ function choosePitchManual(type){
   updatePremiumHUD();
 }
 function pitch(){
-  if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM')||!isLocalPitcher())return;
+  const aiPitchAuthority=matchMode==='AI'&&match.half==='TOP';
+  if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM')||(!isLocalPitcher()&&!aiPitchAuthority))return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
   const pitcherPlayer=pitcherPlayerForSide(match.half==='TOP'?'home':'away');
   if(!isOnlineMatch()&&match.half==='TOP'){
@@ -432,7 +433,7 @@ function pitch(){
 function swing(){
   if(match.ended||!isLocalBatter()||pitchState!=='pitch')return;
   const timing=Math.max(0,Math.min(1,t/(ballPhysics?.duration||.9))), dx=Math.abs(aimTarget.x-pitchTarget.x),dy=Math.abs(aimTarget.y-pitchTarget.y);
-  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',0):lineupPlayer(0)||ALL_PLAYERS[4], prof=aiProfile(p,developmentFor(save,p.id));
+  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):lineupPlayer(0)||ALL_PLAYERS[4], prof=gameplayProfile(p);
   const modePower=battingMode==='POWER'?1:.72;
   if(isOnlineMatch()&&onlineRole==='GUEST'){
     if(onlineActionSentForPitch)return;
@@ -585,7 +586,7 @@ function isLocalPitcher(){
 }
 function onlineSend(message){onlineConnection?.send?.({v:1,...message});}
 function onlineRosterPlayer(side,index=0){
-  const ids=onlineRosters?.[side]?.length?onlineRosters[side]:(side==='away'?save.collection:(onlineRemoteRoster.length?onlineRemoteRoster:save.collection));
+  const ids=onlineRosters?.[side]?.length?onlineRosters[side]:(side==='away'?encodeTeamForOnline():(onlineRemoteRoster.length?onlineRemoteRoster:encodeTeamForOnline()));
   const id=ids[index%Math.max(1,ids.length)];
   return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[index%ALL_PLAYERS.length];
 }
@@ -659,7 +660,7 @@ async function startOnlineGuest(){
   matchMode='ONLINE';onlineRole='GUEST';onlineRemoteRoster=[];onlinePendingPitchId=null;onlinePendingPitch=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;
   onlineSignalStatus('参加コードを作成中…');
   onlineConnection=await createOnlineGuest(offer,{
-    onOpen(){onlineConnected=true;onlineSignalStatus('接続しました。ホストの開始を待っています');onlineSend({type:'ONLINE_READY',collection:[...new Set((save.collection||[]).map(Number).filter(Number.isFinite))].slice(0,14)});},
+    onOpen(){onlineConnected=true;onlineSignalStatus('接続しました。ホストの開始を待っています');onlineSend({type:'ONLINE_READY',collection:encodeTeamForOnline()});},
     onClose(){onlineConnected=false;onlineSignalStatus('接続が終了しました');},
     onConnectionState:s=>onlineSignalStatus('接続: '+s),
     onMessage:handleOnlineMessage,
@@ -672,7 +673,7 @@ function handleOnlineMessage(msg){
   if(onlineRole==='HOST'){
     if(msg.type==='ONLINE_READY'&&!onlineSessionStarted){
       onlineRemoteRoster=Array.isArray(msg.collection)?msg.collection:[];
-      onlineRosters={away:[...new Set((save.collection||[]).map(Number).filter(Number.isFinite))].slice(0,14),home:onlineRemoteRoster};
+      onlineRosters={away:encodeTeamForOnline(),home:onlineRemoteRoster};
       onlineSessionStarted=true;onlineRevision=0;
       onlineSend({type:'ONLINE_START',match,revision:onlineRevision,rosters:onlineRosters});
       startOnlineMatchView();
