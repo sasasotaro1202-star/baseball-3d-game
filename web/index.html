@@ -740,6 +740,29 @@ body{background:#040a11!important;color:var(--ui-text)}
 .gacha-page .gacha-lights{position:absolute;inset:0;background:radial-gradient(circle at 18% 23%,#fff8 0 1%,transparent 7%),radial-gradient(circle at 82% 20%,#fff7 0 1%,transparent 7%),radial-gradient(circle at 12% 42%,#fff5 0 1%,transparent 6%),radial-gradient(circle at 88% 41%,#fff5 0 1%,transparent 6%)}
 .gacha-page .gacha-ball{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:#fff;box-shadow:0 0 22px rgba(255,255,255,.9);opacity:.85}
 @media(max-width:390px){.pres-card-art{height:155px}.pres-card-slot{width:min(200px,56vw)}.gacha-reveal .pres-title{top:23%!important}.gacha-reveal .pres-sub{top:29%!important}}
+</style><style id="ui-icon-vector-v1">
+/* Vector-like native UI icons — avoid platform emoji rendering. */
+.ui-icon{display:inline-block;position:relative;width:18px;height:18px;flex:0 0 18px;color:currentColor}
+.home-quick-card .ui-icon{grid-row:1/-1;width:28px;height:28px;flex-basis:28px}
+.command-icon.ui-icon{width:30px;height:30px;flex-basis:30px}
+.home-bottom-nav .ui-icon{width:18px;height:18px}
+.ui-icon:before,.ui-icon:after{content:"";position:absolute;box-sizing:border-box}
+.ui-icon-home:before{left:3px;right:3px;bottom:3px;height:10px;border:1.5px solid currentColor;border-top:0;border-radius:2px}
+.ui-icon-home:after{width:10px;height:10px;left:4px;top:1px;border-left:1.5px solid currentColor;border-top:1.5px solid currentColor;transform:rotate(45deg);border-radius:2px 0 0 0}
+.ui-icon-match:before{width:12px;height:12px;border:1.6px solid currentColor;border-radius:50%;left:3px;top:3px}
+.ui-icon-match:after{width:5px;height:5px;border-top:1px solid currentColor;border-right:1px solid currentColor;left:6px;top:3px;transform:rotate(26deg);opacity:.8}
+.ui-icon-scout:before{left:4px;top:2px;width:10px;height:14px;background:currentColor;clip-path:polygon(50% 0,61% 34%,100% 36%,70% 57%,80% 100%,50% 74%,20% 100%,30% 57%,0 36%,39% 34%)}
+.ui-icon-online:before{left:2px;top:5px;width:8px;height:8px;border:1.5px solid currentColor;border-radius:50%}
+.ui-icon-online:after{right:1px;top:2px;width:9px;height:9px;border:1.5px solid currentColor;border-radius:50%;background:transparent;box-shadow:-5px 5px 0 -4px currentColor}
+.ui-icon-order:before{left:5px;top:6px;width:20px;height:1.5px;background:currentColor;box-shadow:0 6px 0 currentColor,0 12px 0 currentColor}
+.ui-icon-order:after{left:1px;top:5px;width:2px;height:2px;border-radius:50%;background:currentColor;box-shadow:0 6px 0 currentColor,0 12px 0 currentColor}
+.ui-icon-training:before{left:8px;top:3px;width:2px;height:21px;background:currentColor;border-radius:2px}
+.ui-icon-training:after{left:3px;top:4px;width:11px;height:11px;border-top:2px solid currentColor;border-left:2px solid currentColor;transform:rotate(45deg)}
+.ui-icon-collection:before{left:5px;top:2px;width:19px;height:23px;border:1.5px solid currentColor;border-radius:3px;transform:skewY(-3deg)}
+.ui-icon-collection:after{left:9px;top:7px;width:11px;height:1.5px;background:currentColor;box-shadow:0 5px 0 currentColor}
+.ui-icon-settings:before{left:4px;top:4px;width:14px;height:14px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 0 4px transparent}
+.ui-icon-settings:after{left:8px;top:8px;width:6px;height:6px;border:1.5px solid currentColor;border-radius:50%}
+.ui-icon-settings{filter:drop-shadow(0 0 5px rgba(105,188,240,.18))}
 </style></head><body><canvas id="game"></canvas><div class="panel"><div class="top"><span class="brand">BASEBALL 3D</span><div class="topstats"><span id="record-top" class="record">0勝 0試合</span><span id="currency" class="currency">1,000</span></div></div><div id="home" class="screen home">
   <div class="home-premium-shell">
     <section class="home-hero-card">
@@ -758,8 +781,8 @@ body{background:#040a11!important;color:var(--ui-text)}
           <span><b>AI戦</b><small>1試合を開始</small></span><em>▶</em>
         </button>
         <div class="home-quick-row">
-          <button class="home-quick-card online" data-mode="online-lobby" type="button"><span>⚔</span><b>オンライン戦</b><small>1対1 P2P</small></button>
-          <button class="home-quick-card scout" data-mode="gacha" type="button"><span>✦</span><b>スカウト</b><small>注目選手を獲得</small></button>
+          <button class="home-quick-card online" data-mode="online-lobby" type="button"><span class="ui-icon ui-icon-online" aria-hidden="true"></span><b>オンライン戦</b><small>1対1 P2P</small></button>
+          <button class="home-quick-card scout" data-mode="gacha" type="button"><span class="ui-icon ui-icon-scout" aria-hidden="true"></span><b>スカウト</b><small>注目選手を獲得</small></button>
         </div>
       </div>
     </section>
@@ -767,10 +790,10 @@ body{background:#040a11!important;color:var(--ui-text)}
     <section class="home-command">
       <div class="home-section-title"><span>TEAM MANAGEMENT</span><b>チームを育てる</b></div>
       <div class="home-command-grid">
-        <button data-mode="roster" type="button"><span class="command-icon">◆</span><b>オーダー</b><small>打順・守備・投手</small></button>
-        <button data-mode="training" type="button"><span class="command-icon">↑</span><b>育成</b><small>能力を伸ばす</small></button>
-        <button data-mode="collection" type="button"><span class="command-icon">◎</span><b>選手名鑑</b><small>獲得選手を確認</small></button>
-        <button data-mode="settings" type="button"><span class="command-icon">⚙</span><b>設定</b><small>操作・表示</small></button>
+        <button data-mode="roster" type="button"><span class="command-icon ui-icon ui-icon-order" aria-hidden="true"></span><b>オーダー</b><small>打順・守備・投手</small></button>
+        <button data-mode="training" type="button"><span class="command-icon ui-icon ui-icon-training" aria-hidden="true"></span><b>育成</b><small>能力を伸ばす</small></button>
+        <button data-mode="collection" type="button"><span class="command-icon ui-icon ui-icon-collection" aria-hidden="true"></span><b>選手名鑑</b><small>獲得選手を確認</small></button>
+        <button data-mode="settings" type="button"><span class="command-icon ui-icon ui-icon-settings" aria-hidden="true"></span><b>設定</b><small>操作・表示</small></button>
       </div>
     </section>
 
@@ -785,12 +808,12 @@ body{background:#040a11!important;color:var(--ui-text)}
   </div>
 
   <nav class="home-bottom-nav" aria-label="メインメニュー">
-    <button type="button" class="selected" data-mode="home"><span>⌂</span><b>ホーム</b></button>
-    <button type="button" data-mode="ai-match"><span>⚾</span><b>試合</b></button>
-    <button type="button" data-mode="gacha"><span>✦</span><b>スカウト</b></button>
-    <button type="button" data-mode="roster"><span>◆</span><b>オーダー</b></button>
-    <button type="button" data-mode="training"><span>↑</span><b>育成</b></button>
-    <button type="button" data-mode="collection"><span>◎</span><b>選手</b></button>
+    <button type="button" class="selected" data-mode="home"><span class="ui-icon ui-icon-home" aria-hidden="true"></span><b>ホーム</b></button>
+    <button type="button" data-mode="ai-match"><span class="ui-icon ui-icon-match" aria-hidden="true"></span><b>試合</b></button>
+    <button type="button" data-mode="gacha"><span class="ui-icon ui-icon-scout" aria-hidden="true"></span><b>スカウト</b></button>
+    <button type="button" data-mode="roster"><span class="ui-icon ui-icon-order" aria-hidden="true"></span><b>オーダー</b></button>
+    <button type="button" data-mode="training"><span class="ui-icon ui-icon-training" aria-hidden="true"></span><b>育成</b></button>
+    <button type="button" data-mode="collection"><span class="ui-icon ui-icon-collection" aria-hidden="true"></span><b>選手</b></button>
   </nav>
 </div><div id="view" class="screen view hidden"><div id="card" class="card"></div></div><div id="match-ui" class="screen hidden">
 <div class="match-topbar"><div class="score-pill" id="inning-label">1回表</div><div class="score-pill scoreboard"><span>A <b id="away-score">0</b> - <b id="home-score">0</b> H</span></div><div class="score-pill" id="count-label">B0 S0 O0</div></div>
