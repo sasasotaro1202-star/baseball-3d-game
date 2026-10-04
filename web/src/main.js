@@ -70,7 +70,7 @@ let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhy
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
 let matchMode='AI'; let matchDifficulty='NORMAL'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
 let onlineRevision=0;let onlineSessionStarted=false;let onlineActionSentForPitch=false;
-let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.now();
+let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.now();let stealTargetBase=1;
 const $=id=>document.getElementById(id); const homeUI=$('home'),viewUI=$('view'),card=$('card'),matchUI=$('match-ui'),currency=$('currency');
 function updateProfileUI(){const count=save.collection.length;const power=save.collection.reduce((sum,id)=>{const p=ALL_PLAYERS.find(x=>x.id===id);return sum+(p?Math.round(((p.power||70)+(p.contact||70)+(p.field||70)+(p.control||70))/4):0)},0);$('record').textContent=`${save.wins}勝 ${save.matches}試合`;$('roster-count').textContent=count;$('team-power').textContent=count?Math.round(power/count):'—';}
 function playerCards(){
@@ -609,6 +609,33 @@ function startAIMatch(){
   matchMode='AI';if(!AI_DIFFICULTIES[matchDifficulty])matchDifficulty='NORMAL';onlineRole=null;onlineRevision=0;onlineSessionStarted=false;onlineActionSentForPitch=false;onlineConnection?.close?.();onlineConnection=null;onlineConnected=false;onlinePendingPitchId=null;onlinePendingPitch=null;
   match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;setMode('match');resetMatchView();updateMatchHUD();scheduleTopPitch(700);
 }
+function getStealCandidate(){
+  const candidates=(match.runners||[]).filter(r=>r.status==='LIVE'&&Number(r.base)>=0&&Number(r.base)<2).sort((a,b)=>Number(b.base)-Number(a.base));
+  if(!candidates.length)return null;
+  const r=candidates[0];return{runnerId:r.id,targetBase:Number(r.base)+1};
+}
+function updateStealButton(){
+  const b=$('steal');if(!b)return;
+  const candidate=getStealCandidate();
+  const show=Boolean(candidate&&isLocalBatter()&&pitchState==='idle'&&!match.ended);
+  b.style.display=show?'block':'none';
+  if(show){stealTargetBase=candidate.targetBase;b.textContent='盗塁 '+candidate.targetBase+'塁';}
+}
+function performSteal(){
+  const candidate=getStealCandidate();
+  if(!candidate||!isLocalBatter()||pitchState!=='idle'||match.ended)return;
+  if(isOnlineMatch()&&onlineRole==='GUEST'){
+    if(!onlineActionSentForPitch){onlineActionSentForPitch=true;onlineSend({type:'ONLINE_STEAL',runnerId:candidate.runnerId,targetBase:candidate.targetBase});}
+    return;
+  }
+  const result=stealBase(match,candidate.runnerId,candidate.targetBase);
+  match=result.state;
+  matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');
+  updateMatchHUD();updatePremiumHUD();
+  if(isOnlineMatch())onlineRevision+=1,onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
+  if(match.half==='TOP'&&!match.ended&&matchMode==='AI')scheduleTopPitch(450);
+  if(isOnlineMatch()&&isLocalPitcher()&&!match.ended)setTimeout(()=>pitch(),450);
+}
 function onlineSignalStatus(textValue){const el=$('online-status');if(el)el.textContent=textValue;}
 function renderOnlineLobby(){
   card.innerHTML='<div class="online-header"><span class="mode-kicker">ONLINE MATCH</span><h2>オンライン戦</h2><p>1対1のP2P対戦。投球・打撃・試合結果を同期します。</p></div>'+
@@ -684,6 +711,11 @@ function handleOnlineMessage(msg){
       resolveRemoteBatting(msg);
     }else if(msg.type==='ONLINE_TAKE'&&match.half==='BOTTOM'&&pitchState==='pitch'){
       resolveRemoteBatting(msg);
+    }else if(msg.type==='ONLINE_STEAL'&&isLocalPitcher()&&pitchState==='idle'){
+      const result=stealBase(match,msg.runnerId,msg.targetBase);
+      match=result.state;onlineRevision+=1;onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
+      matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');updateMatchHUD();updatePremiumHUD();
+      if(!match.ended)setTimeout(()=>pitch(),450);
     }
     return;
   }
@@ -784,6 +816,7 @@ function updateMatchHUD(){
   $('pitch-readout').textContent=pitchState==='pitch'?selectedPitch:'READY';
   $('pitch').querySelector('span').textContent=isOnlineMatch()?'投球':'投球';
   $('pitch').style.display=isLocalPitcher()?'block':'none';
+  updateStealButton();
   $('take').style.display=batting?'block':'none';
   $('swing').style.display=batting?'block':'none';
   document.querySelectorAll('[data-pitch]').forEach(b=>b.style.display=isLocalPitcher()?'block':'none');
@@ -804,7 +837,7 @@ $('aim-area')?.addEventListener('pointermove',e=>{if(!aimDragging)return;if(aimP
 $('aim-area')?.addEventListener('pointerup',e=>{const tap=!aimPointerMoved;aimDragging=false;if(tap&&match.half==='TOP'&&pitchState==='pitch')pointerSwing();aimPointerStart=null;aimPointerMoved=false;$('aim-area').releasePointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointercancel',e=>{aimDragging=false;aimPointerStart=null;aimPointerMoved=false;});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
-$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setBattingMode('CONTACT');
+$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('steal')?.addEventListener('click',performSteal);$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setBattingMode('CONTACT');
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
 function animate(){requestAnimationFrame(animate);const now=performance.now();const frameDt=Math.max(0,Math.min(.05,(now-lastFrameTime)/1000));lastFrameTime=now;updateRunnerVisuals();animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[fielderIndex];const defender=fieldingPlayer(fielderIndex);const reaction=Math.max(.75,Math.min(1.35,(Number(defender?.reaction||defender?.field||70)/70)));const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14*reaction,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2*reaction)}}else if(fielderAction!=='idle'&&performance.now()<fielderActionUntil){const lead=fielders[fielderIndex];animatePlayer(lead,fielderAction,.5)}else if(fielderAction!=='idle'){fielderAction='idle';}if(pitchState==='pitch'){
   const previous=ballPhysics;
