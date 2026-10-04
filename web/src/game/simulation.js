@@ -52,7 +52,7 @@ function advanceOnSingle(s,{batterSpeed=70,runnerReaction=70}={}){
    if(r.base===2){
      if(speed>=76||(speed>=68&&reaction>=82))advanceRunnerTo(s,r,3);else r.base=2;
    }else if(r.base===1){
-     if(speed>=86&&reaction>=76)r.base=3;else r.base=2;
+     if(speed>=86&&reaction>=76)advanceRunnerTo(s,r,3);else r.base=2;
    }else if(r.base===0)r.base=1;
  }
  const batter=addBatter(s,batterSpeed,runnerReaction);batter.base=0;removeScored(s);
@@ -62,7 +62,7 @@ function advanceOnDouble(s,{batterSpeed=70,runnerReaction=70}={}){
  for(const r of old){
    const speed=Number(r.speed||70),reaction=Number(r.reaction??runnerReaction??70);
    if(r.base===2)advanceRunnerTo(s,r,3);
-   else if(r.base===1){if(speed>=82&&reaction>=75)advanceRunnerTo(s,r,3);else r.base=3;}
+   else if(r.base===1){if(speed>=82&&reaction>=75)advanceRunnerTo(s,r,3);else r.base=2;}
    else if(r.base===0){if(speed>=88&&reaction>=78)advanceRunnerTo(s,r,3);else r.base=2;}
  }
  const batter=addBatter(s,batterSpeed,runnerReaction);batter.base=1;removeScored(s);
