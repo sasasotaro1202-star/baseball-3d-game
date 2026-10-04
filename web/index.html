@@ -564,7 +564,7 @@ body{background:#050505}
 <button id="swing" class="swing-main"><span>スイング</span><small>タップで打つ</small></button>
 <button id="pitch"><span>投球</span><small>タップで投げる</small></button>
 </div>
-<button id="matchback" class="danger" style="position:absolute;right:8px;top:48px;z-index:13;pointer-events:auto;border:1px solid #ffffff25;background:#050a11dd;color:#fff;border-radius:5px;padding:6px 8px;font-size:9px">終了</button>
+<button id="bullpen" class="bullpen-button" type="button">継投</button><button id="matchback" class="danger" style="position:absolute;right:8px;top:48px;z-index:13;pointer-events:auto;border:1px solid #ffffff25;background:#050a11dd;color:#fff;border-radius:5px;padding:6px 8px;font-size:9px">終了</button>
 <div id="fielding-banner" class="fielding-banner">守備操作</div><div id="fielding-console" class="fielding-console"><div id="fielding-pad" class="fielding-pad"><span>MOVE</span></div><div class="throw-grid"><button type="button" data-throw-base="1">1塁</button><button type="button" data-throw-base="2">2塁</button><button type="button" data-throw-base="3">3塁</button><button type="button" data-throw-base="4">本塁</button></div></div>
 </div></div><script>
 window.__fallbackRender=function(mode){
@@ -1478,4 +1478,4 @@ document.querySelectorAll('[data-ai-difficulty]').forEach(b=>b.addEventListener(
  .throw-console{grid-template-columns:repeat(5,34px)}
  .throw-console button{height:29px;font-size:7px}
 }
-</style>
+</style><style id="bullpen-control-v1">#match-ui .bullpen-button{display:none;position:absolute;left:8px;top:55px;z-index:15;height:27px;padding:0 9px;border-radius:6px;border:1px solid #ffffff1b;background:#050b12e8;color:#cfd9e2;font-size:7px;font-weight:900;box-shadow:0 4px 10px #0008;pointer-events:auto}#match-ui .bullpen-button:active{transform:scale(.98)}</style>
