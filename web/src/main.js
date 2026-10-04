@@ -8,8 +8,8 @@ import {modeLabel} from './game/ui.js';
 import {getCloudSave,putCloudSave,getCloudUser,signInWithMagicLink,signOutCloud} from './game/cloud-save.js';
 import {ensurePresentationLayer,playGachaReveal,playMatchEvent} from './game/presentation.js';
 import {createPlayerModel,animatePlayer} from './game/player-models.js';
-import {choosePitch,chooseSwing} from './game/ai.js';
-import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward,releasePlayer} from './game/player-system.js';
+import {choosePitch,chooseSwing,AI_DIFFICULTIES} from './game/ai.js';
+import {cardModel,modelConfig,aiProfile,developmentFor,trainPlayer,duplicateReward,releasePlayer,triggerSpecialAbility} from './game/player-system.js';
 import {createOnlineHost,createOnlineGuest,acceptOnlineAnswer,isOnlineSupported} from './game/online.js';
 
 ensurePresentationLayer();
@@ -51,7 +51,7 @@ for(const [x,z] of [[0,-8],[8,-8],[8,0],[0,0]]){const b=new THREE.Mesh(new THREE
 let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhysics=null;let pendingOutcome=null;
 
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
-let matchMode='AI'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
+let matchMode='AI'; let matchDifficulty='NORMAL'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
 let fielderAction='idle';let fielderActionUntil=0;
 const $=id=>document.getElementById(id); const homeUI=$('home'),viewUI=$('view'),card=$('card'),matchUI=$('match-ui'),currency=$('currency');
 function updateProfileUI(){const count=save.collection.length;const power=save.collection.reduce((sum,id)=>{const p=ALL_PLAYERS.find(x=>x.id===id);return sum+(p?Math.round(((p.power||70)+(p.contact||70)+(p.field||70)+(p.control||70))/4):0)},0);$('record').textContent=`${save.wins}勝 ${save.matches}試合`;$('roster-count').textContent=count;$('team-power').textContent=count?Math.round(power/count):'—';}
@@ -391,7 +391,8 @@ function pitch(){
     const decision=choosePitch({
       count:[match.balls,match.strikes],
       runnerThreat:(match.runners||[]).length/3,
-      profile:aiProfile(pitcherPlayer,developmentFor(save,pitcherPlayer.id))
+      profile:gameplayProfile(pitcherPlayer),
+      difficulty:matchDifficulty
     });
     selectedPitch=typeof decision==='string'?decision:(decision?.pitch||selectedPitch);
     const control=Math.max(40,Math.min(95,Number(pitcherPlayer.control||70)));
@@ -402,7 +403,9 @@ function pitch(){
   }
   updatePitchControlUI();window.__lastPitch=selectedPitch;
   const pitchInfo=PITCHES[selectedPitch]||PITCHES.FASTBALL;
-  window.__pitchVelocity=Math.round((pitchInfo.speed||90)*(0.97+Math.random()*.06));window.__pitchStart=performance.now();
+  const arm=Math.max(45,Math.min(99,Number(pitcherPlayer.arm||70)));
+  const velocityFactor=.91+(arm/99)*.10;
+  window.__pitchVelocity=Math.round((pitchInfo.speed||90)*velocityFactor*(0.985+Math.random()*.03));window.__pitchStart=performance.now();
   const id=(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random());
   ballPhysics=createPitchPhysics({speedMph:window.__pitchVelocity,targetX:pitchTarget.x,targetY:pitchTarget.y,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3});
   if(isOnlineMatch()){onlinePendingPitchId=id;onlinePendingPitch={id,pitch:selectedPitch,target:pitchTarget,velocity:window.__pitchVelocity,breakX:(Number(pitchInfo.break)||0)*(selectedPitch==='CURVEBALL'?-1:1),breakY:(Number(pitchInfo.break)||0)*.3};onlineSend({type:'ONLINE_PITCH',...onlinePendingPitch});}
@@ -453,8 +456,8 @@ function finishPlay(outcome){
   if(match.half==='TOP'&&!match.ended&&!['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT'].includes(outcome))scheduleTopPitch(450);
 }
 function aiBatterAtBat(){
-  const batterPlayer=lineupPlayer(0),prof=aiProfile(batterPlayer,developmentFor(save,batterPlayer.id));
-  const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',zone:.55,profile:prof});
+  const batterPlayer=lineupPlayer(0),prof=gameplayProfile(batterPlayer);
+  const decision=chooseSwing({pitch:window.__lastPitch||'FASTBALL',zone:.55,profile:prof,difficulty:matchDifficulty});
   const timing=decision.action==='TAKE'?0.2:Math.max(.05,Math.min(.98,decision.timing));
   const contact=decision.action==='TAKE'?0.08:decision.contact;
   const outcome=decision.action==='TAKE'?((Math.random()<.58)?'BALL':'STRIKE'):resolvePitch({pitch:window.__lastPitch||'FASTBALL',timing,contact,power:prof.powerRisk});
@@ -542,8 +545,22 @@ function onlineRosterPlayer(side,index=0){
   const id=ids[index%Math.max(1,ids.length)];
   return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[index%ALL_PLAYERS.length];
 }
+function gameplayProfile(player){
+  const prof=aiProfile(player,developmentFor(save,player.id));
+  for(const [id] of (player?.abilities||[])){
+    if(!triggerSpecialAbility(player,id))continue;
+    if(['power_hitter','pull_power','legend_power'].includes(id))prof.powerRisk=Math.min(1,prof.powerRisk+.08);
+    if(['contact_hitter','clutch','two_strike','legend_contact'].includes(id))prof.contactFocus=Math.min(1,prof.contactFocus+.08);
+    if(['walk_machine','plate_discipline'].includes(id))prof.selectivity=Math.min(1,prof.selectivity+.08);
+    if(['first_step','range','sure_hands','legend_field'].includes(id))prof.reaction=Math.min(1,prof.reaction+.10);
+    if(['strong_arm','quick_throw'].includes(id))prof.arm=Math.min(1,prof.arm+.10);
+    if(['speedster','base_running','legend_speed'].includes(id))prof.stealRisk=Math.min(1,prof.stealRisk+.10);
+    if(['ace','control_artist','pitch_mix','consistency'].includes(id))prof.aggression=Math.min(1,prof.aggression+.06);
+  }
+  return prof;
+}
 function startAIMatch(){
-  matchMode='AI';onlineRole=null;onlineConnection?.close?.();onlineConnection=null;onlineConnected=false;onlinePendingPitchId=null;onlinePendingPitch=null;
+  matchMode='AI';matchDifficulty=document.querySelector('[data-ai-difficulty].selected')?.dataset.aiDifficulty||'NORMAL';if(!AI_DIFFICULTIES[matchDifficulty])matchDifficulty='NORMAL';onlineRole=null;onlineConnection?.close?.();onlineConnection=null;onlineConnected=false;onlinePendingPitchId=null;onlinePendingPitch=null;
   match=createMatchState();matchResultRecorded=false;$('swing').disabled=false;$('pitch').disabled=false;setMode('match');resetMatchView();updateMatchHUD();scheduleTopPitch(700);
 }
 function onlineSignalStatus(textValue){const el=$('online-status');if(el)el.textContent=textValue;}
