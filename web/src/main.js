@@ -365,7 +365,9 @@ function updatePremiumHUD(){
   $('mph-batter').textContent=batting?(p?.name||'打者'):'CPU打者';
   $('mph-rank').textContent=pc?.rank||'—';$('mph-ovr').textContent=pc?'OVR '+pc.overall:'AI';
   $('mph-balls').textContent='B '+match.balls;$('mph-strikes').textContent='S '+match.strikes;
-  $('mph-pitches').textContent='P '+(match.pitches||0);
+  $('mph-pitches').textContent='P '+(match.pitches||0);\n  const pitcherSide=match.half==='TOP'?'home':'away';
+  const stamina=Math.round(Math.max(0,Math.min(100,Number(match.pitcherStamina?.[pitcherSide]??100))));
+  const st=$('pitcher-stamina');if(st)st.textContent='ST '+stamina;
   document.querySelectorAll('.mph-base i').forEach(x=>x.classList.toggle('on',false));
   (match.runners||[]).forEach(r=>{const b=document.querySelector('.mph-base i[data-base="'+r.base+'"]');if(b)b.classList.add('on')});
 }
@@ -897,7 +899,7 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
     }
   }
 }else if(pitchState==='hit'){
-  ballPhysics=ballPhysics?stepBallPhysics(ballPhysics,.016):null;
+  ballPhysics=ballPhysics?stepBallPhysics(ballPhysics,frameDt):null;
   if(!ballPhysics||!isFiniteBallPhysics(ballPhysics)){window.__lastGameError='INVALID_BATTED_BALL_PHYSICS';ballPhysics=null;pendingOutcome=null;finishPlay('OUT');}
   else{
     t=ballPhysics.time;ball.position.set(...ballPhysics.position);
@@ -937,4 +939,4 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
   camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)
 }renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
-window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-match-modes-v14";
+window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-playable-modes-v15";
