@@ -845,7 +845,8 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
           fielderCatch:defender.catch||defender.field||70,
           fielderArm:defender.arm||defender.field||70,
           throwDistance:completed==='SINGLE'?27:42,
-          batterSpeed:((lineupPlayer(0)?.speed)||70)
+          batterSpeed:((lineupPlayer(0)?.speed)||70),
+          difficulty:isOnlineMatch()?'NORMAL':matchDifficulty
         });
         fielderAction=finalResult.throwSuccess?'throw':finalResult.catchSuccess?'catch':'idle';fielderActionUntil=performance.now()+280;
         matchEvent(finalResult.event==='THROW_ON_TARGET'?'OUT AT BASE':finalResult.event==='CATCH_MISS'?'CATCH MISS':finalResult.event==='FIELDING_ERROR'?'ERROR':finalResult.event==='CLEAN_CATCH'?'CATCH':'IN PLAY','field');
