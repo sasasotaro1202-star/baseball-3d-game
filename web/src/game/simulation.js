@@ -117,7 +117,7 @@ export function applyOutcome(input,outcome,options={}){const s=cloneState(input)
   s.pitcherStamina[pitchingSide]=Math.max(0,Math.min(100,Number(s.pitcherStamina[pitchingSide]??100)-fatigueCost));
 if(outcome==='BALL'){s.balls++;if(s.balls>=4){resetCount(s);walk(s);s.lastOutcome='WALK';advanceBatterIndex(s);checkGameEndAfterScore(s);}else s.lastOutcome='BALL';syncBases(s);return s;}
 if(outcome==='FOUL'){s.strikes=Math.min(2,s.strikes+1);s.lastOutcome='FOUL';return s;}
-if(outcome==='STRIKE'){s.strikes++;if(s.strikes>=3){s.outs++;resetCount(s);s.lastOutcome='STRIKEOUT';advanceBatterIndex(s);return rotateHalf(s);}s.lastOutcome='STRIKE';return s;}
+if(outcome==='STRIKE'||outcome==='STRIKEOUT'){if(outcome==='STRIKEOUT'||s.strikes>=2){s.outs++;resetCount(s);s.lastOutcome='STRIKEOUT';advanceBatterIndex(s);return rotateHalf(s);}s.strikes++;s.lastOutcome='STRIKE';return s;}
 if(['SINGLE','DOUBLE','TRIPLE','HOME_RUN','GROUND_OUT','FLY_OUT','SAC_BUNT','SAC_FLY'].includes(outcome)){const next=advanceRunners(s,{result:outcome,...options});if(terminalPlateAppearance(outcome))advanceBatterIndex(next);return next;}
 if(outcome==='OUT'){s.outs++;resetCount(s);s.lastOutcome='OUT';advanceBatterIndex(s);return rotateHalf(s);}
 if(outcome==='DOUBLE_PLAY')return doublePlay(s);
