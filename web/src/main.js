@@ -327,6 +327,7 @@ function renderGacha(){
       const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
       if(best?.result?.player){
         try{
+          const bestCard=cardModel(best.result.player,developmentFor(save,best.result.player.id));
           await playGachaReveal({
             rarity:best.result.rarity,
             name:best.result.player.name,
@@ -336,7 +337,10 @@ function renderGacha(){
             duplicate:best.duplicate,
             banner:bannerId,
             cardType:best.result.player.cardType,
-            limitedTheme:best.result.player.limitedTheme
+            limitedTheme:best.result.player.limitedTheme,
+            overall:bestCard.overall,
+            position:best.result.player.pos,
+            stats:bestCard.stats
           });
         }catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
       }
