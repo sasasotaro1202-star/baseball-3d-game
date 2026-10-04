@@ -19,6 +19,7 @@ const checks = [
   ["online match entry", html.includes('data-mode="online-lobby"') && html.includes('オンライン戦')],
   ["P2P transport", js.includes("from './game/online.js'") && js.includes('createOnlineHost') && js.includes('createOnlineGuest') && js.includes('ONLINE_STATE')],
   ["fielding simulation", sim.includes('resolveFieldingPlay') && js.includes('resolveFieldingPlay')],
+  ["fielding controls", html.includes('id="fielding-console"') && html.includes('id="fielding-pad"') && html.includes('data-throw-base="1"')],
   ["batting order state", sim.includes('batterIndex') && js.includes('match.batterIndex')],
   ["online signal encoder", online.includes('encodeSignal') && online.includes('replace(/\\+/g,"-")')],
   ["online role routing", js.includes('function isLocalBatter()') && js.includes('function isLocalPitcher()') && js.includes("matchMode==='ONLINE'")],
