@@ -49,13 +49,16 @@ function waitForIceGathering(pc,timeoutMs=8000){
 }
 
 function attachChannel(channel,{onOpen,onClose,onMessage,onError}={}){
+  const allowed=new Set(["ONLINE_READY","ONLINE_READY_ACK","ONLINE_START","ONLINE_PITCH","ONLINE_SWING","ONLINE_TAKE","ONLINE_CONTACT","ONLINE_STATE"]);
   channel.onopen=()=>onOpen?.();
   channel.onclose=()=>onClose?.();
   channel.onerror=event=>onError?.(event);
   channel.onmessage=event=>{
+    if(typeof event.data!=="string"||event.data.length>50000)return;
     let message;
     try{message=JSON.parse(event.data);}catch{return;}
-    if(message&&typeof message.type==="string")onMessage?.(message);
+    if(!message||message.v!==1||!allowed.has(message.type))return;
+    onMessage?.(message);
   };
 }
 
