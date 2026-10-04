@@ -110,6 +110,21 @@ function playerTeamColor(p){
   return palette[p.teamCode]||'#7f8fa4';
 }
 function playerRankClass(rank){return ['S','A','B','C','D','F'].includes(rank)?rank:'B';}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function playerPortraitMarkup(p,{compact=false}={}){
+  const name=escapeHtml(p?.name||'PLAYER');
+  const id=Math.abs(Number(p?.id)||0);
+  const skin=['#f2c2a7','#dba27c','#a96f4d','#8f5b42'][id%4];
+  const hair=['#151922','#34271f','#5d4634','#202b36'][id%4];
+  const jersey=playerTeamColor(p);
+  const initials=escapeHtml(String(p?.name||'?').replace(/[\s・—–-]/g,'').slice(0,3));
+  const pos=escapeHtml(String(p?.pos||'PLAYER'));
+  const grad='gp'+id+(compact?'c':'f');
+  if(p?.image){
+    return '<div class="generated-player-portrait '+(compact?'compact':'full')+'"><img class="player-photo" src="'+escapeHtml(p.image)+'" alt="'+name+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><svg class="generated-player-art" viewBox="0 0 160 210" aria-label="'+name+'" style="display:none"><defs><linearGradient id="'+grad+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+jersey+'"/><stop offset="1" stop-color="#07101a"/></linearGradient></defs><rect width="160" height="210" fill="url(#'+grad+')"/><circle cx="80" cy="73" r="36" fill="'+skin+'"/><path d="M45 72c2-35 68-48 75 0-10-12-25-18-40-16-15 0-26 5-35 16Z" fill="'+hair+'"/><path d="M49 108h62c8 0 17 7 22 22l17 80H10l17-80c5-15 14-22 22-22Z" fill="'+jersey+'"/><path d="M58 111h44l-8 31H66Z" fill="#f5f7fa" opacity=".9"/><circle cx="67" cy="74" r="3" fill="#1b1b1b"/><circle cx="93" cy="74" r="3" fill="#1b1b1b"/><path d="M70 91c7 5 13 5 20 0" stroke="#6a3f32" stroke-width="3" fill="none" stroke-linecap="round"/><text x="80" y="151" text-anchor="middle" fill="#fff" font-size="23" font-weight="900">'+initials+'</text><text x="80" y="193" text-anchor="middle" fill="#ffffffaa" font-size="10" font-weight="800">'+pos+'</text></svg></div>';
+  }
+  return '<div class="generated-player-portrait '+(compact?'compact':'full')+'"><svg class="generated-player-art" viewBox="0 0 160 210" aria-label="'+name+'"><defs><linearGradient id="'+grad+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+jersey+'"/><stop offset="1" stop-color="#07101a"/></linearGradient></defs><rect width="160" height="210" fill="url(#'+grad+')"/><circle cx="80" cy="73" r="36" fill="'+skin+'"/><path d="M45 72c2-35 68-48 75 0-10-12-25-18-40-16-15 0-26 5-35 16Z" fill="'+hair+'"/><path d="M49 108h62c8 0 17 7 22 22l17 80H10l17-80c5-15 14-22 22-22Z" fill="'+jersey+'"/><path d="M58 111h44l-8 31H66Z" fill="#f5f7fa" opacity=".9"/><circle cx="67" cy="74" r="3" fill="#1b1b1b"/><circle cx="93" cy="74" r="3" fill="#1b1b1b"/><path d="M70 91c7 5 13 5 20 0" stroke="#6a3f32" stroke-width="3" fill="none" stroke-linecap="round"/><text x="80" y="151" text-anchor="middle" fill="#fff" font-size="23" font-weight="900">'+initials+'</text><text x="80" y="193" text-anchor="middle" fill="#ffffffaa" font-size="10" font-weight="800">'+pos+'</text></svg></div>';
+}
 function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
   const c=cardModel(p,developmentFor(save,p.id));
   const level=developmentFor(save,p.id)?.level||1;
@@ -124,12 +139,8 @@ function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
     ? [['球威',c.stats.power],['制球',c.stats.control],['スタ',c.stats.stamina],['肩',c.stats.arm],['選球',c.stats.vision]]
     : [['ミート',c.stats.contact],['パワー',c.stats.power],['走力',c.stats.speed],['肩力',c.stats.arm],['守備',c.stats.field]];
   const statHtml=statRows.map(([label,value])=>'<span><small>'+label+'</small><b>'+value+'</b></span>').join('');
-  const photo=owned&&p.image
-    ? '<img src="'+p.image+'" alt="" loading="lazy" referrerpolicy="no-referrer">'
-    : '';
-  const fallback=owned
-    ? '<div class="sc-card-avatar-fallback" style="display:'+(p.image?'none':'grid')+'"><strong>'+initials+'</strong><small>'+role+'</small></div>'
-    : '<div class="sc-card-avatar-fallback locked"><strong>?</strong><small>LOCKED</small></div>';
+  const photo=owned?playerPortraitMarkup(p):'';
+  const fallback=owned?'':'<div class="sc-card-avatar-fallback locked"><strong>?</strong><small>LOCKED</small></div>';
   return '<article class="sc-player-card rank-'+playerRankClass(c.rank)+' '+(owned?'':'is-locked')+'" data-player-id="'+p.id+'" style="--team:'+color+'">'+
     '<div class="sc-card-ribbon"><span>'+c.rank+' RANK</span><b>'+(p.limited?'LIMITED':'2026 SERIES')+'</b></div>'+
     '<div class="sc-card-main">'+
@@ -308,11 +319,10 @@ function renderGacha(){
   const updateBalance=()=>{coinsEl.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString('ja-JP');};
 
   function featuredCard(p,index){
-    const initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
     const featuredCardModel=cardModel(p,developmentFor(save,p.id));
     const tag=p.limited?'LIMITED':(p.featuredTag||'FEATURED');
     return '<button type="button" class="gacha-feature-card '+(p.limited?'limited':'')+'" data-player-id="'+escape(p.id)+'">'+
-      (p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+      playerPortraitMarkup(p,{compact:true})+
       '<span class="gacha-feature-rank">'+escape(p.rank||'—')+'</span>'+
       '<div class="gacha-feature-meta"><strong>'+escape(p.name)+'</strong><b>OVR '+escape(featuredCardModel.overall)+'</b><small>'+escape(tag)+' · '+escape(p.teamCode||'NPB')+' · '+escape(p.pos||'PLAYER')+'</small></div>'+
     '</button>';
@@ -350,10 +360,10 @@ function renderGacha(){
     const dupCount=resultCount-newCount;
     const hero=playerCardMarkup(p,{owned:true,release:false,showAbilities:true});
     const mini=sorted.slice(0,10).map((x,index)=>{
-      const player=x.result.player,initials=String(player.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
+      const player=x.result.player;
       return '<button type="button" class="gacha-result-card rank-'+escape(x.result.rank)+' '+(x.result.limited?'limited':'')+'" data-player-id="'+escape(player.id)+'">'+
         '<span class="result-badge">'+escape(x.result.rank)+'</span>'+
-        (player.image?'<img src="'+escape(player.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+        playerPortraitMarkup(player,{compact:true})+
         '<strong>'+escape(player.name)+'</strong>'+
         '<small>OVR '+escape(cardModel(player,developmentFor(save,player.id)).overall)+' · '+escape(player.teamCode||'NPB')+' · '+escape(player.pos||'PLAYER')+(x.result.limited?' · LIMITED':'')+'</small>'+
         (x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':index===0&&bonusApplied?'<em>10連保証枠</em>':'')+
@@ -362,7 +372,7 @@ function renderGacha(){
     resultEl.innerHTML=
       '<div class="results-head"><div><b>'+resultCount+'連 結果</b><small>新規 '+newCount+' · 重複 '+dupCount+(bonusApplied?' · B以上確定':'')+'</small></div><span>RESULTS</span></div>'+
       '<div class="gacha-result-feature">'+
-        '<div class="gacha-result-feature-art">'+(p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>')+'</div>'+
+        '<div class="gacha-result-feature-art">'+playerPortraitMarkup(p,{compact:true})+'</div>'+
         '<div class="gacha-result-feature-copy"><small>BEST RESULT · '+escape(best.result.rank)+' RANK</small><strong>'+escape(p.name)+'</strong><span>'+escape(p.pos||'PLAYER')+' · OVR '+(cardModel(p,developmentFor(save,p.id)).overall||'—')+'</span><button type="button" id="result-detail">選手詳細</button></div>'+
       '</div>'+
       '<div class="gacha-result-grid">'+mini+'</div>';
@@ -419,7 +429,8 @@ function renderGacha(){
           limitedTheme:best.result.player.limitedTheme,
           overall:bestCard.overall,
           position:best.result.player.pos,
-          stats:bestCard.stats
+          stats:bestCard.stats,
+          portrait:playerPortraitMarkup(best.result.player)
         });
       }catch(revealErr){console.warn('gacha reveal skipped',revealErr);}
     }catch(err){
@@ -701,8 +712,8 @@ function syncVisualPlayers(){
   }
 }
 function miniPlayer(p,label){
-  const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'',team=p.teamCode||'NPB',initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,2);
-  const portrait=img?'<img src="'+img+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<span class="lineup-avatar">'+initials+'</span>';
+  const c=cardModel(p,developmentFor(save,p.id)),team=p.teamCode||'NPB',initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,2);
+  const portrait=playerPortraitMarkup(p,{compact:true})||'<span class="lineup-avatar">'+initials+'</span>';
   return '<div class="lineup-slot premium-lineup-slot"><div class="lineup-slot-top"><b>'+label+'</b><i>'+team+'</i></div><div class="lineup-slot-body">'+portrait+'<div><strong>'+c.name+'</strong><small>'+c.pos+' · '+c.rank+' · OVR '+c.overall+'</small></div></div></div>';
 }
 function renderRoster(){
@@ -718,8 +729,8 @@ function renderRoster(){
 function renderTraining(){
   const players=(save.collection||[]).map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean);
   card.innerHTML='<h2>選手育成</h2><p>選手カードを確認しながら、打撃・パワー・守備を個別強化。</p><div class="player-grid training-grid">'+(players.map(p=>{
-    const d=developmentFor(save,p.id),c=cardModel(p,d),image=p.image||'';
-    const portrait=image?'<img src="'+image+'" alt="" loading="lazy">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span></div>';
+    const d=developmentFor(save,p.id),c=cardModel(p,d);
+    const portrait=playerPortraitMarkup(p,{compact:true});
     return '<div class="player-card training-player"><div class="player-portrait training-portrait">'+portrait+'<span class="training-level">LV '+d.level+'</span></div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+c.pos+' · XP '+d.xp+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="row"><button class="action train" data-id="'+p.id+'" data-focus="contact">ミート</button><button class="action train" data-id="'+p.id+'" data-focus="power">パワー</button><button class="action train" data-id="'+p.id+'" data-focus="field">守備</button></div></div>';
   }).join('')||'<p>スカウトで選手を獲得してください。</p>')+'</div><button class="action back" id="back">ホームへ</button>';
   $('back').onclick=()=>setMode('home');
