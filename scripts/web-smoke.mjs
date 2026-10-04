@@ -49,6 +49,10 @@ const checks = [
   ["premium UI v3", presentation.includes("premium-design-system-v3") && presentation.includes("premium-design-system-v3-hotfix")],
   ["vector navigation icons", html.includes('id="ui-icon-vector-v1"') && html.includes('ui-icon-scout') && html.includes('ui-icon-order')],
   ["scout premium hierarchy", js.includes("gacha-banner-kpis") && js.includes("gacha-feature-meta") && js.includes("OVR ")],
+  ["player portrait fallback", js.includes("function playerPortraitMarkup") && js.includes("generated-player-art") && js.includes("playerPortraitMarkup(p")],
+  ["scout audio", presentation.includes("AudioContext") && presentation.includes("playScoutSequence") && presentation.includes("playScoutTone")],
+  ["scout cinematic layers", presentation.includes("gacha-v4-orbit") && presentation.includes("gacha-v4-energy") && presentation.includes("gacha-v4-scanline")],
+
 ];
 for (const [name, ok] of checks) {
   if (!ok) throw new Error("Smoke check failed: " + name);
