@@ -380,7 +380,8 @@ function updatePremiumHUD(){
   $('mph-batter').textContent=batting?(p?.name||'打者'):'CPU打者';
   $('mph-rank').textContent=pc?.rank||'—';$('mph-ovr').textContent=pc?'OVR '+pc.overall:'AI';
   $('mph-balls').textContent='B '+match.balls;$('mph-strikes').textContent='S '+match.strikes;
-  $('mph-pitches').textContent='P '+(match.pitches||0);\n  const pitcherSide=match.half==='TOP'?'home':'away';
+  $('mph-pitches').textContent='P '+(match.pitches||0);
+  const pitcherSide=match.half==='TOP'?'home':'away';
   const stamina=Math.round(Math.max(0,Math.min(100,Number(match.pitcherStamina?.[pitcherSide]??100))));
   const st=$('pitcher-stamina');if(st)st.textContent='ST '+stamina;
   document.querySelectorAll('.mph-base i').forEach(x=>x.classList.toggle('on',false));
