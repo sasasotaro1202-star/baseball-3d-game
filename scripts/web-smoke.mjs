@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 
 const html = readFileSync("web/index.html", "utf8");
 const js = readFileSync("web/src/main.js", "utf8");
+const sim = readFileSync("web/src/game/simulation.js", "utf8");
+const online = readFileSync("web/src/game/online.js", "utf8");
 const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
@@ -19,7 +21,7 @@ const checks = [
   ["online signal encoder", online.includes('encodeSignal') && online.includes('replace(/\\+/g,"-")')],
   ["online role routing", js.includes('function isLocalBatter()') && js.includes('function isLocalPitcher()') && js.includes("matchMode==='ONLINE'")],
   ["phase-specific match UI", js.includes("matchUI.classList.toggle('batting-phase',batting)") && js.includes("matchUI.classList.toggle('pitching-phase',!batting)")],
-  ["single match score hierarchy", js.includes("$('mph-away').textContent='YOU'") && js.includes("$('mph-home').textContent='CPU'")],
+  ["match score hierarchy", js.includes("mph-away-score") && js.includes("mph-home-score") && js.includes("mph-count")],
   ["pitch control", html.includes('id="pitch"')],
   ["swing control", html.includes('id="swing"')],
   ["Three.js import map", html.includes('"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"')],
