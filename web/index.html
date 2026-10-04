@@ -891,7 +891,67 @@ document.addEventListener('click',function(e){
   window.__fallbackMode(b.dataset.mode,false);
 },true);
 setTimeout(function(){if(!window.__gameReady||window.__lastGameError){window.__fallbackMode('home',true);}},1200);
-</script><script type="module" src="./src/main.js"></script></body></html>
+</script><script type="module" src="./src/main.js"></script>
+<style id="collectible-player-cards-v3">
+/* Clean-room collectible-card presentation: dense, premium, baseball-card hierarchy. */
+.collection-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:0 2px 10px}
+.collection-head .section-kicker{font-size:7px;letter-spacing:.18em;color:#7e8fa2;font-weight:950}
+.collection-head h2{margin:3px 0 2px!important;font-size:25px!important;letter-spacing:-.04em}
+.collection-head p{margin:0!important;max-width:280px;font-size:8px!important;line-height:1.5;color:#788899!important}
+.collection-count{min-width:69px;padding:8px 9px;border-radius:8px;text-align:right;background:linear-gradient(180deg,#14263a,#08121d);border:1px solid rgba(214,180,91,.22)}
+.collection-count strong{font-size:18px;color:#f1d474}.collection-count span{font-size:8px;color:#8e9aa6}.collection-count small{display:block;margin-top:1px;font-size:5px;color:#657586;letter-spacing:.12em}
+.collection-filter-row{display:flex;gap:4px;overflow:hidden;margin:0 0 8px}
+.collection-filter-row span{padding:5px 7px;border:1px solid rgba(255,255,255,.08);background:#07111b;border-radius:999px;color:#8795a3;font-size:6px;font-weight:900;white-space:nowrap}
+.collection-filter-row span:first-child{background:#172c40;color:#f0cf73;border-color:#566f84}
+.sc-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding-bottom:8px}
+.sc-player-card{position:relative;overflow:hidden;min-width:0;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:
+ linear-gradient(155deg,#15283a 0,#091521 53%,#050a0f 100%);
+ box-shadow:0 8px 16px rgba(0,0,0,.25);padding:6px;cursor:pointer;isolation:isolate}
+.sc-player-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:
+ linear-gradient(135deg,rgba(255,255,255,.07),transparent 28%),
+ radial-gradient(circle at 90% 0, color-mix(in srgb,var(--team) 28%,transparent),transparent 45%);
+ opacity:.9}
+.sc-player-card:after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--team);box-shadow:0 0 13px color-mix(in srgb,var(--team) 48%,transparent)}
+.sc-player-card.rank-S{border-color:rgba(231,199,105,.55);box-shadow:0 10px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)}
+.sc-player-card.rank-A{border-color:rgba(105,156,206,.35)}
+.sc-player-card.rank-B{border-color:rgba(112,129,145,.25)}
+.sc-card-ribbon{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;margin:0 0 5px;padding:3px 5px;border-radius:4px;background:linear-gradient(90deg,rgba(3,8,13,.86),rgba(8,16,24,.72));font-size:6px;letter-spacing:.08em}
+.sc-card-ribbon span{font-weight:1000;color:#ebd276}.sc-player-card.rank-A .sc-card-ribbon span{color:#98c9f5}.sc-player-card.rank-B .sc-card-ribbon span{color:#c7d0d8}.sc-card-ribbon b{font-size:5px;color:#7f90a0}
+.sc-card-main{position:relative;z-index:2;display:grid;grid-template-columns:45% 55%;gap:6px;min-height:106px}
+.sc-card-portrait{position:relative;overflow:hidden;border-radius:6px;min-height:106px;background:linear-gradient(145deg,#263a4a,#0a131c);border:1px solid rgba(255,255,255,.09)}
+.sc-card-portrait img{width:100%;height:100%;display:block;object-fit:cover;filter:saturate(.92) contrast(1.04)}
+.sc-card-avatar-fallback{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:4px;background:
+ radial-gradient(circle at 50% 18%,rgba(255,255,255,.11),transparent 25%),
+ linear-gradient(180deg,color-mix(in srgb,var(--team) 40%,#142536),#071019)}
+.sc-card-avatar-fallback strong{font-size:22px;letter-spacing:.06em;color:#edf4f8;text-shadow:0 3px 8px #000}
+.sc-card-avatar-fallback small{font-size:5px;color:#9caab7;letter-spacing:.12em}
+.sc-card-avatar-fallback.locked{background:linear-gradient(180deg,#15202a,#070b10)}
+.sc-card-avatar-fallback.locked strong{font-size:34px;color:#677786}
+.sc-card-team-dot{position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--team);border:1px solid rgba(255,255,255,.45);box-shadow:0 0 9px color-mix(in srgb,var(--team) 55%,transparent)}
+.sc-card-copy{position:relative;min-width:0;display:grid;grid-template-rows:auto auto auto 1fr;align-content:start}
+.sc-card-team{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:6px;color:#8fa0ae;white-space:nowrap}
+.sc-card-team span{min-width:0;overflow:hidden;text-overflow:ellipsis}.sc-card-team em{font-style:normal;padding:2px 3px;border-radius:3px;background:#071019;color:#c8d3dc;font-weight:900}
+.sc-card-copy h3{margin:4px 0 3px;font-size:13px;line-height:1.05;letter-spacing:-.03em;color:#f4f7fa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-card-position{display:flex;align-items:center;gap:3px;flex-wrap:wrap}.sc-card-position b{padding:3px 5px;border-radius:4px;background:#08131d;border:1px solid rgba(255,255,255,.08);color:#f0d175;font-size:6px}.sc-card-position span{font-size:5px;color:#778898}
+.sc-card-rating{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;align-items:end;column-gap:4px;align-self:end;padding-top:5px}
+.sc-card-rating strong{grid-row:1/-1;font-size:34px;line-height:.8;letter-spacing:-.08em;color:#f5f8fb;text-shadow:0 3px 10px #0009}
+.sc-card-rating span{font-size:6px;letter-spacing:.14em;color:#7f92a4;font-weight:1000}.sc-card-rating small{font-size:5px;color:#b4c0ca}
+.sc-card-stats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08)}
+.sc-card-stats span{display:grid;justify-items:center;gap:1px;min-width:0}.sc-card-stats small{font-size:5px;color:#6f8090}.sc-card-stats b{font-size:9px;color:#e4ebf0}
+.sc-card-bottom{position:relative;z-index:2;display:grid;grid-template-columns:1fr auto;gap:5px;align-items:end;margin-top:5px}
+.sc-card-abilities{display:flex;gap:2px;overflow:hidden}
+.sc-card-ability{display:grid;grid-template-columns:1fr auto;gap:2px;min-width:0;max-width:48%;padding:4px 5px;border-radius:4px;background:#0a1824;border:1px solid rgba(255,255,255,.07)}
+.sc-card-ability b{font-size:5px;color:#c7d0d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sc-card-ability em{font-style:normal;font-size:5px;color:#d4b967}
+.sc-card-ability.special{border-color:rgba(214,180,91,.26);background:linear-gradient(180deg,#1a2a27,#0a1517)}
+.sc-card-empty{font-size:5px;color:#667787}.sc-card-id{font-size:5px;color:#5c6c7a;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sc-card-release{position:absolute;right:5px;top:30px;z-index:5;border:1px solid rgba(255,255,255,.13);background:#03070bdc;color:#aab7c2;border-radius:5px;padding:3px 5px;font-size:5px;font-weight:900;opacity:0;transition:opacity .15s}.sc-player-card:hover .sc-card-release{opacity:1}
+.sc-player-card.is-locked{cursor:pointer;filter:saturate(.55)}.sc-player-card.is-locked .sc-card-main{opacity:.82}
+.sc-player-card.is-locked .sc-card-rating strong{color:#5b6874}.sc-player-card.is-locked .sc-card-stats{opacity:.45}.sc-player-card.is-locked .sc-card-bottom{opacity:.35}
+@media(max-width:390px){
+  .sc-player-grid{gap:5px}.sc-player-card{padding:5px}.sc-card-main{grid-template-columns:43% 57%;min-height:100px}.sc-card-portrait{min-height:100px}.sc-card-copy h3{font-size:12px}.sc-card-rating strong{font-size:31px}.sc-card-stats b{font-size:8px}.sc-card-ability{padding:3px 4px}
+}
+@media(min-width:700px){.sc-player-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sc-player-card{padding:8px}}
+</style></body></html>
 <style>
 /* Compact encyclopedia: smaller cards, but name/rank/OVR/face remain readable. */
 .view .player-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
