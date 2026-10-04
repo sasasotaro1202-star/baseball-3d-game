@@ -95,7 +95,7 @@ function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
     : [['ミート',c.stats.contact],['パワー',c.stats.power],['走力',c.stats.speed],['肩力',c.stats.arm],['守備',c.stats.field]];
   const statHtml=statRows.map(([label,value])=>'<span><small>'+label+'</small><b>'+value+'</b></span>').join('');
   const photo=owned&&p.image
-    ? '<img src="'+p.image+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'grid\\'">'
+    ? '<img src="'+p.image+'" alt="" loading="lazy" referrerpolicy="no-referrer">'
     : '';
   const fallback=owned
     ? '<div class="sc-card-avatar-fallback" style="display:'+(p.image?'none':'grid')+'"><strong>'+initials+'</strong><small>'+role+'</small></div>'
