@@ -15,7 +15,7 @@ import {createOnlineHost,createOnlineGuest,acceptOnlineAnswer,isOnlineSupported}
 ensurePresentationLayer();
 const canvas=document.querySelector('#game');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight,false);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight,false); renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.08;
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x08111f); scene.fog=new THREE.Fog(0x08111f,35,110);
 const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,200); camera.position.set(0,16,27); camera.lookAt(0,2,-8);
 scene.add(new THREE.HemisphereLight(0xffffff,0x203040,2.2));
@@ -65,6 +65,36 @@ const wall=new THREE.Mesh(new THREE.CylinderGeometry(28,28,3,64,1,true,0,Math.PI
 wall.rotation.y=Math.PI;wall.position.set(0,1,9);scene.add(wall);
 const baseMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.7});
 for(const [x,z] of [[0,-8],[8,-8],[8,0],[0,0]]){const b=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.5),baseMat);b.position.set(x,.1,z);b.rotation.y=Math.PI/4;scene.add(b);}
+
+function addPremiumStadiumDressing(){
+  const stripeMatA=new THREE.MeshStandardMaterial({color:0x2f8139,roughness:.95});
+  const stripeMatB=new THREE.MeshStandardMaterial({color:0x276f31,roughness:.95});
+  for(let i=0;i<7;i++){
+    const strip=new THREE.Mesh(new THREE.BoxGeometry(46,.01,4),i%2?stripeMatA:stripeMatB);
+    strip.position.set(0,-.13,4+i*4.8);
+    scene.add(strip);
+  }
+  const track=new THREE.Mesh(new THREE.RingGeometry(24.5,27.5,96,1,Math.PI*.04,Math.PI*.92),new THREE.MeshStandardMaterial({color:0x9b6a46,roughness:1}));
+  track.rotation.x=-Math.PI/2;track.position.set(0,-.08,9);scene.add(track);
+  for(const x of [-30,-20,-10,0,10,20,30]){
+    const upper=new THREE.Mesh(new THREE.BoxGeometry(8,1.5,1),new THREE.MeshStandardMaterial({color:0x263746,roughness:.8}));
+    upper.position.set(x,5.2,19);scene.add(upper);
+    const rail=new THREE.Mesh(new THREE.BoxGeometry(8.2,.08,.12),new THREE.MeshStandardMaterial({color:0x60707d,metalness:.35,roughness:.5}));
+    rail.position.set(x,6.0,18.35);scene.add(rail);
+  }
+  for(const x of [-25,25]){
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.10,.14,11,10),new THREE.MeshStandardMaterial({color:0x3e4a55,metalness:.5,roughness:.45}));
+    pole.position.set(x,5.5,16);scene.add(pole);
+    const head=new THREE.Mesh(new THREE.BoxGeometry(1.2,.35,.6),new THREE.MeshStandardMaterial({color:0xdbe3e8,emissive:0x71808d,emissiveIntensity:.55}));
+    head.position.set(x,10.6,15.8);scene.add(head);
+    const light=new THREE.PointLight(0xdbe6ef,1.8,28,.9);light.position.set(x,10.4,15.2);scene.add(light);
+  }
+  const board=new THREE.Mesh(new THREE.BoxGeometry(15,2.7,.35),new THREE.MeshStandardMaterial({color:0x0c1722,metalness:.2,roughness:.6,emissive:0x061421,emissiveIntensity:.7}));
+  board.position.set(0,4.6,23.3);scene.add(board);
+  const boardGlow=new THREE.Mesh(new THREE.BoxGeometry(14.2,2.1,.06),new THREE.MeshBasicMaterial({color:0x1c4057,transparent:true,opacity:.72}));
+  boardGlow.position.set(0,4.6,23.08);scene.add(boardGlow);
+}
+addPremiumStadiumDressing();
 let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhysics=null;let pendingOutcome=null;
 
 let save=loadSave(); let match=createMatchState(); let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
