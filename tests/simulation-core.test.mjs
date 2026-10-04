@@ -43,3 +43,8 @@ test('fielding catch miss turns a catchable fly ball into a live hit',()=>{
  assert.equal(r.finalOutcome,'SINGLE');
  assert.equal(r.catchSuccess,false);
 });
+
+test('runner speed changes advancement on singles',()=>{
+ let fast=createMatchState();fast.runners=[{id:1,base:1,status:'LIVE',speed:95,reaction:90}];fast=applyOutcome(fast,'SINGLE');assert.deepEqual(fast.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,2]);
+ let slow=createMatchState();slow.runners=[{id:1,base:1,status:'LIVE',speed:60,reaction:60}];slow=applyOutcome(slow,'SINGLE');assert.deepEqual(slow.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,1]);
+});
