@@ -213,6 +213,20 @@ function installPremiumDesignSystem(){
         linear-gradient(180deg,#02070d,#081626 60%,#031019)!important;
     }
     body.premium-ui #presentation .gacha-sky{filter:brightness(.9) saturate(.85)}
+    @keyframes scout-stage-pulse{0%,100%{filter:brightness(.90);transform:scale(1)}50%{filter:brightness(1.08);transform:scale(1.025)}}
+    @keyframes scout-ball-spin{to{transform:rotate(360deg)}}
+    @keyframes scout-shine{0%{transform:translateX(-130%) skewX(-18deg);opacity:0}15%{opacity:.65}38%{opacity:0}100%{transform:translateX(150%) skewX(-18deg);opacity:0}}
+    body.premium-ui #presentation .gacha-stage{animation:scout-stage-pulse 2.8s ease-in-out infinite;overflow:hidden}
+    body.premium-ui #presentation .gacha-ball{animation:scout-ball-spin 1.35s linear infinite;filter:drop-shadow(0 0 18px #e6cc7138)}
+    body.premium-ui #presentation .pres-card-frame{position:relative;overflow:hidden}
+    body.premium-ui #presentation .pres-card-frame:after{
+      content:'';position:absolute;inset:-20% 45%;background:linear-gradient(90deg,transparent,#fff8d84c,transparent);
+      transform:translateX(-130%) skewX(-18deg);pointer-events:none;animation:scout-shine 3.8s .4s ease-in-out infinite
+    }
+    body.premium-ui #presentation #gacha-result-banner{padding:6px 9px;border:1px solid #d8bc654d;border-radius:7px;background:#050b12c8;backdrop-filter:blur(6px);box-shadow:0 10px 28px #0008}
+    body.premium-ui #presentation .gacha-result-rank{font-size:22px;font-weight:1000;letter-spacing:.04em}
+    body.premium-ui #presentation .gacha-result-status{font-size:7px;color:#d8bd67;letter-spacing:.14em;font-weight:900}
+    body.premium-ui #presentation .gacha-result-type{font-size:6px;color:#8593a0;margin-top:2px}
     body.premium-ui #presentation .gacha-field{
       background:radial-gradient(ellipse at center,#163b2d,#06150e 72%)!important;
       opacity:.92
