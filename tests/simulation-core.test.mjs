@@ -31,6 +31,24 @@ test('plate appearances advance the batting order after terminal outcomes',()=>{
  assert.equal(s.batterIndex.away,1);
  assert.equal(s.batters,1);
 });
+
+test('walk only forces runners when the preceding bases are occupied',()=>{
+ let s=createMatchState();
+ s.runners=[{id:1,base:1,status:'LIVE',speed:70,reaction:70}];s.bases=[false,true,false];
+ s=applyOutcome(s,'BALL');s=applyOutcome(s,'BALL');s=applyOutcome(s,'BALL');s=applyOutcome(s,'BALL');
+ assert.deepEqual(s.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,1]);
+ let loaded=createMatchState();
+ loaded.runners=[{id:1,base:0,status:'LIVE',speed:70,reaction:70},{id:2,base:1,status:'LIVE',speed:70,reaction:70},{id:3,base:2,status:'LIVE',speed:70,reaction:70}];loaded.bases=[true,true,true];
+ loaded=applyOutcome(loaded,'BALL');loaded=applyOutcome(loaded,'BALL');loaded=applyOutcome(loaded,'BALL');loaded=applyOutcome(loaded,'BALL');
+ assert.equal(loaded.score.away,1);assert.deepEqual(loaded.runners.filter(r=>r.status==='LIVE').map(r=>r.base).sort((a,b)=>a-b),[0,1,2]);
+});
+
+test('successful tag-up to home scores and leaves a valid runner state',()=>{
+ let s=createMatchState();
+ s.runners=[{id:9,base:2,status:'LIVE',speed:95,reaction:95}];s.bases=[false,false,true];
+ const r=tagUp(s,9,3,50,{rng:()=>0});
+ assert.equal(r.success,true);assert.equal(r.state.score.away,1);assert.deepEqual(r.state.bases,[false,false,false]);assert.equal(r.state.runners.length,0);assert.equal(isValidMatchState(r.state),true);
+});
 test('fielding can convert a single into an out on a strong throw',()=>{
  const s=createMatchState();
  const r=resolveFieldingPlay(s,{result:'SINGLE',distance:2,travelTime:.8,fielderReaction:95,fielderField:95,fielderCatch:95,fielderArm:99,throwDistance:15,batterSpeed:55,rng:()=>0});
