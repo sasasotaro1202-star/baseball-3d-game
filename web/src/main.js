@@ -492,7 +492,8 @@ function setFielderTarget(outcome){
 /* Premium console-baseball presentation layer. Clean-room UI; no proprietary assets/code. */
 function lineupPlayer(index){
   const ids=(save.team?.lineup?.length?save.team.lineup:save.collection)||[];
-  const slot=Number(match.batterIndex?.away||0)+Number(index||0);
+  const side=match.half==='TOP'?'away':'home';
+  const slot=Number(match.batterIndex?.[side]||0)+Number(index||0);
   return ids.length?ALL_PLAYERS.find(p=>p.id===Number(ids[slot%ids.length]))||ALL_PLAYERS[slot%ALL_PLAYERS.length]:ALL_PLAYERS[slot%ALL_PLAYERS.length];
 }
 function fieldingPlayer(index){
