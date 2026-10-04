@@ -558,7 +558,7 @@ body{background:#050505}
 <div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b></div></div>
 <div class="aim-help" id="aim-help">投球時：画面をドラッグしてコース指定</div>
 <div class="pitch-control"><button type="button" data-pitch="FASTBALL">ストレート</button><button type="button" data-pitch="SLIDER">スライダー</button><button type="button" data-pitch="CURVEBALL">カーブ</button><button type="button" data-pitch="CHANGEUP">チェンジアップ</button></div>
-<div class="bat-mode-pill" id="bat-mode-pill"><button id="bat-contact-mode" type="button" class="selected">ミート</button><button id="bat-power-mode" type="button">強振</button></div>
+<div class="bat-mode-pill" id="bat-mode-pill"><button id="bat-contact-mode" type="button" class="selected">ミート</button><button id="bat-power-mode" type="button">強振</button></div><button id="steal" class="steal-button" type="button">盗塁</button>
 <div class="match-action-pad">
 <button id="take"><span>見送る</span><small>タイミングを待つ</small></button>
 <button id="swing" class="swing-main"><span>スイング</span><small>タップで打つ</small></button>
@@ -1451,4 +1451,7 @@ document.querySelectorAll('[data-ai-difficulty]').forEach(b=>b.addEventListener(
 .ai-difficulty-row span{font-size:8px;color:#9aa7b5;margin-right:auto}
 .ai-difficulty-row button{height:26px;padding:0 9px;border:1px solid #ffffff12;border-radius:6px;background:#09131d;color:#a9b3bd;font-size:7px;font-weight:800}
 .ai-difficulty-row button.selected{background:#d2ae4b;color:#171209;border-color:#ebcc77}
+</style><style id="steal-control-v1">
+#match-ui .steal-button{display:none;position:absolute;right:8px;top:103px;z-index:14;height:31px;padding:0 11px;border-radius:7px;border:1px solid #ffffff22;background:#07121ceF;color:#dbe7ef;font-size:8px;font-weight:900;box-shadow:0 5px 13px #0009;pointer-events:auto}
+#match-ui .steal-button:active{transform:translateY(1px)}
 </style>
