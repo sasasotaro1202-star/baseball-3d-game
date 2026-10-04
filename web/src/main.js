@@ -97,7 +97,7 @@ addPremiumStadiumDressing();
 let fieldingFrom={x:0,z:0};let fielderTarget=null;let fielderIndex=0;let ballPhysics=null;let pendingOutcome=null;
 
 let save=loadSave(); let match=createMatchState();
-const PITCHES_FOR_UI=PITCHES; let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
+let pitchState='idle',t=0; let selectedPitch='FASTBALL'; let pitchStart=0; let swingWindowOpen=false; let pitchTarget={x:0,y:0}; let aimTarget={x:0,y:0}; let cameraMode='BATTER'; let aimDragging=false;
 let matchMode='AI'; let matchDifficulty=save.settings?.aiDifficulty||'NORMAL'; let onlineRole=null; let onlineConnection=null; let onlineConnected=false; let onlinePendingPitchId=null; let onlinePendingPitch=null; let onlineRemoteRoster=[]; let onlineRosters={away:[],home:[]};
 let onlineRevision=0;let onlineSessionStarted=false;let onlineActionSentForPitch=false;let onlineStealPending=false;
 let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.now();let stealTargetBase=1;
@@ -1076,7 +1076,7 @@ function updateMatchHUD(){
   const zone=$('strike-zone');if(zone)zone.classList.toggle('active',true);
   updatePitchControlUI();
 }
-const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,CHANGEUP:.35};
+const PITCHES_FOR_UI={FASTBALL:'FASTBALL',SLIDER:'SLIDER',CURVEBALL:'CURVEBALL',FORK:'FORK',CHANGEUP:'CHANGEUP'}; const PITCH_CURVE={FASTBALL:0,SLIDER:.65,CURVEBALL:-.8,FORK:.74,CHANGEUP:.35};
 document.querySelectorAll('[data-ai-difficulty]').forEach(b=>b.addEventListener('click',()=>setAIDifficulty(b.dataset.aiDifficulty)));
 $('take').addEventListener('click',take);document.querySelectorAll('[data-pitch]').forEach(b=>b.addEventListener('click',()=>choosePitchManual(b.dataset.pitch)));
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{
