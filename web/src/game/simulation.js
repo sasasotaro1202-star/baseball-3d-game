@@ -112,7 +112,7 @@ export function isFiniteBallPhysics(state){
   const arm=clamp01(Number(fielderArm||70)/100);
   if(result==='HOME_RUN')return{state:s,finalOutcome:'HOME_RUN',catchSuccess:false,throwSuccess:false,event:'HOMERUN'};
   const isAir=result==='FLY_OUT';
-  const catchChance=clamp01((isAir?.90:.80)-d/36+quality*.20+Math.min(t,1.8)*.035);
+  const catchChance=clamp01((isAir ? .90 : .80)-d/36+quality*.20+Math.min(t,1.8)*.035);
   const catchSuccess=rng()<catchChance;
   if(isAir)return{state:s,finalOutcome:catchSuccess?'FLY_OUT':'SINGLE',catchSuccess,throwSuccess:false,event:catchSuccess?'CLEAN_CATCH':'CATCH_MISS'};
   const pickupChance=clamp01(.92-d/42+quality*.16);
