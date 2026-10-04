@@ -30,7 +30,7 @@ const checks = [
   ["steal control", html.includes('id="steal"') && js.includes('function performSteal')],
   ["pitcher stamina and rotation", sim.includes('pitcherStamina') && sim.includes('pitcherIndex') && sim.includes('advancePitcher')],
   ["GameState validator", sim.includes('isValidMatchState')],
-  ["save versioning", save.includes('SAVE_VERSION=2') && save.includes('function migrate') && html.includes('settings-gameplay-v1')],
+  ["save versioning", save.includes('SAVE_VERSION=3') && save.includes('function migrate') && html.includes('settings-gameplay-v1')],
   ["phase-specific match UI", js.includes("matchUI.classList.toggle('batting-phase',batting)") && js.includes("matchUI.classList.toggle('pitching-phase',!batting)")],
   ["match score hierarchy", html.includes('id="away-score"') && html.includes('id="home-score"') && html.includes('id="count-label"')],
   ["pitch control", html.includes('id="pitch"')],
