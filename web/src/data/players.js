@@ -189,7 +189,7 @@ export const LEGACY_MOB_PLAYERS=Array.from({length:118},(_,i)=>{
   const base=50+(i%9)*2;
   const rank=i<8?'A':i<30?'B':i<72?'C':i<105?'D':'F';
   const rarity=rank==='A'?'PRO':rank==='B'?'ROOKIE':'MOB';
-  return {id,name,era:'HISTORICAL_DEPTH',pos:['OF','IF','2B','3B','SS','C','1B','P'][i%8],rarity,rank,build:i%3===0?'lean':'athletic',batting:i%2?'right':'left',power:Math.min(72,base+(i%6)),contact:Math.min(74,base-1+(i%7)),field:Math.min(74,base+(i%8)),speed:Math.min(74,base+(i%9)),arm:Math.min(74,base-1+(i%8)),control:Math.min(74,base+(i%7)),stamina:Math.min(76,base+2+(i%7)),vision:Math.min(74,base+(i%6)),achievements:['歴代選手カード','ゲーム用能力値'],abilities:i%4===0?[['consistency',.02]]:i%4===1?[['base_running',.01]]:[]};
+  return {id,name,era:'HISTORICAL_DEPTH',league:'HISTORICAL',status:'LEGACY',pos:['OF','IF','2B','3B','SS','C','1B','P'][i%8],rarity,rank,build:i%3===0?'lean':'athletic',batting:i%2?'right':'left',power:Math.min(72,base+(i%6)),contact:Math.min(74,base-1+(i%7)),field:Math.min(74,base+(i%8)),speed:Math.min(74,base+(i%9)),arm:Math.min(74,base-1+(i%8)),control:Math.min(74,base+(i%7)),stamina:Math.min(76,base+2+(i%7)),vision:Math.min(74,base+(i%6)),achievements:['歴代選手カード','ゲーム用能力値'],abilities:i%4===0?[['consistency',.02]]:i%4===1?[['base_running',.01]]:[]};
 });
 
 export const HISTORIC_PLAYERS=[...NPB_LEGENDS,...MLB_LEGENDS,...LEGACY_HISTORIC_PLAYERS];
