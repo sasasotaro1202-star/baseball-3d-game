@@ -425,9 +425,15 @@ function renderGacha(){
     }
   }
   renderBanner();
-  $('pull').onclick=()=>runPull(1);
-  $('pull10').onclick=()=>runPull(10);
-  $('back').onclick=()=>setMode('home');
+  const bindTap=(el,handler)=>{
+    if(!el)return;
+    let lastTouch=0;
+    el.addEventListener('touchend',e=>{e.preventDefault();lastTouch=Date.now();handler();},{passive:false});
+    el.addEventListener('click',()=>{if(Date.now()-lastTouch<650)return;handler();});
+  };
+  bindTap($('pull'),()=>runPull(1));
+  bindTap($('pull10'),()=>runPull(10));
+  bindTap($('back'),()=>setMode('home'));
 }
 
 function ensureMatchPresentation(){
