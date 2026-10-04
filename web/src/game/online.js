@@ -49,7 +49,7 @@ function waitForIceGathering(pc,timeoutMs=8000){
 }
 
 function attachChannel(channel,{onOpen,onClose,onMessage,onError}={}){
-  const allowed=new Set(["ONLINE_READY","ONLINE_READY_ACK","ONLINE_START","ONLINE_PITCH","ONLINE_SWING","ONLINE_TAKE","ONLINE_STEAL","ONLINE_CONTACT","ONLINE_STATE"]);
+  const allowed=new Set(["ONLINE_READY","ONLINE_READY_ACK","ONLINE_START","ONLINE_PITCH","ONLINE_SWING","ONLINE_TAKE","ONLINE_STEAL","ONLINE_CONTACT","ONLINE_FIELDING_RESULT","ONLINE_STATE"]);
   channel.onopen=()=>onOpen?.();
   channel.onclose=()=>onClose?.();
   channel.onerror=event=>onError?.(event);
