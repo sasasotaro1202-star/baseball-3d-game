@@ -74,23 +74,67 @@ let fielderAction='idle';let fielderActionUntil=0;let lastFrameTime=performance.
 let fielderManualInput=false;let fielderThrowTarget=0;let fieldingPadPointer=null;
 const $=id=>document.getElementById(id); const homeUI=$('home'),viewUI=$('view'),card=$('card'),matchUI=$('match-ui'),currency=$('currency');
 function updateProfileUI(){const count=save.collection.length;const power=save.collection.reduce((sum,id)=>{const p=ALL_PLAYERS.find(x=>x.id===id);return sum+(p?Math.round(((p.power||70)+(p.contact||70)+(p.field||70)+(p.control||70))/4):0)},0);$('record').textContent=`${save.wins}勝 ${save.matches}試合`;$('roster-count').textContent=count;$('team-power').textContent=count?Math.round(power/count):'—';}
+
+function playerTeamColor(p){
+  const palette={T:'#d94d52',G:'#283c80',DB:'#4a78d2',D:'#4e78ad',C:'#e09a41',S:'#173f7a',B:'#ba6f2f',H:'#f1a62a',F:'#315aa7',E:'#8c3fb4',L:'#1f7a67',M:'#162f62'};
+  return palette[p.teamCode]||'#7f8fa4';
+}
+function playerRankClass(rank){return ['S','A','B','C','D','F'].includes(rank)?rank:'B';}
+function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
+  const c=cardModel(p,developmentFor(save,p.id));
+  const level=developmentFor(save,p.id)?.level||1;
+  const team=String(p.team||'NPB').replace('NPB HISTORY','NPB HISTORY');
+  const role=p.pos?.includes('P')?'PITCHER':'HITTER';
+  const initials=String(p.name||'?').replace(/[\\s・—–-]/g,'').slice(0,3);
+  const color=playerTeamColor(p);
+  const ability=showAbilities&&c.abilities.length
+    ? c.abilities.slice(0,3).map(a=>'<span class="sc-card-ability '+(a.kind==='special'?'special':'')+'"><b>'+a.name+'</b><em>'+a.ratePercent+'%</em></span>').join('')
+    : '<span class="sc-card-empty">特殊能力 未習得</span>';
+  const statRows=role==='PITCHER'
+    ? [['球威',c.stats.power],['制球',c.stats.control],['スタ',c.stats.stamina],['肩',c.stats.arm],['選球',c.stats.vision]]
+    : [['ミート',c.stats.contact],['パワー',c.stats.power],['走力',c.stats.speed],['肩力',c.stats.arm],['守備',c.stats.field]];
+  const statHtml=statRows.map(([label,value])=>'<span><small>'+label+'</small><b>'+value+'</b></span>').join('');
+  const photo=owned&&p.image
+    ? '<img src="'+p.image+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'grid\\'">'
+    : '';
+  const fallback=owned
+    ? '<div class="sc-card-avatar-fallback" style="display:'+(p.image?'none':'grid')+'"><strong>'+initials+'</strong><small>'+role+'</small></div>'
+    : '<div class="sc-card-avatar-fallback locked"><strong>?</strong><small>LOCKED</small></div>';
+  return '<article class="sc-player-card rank-'+playerRankClass(c.rank)+' '+(owned?'':'is-locked')+'" data-player-id="'+p.id+'" style="--team:'+color+'">'+
+    '<div class="sc-card-ribbon"><span>'+c.rank+' RANK</span><b>'+(p.limited?'LIMITED':'2026 SERIES')+'</b></div>'+
+    '<div class="sc-card-main">'+
+      '<div class="sc-card-portrait">'+photo+fallback+'<i class="sc-card-team-dot"></i></div>'+
+      '<div class="sc-card-copy">'+
+        '<div class="sc-card-team"><span>'+team+'</span><em>'+String(p.teamCode||'NPB')+'</em></div>'+
+        '<h3>'+(owned?c.name:'？？？？？？')+'</h3>'+
+        '<div class="sc-card-position"><b>'+c.pos+'</b><span>'+role+'</span><span>'+(p.status==='LEGEND'?'LEGEND':p.league||'NPB')+'</span></div>'+
+        '<div class="sc-card-rating"><strong>'+c.overall+'</strong><span>OVR</span><small>Lv.'+level+'</small></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sc-card-stats">'+statHtml+'</div>'+
+    '<div class="sc-card-bottom"><div class="sc-card-abilities">'+ability+'</div><span class="sc-card-id">ID '+String(p.id).padStart(4,'0')+'</span></div>'+
+    (release?'<button type="button" class="sc-card-release release-player" data-id="'+p.id+'">放出</button>':'')+
+  '</article>';
+}
 function playerCards(){
-  return save.collection.map(id=>ALL_PLAYERS.find(p=>p.id===id)).filter(Boolean).map(p=>{
-    const c=cardModel(p,developmentFor(save,p.id));
-    const image=p.image||'';
-    const limited=p.limited===true;
-    const type=p.cardType||'STANDARD';
-    const typeLabel={SELECTION:'SELECTION',ANNIVERSARY:'ANNIVERSARY',BEST9:'BEST 9',LEGEND_OB:'LEGEND OB',AWAKENED:'覚醒選手',CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
-    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%<button type="button" class="ability-info" data-ability="'+a.id+'">i</button></span>').join('');
-    return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
-      '<div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.parentElement.innerHTML=\'<div class=\"portrait-fallback\"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>\'">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>'+
-      '<div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div>'+
-      '<span class="player-meta">'+(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era+'</span>'+
-      '<div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div>'+
-      '<div class="ability-list">'+abilities+'</div>'+
-      '<button type="button" class="action release-player" data-id="'+p.id+'">放出</button>'+
-    '</div>';
-  }).join('');
+  return resolveOwnedPlayers().map(p=>playerCardMarkup(p,{owned:true,release:true})).join('');
+}
+function showPlayer3D(id){
+  const p=ALL_PLAYERS.find(x=>x.id===Number(id));
+  if(!p)return;
+  const cfg=modelConfig(p);
+  const preview=createPlayerModel(cfg);
+  preview.position.set(0,0,-2);
+  scene.add(preview);
+  const old=scene.userData.playerPreview;
+  if(old)scene.remove(old);
+  scene.userData.playerPreview=preview;
+  const root=ensurePresentationLayer();
+  root.className='pres-show';
+  $('pres-kicker').textContent='PLAYER';
+  $('pres-title').textContent=p.name;
+  const pc=cardModel(p,developmentFor(save,p.id)); $('pres-sub').textContent=(p.pos||'')+' · '+pc.rank+' RANK · OVR '+pc.overall+'　3D PREVIEW';
+  setTimeout(()=>{root.className='';},1100);
 }
 function showPlayer3D(id){
   const p=ALL_PLAYERS.find(x=>x.id===Number(id));
@@ -148,16 +192,18 @@ function bindPlayerCards(){
   card.querySelectorAll('.release-player').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=ALL_PLAYERS.find(x=>x.id===Number(b.dataset.id));if(!p)return;if(!confirm(p.name+'を放出しますか？'))return;const r=releasePlayer(save,p);if(r.error)return;save=r.state;persist();renderRoster();});
 }
 function playerCardsFor(players){
-  return players.map(p=>{
-    const c=cardModel(p,developmentFor(save,p.id)),image=p.image||'',limited=p.limited===true,type=p.cardType||'STANDARD';
-    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
-    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
-    return '<div class="player-card compact-player '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'"><div class="player-portrait"><span class="rank-badge">'+c.rank+'</span>'+(limited?'<span class="limited-badge">LIMITED</span>':'')+(image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.parentElement.innerHTML=\'<div class=\"portrait-fallback\"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>\'">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div><div class="player-head"><strong>'+c.name+'</strong><b>OVR '+c.overall+'</b></div><span class="player-meta">'+(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era+'</span><div class="mini-stats"><span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span></div><div class="ability-list">'+abilities+'</div><button type="button" class="action release-player" data-id="'+p.id+'">放出</button></div>';
-  }).join('');
+  return players.map(p=>playerCardMarkup(p,{owned:true,release:true})).join('');
 }
 function resolveOwnedPlayers(){
   const ids=[...(save.collection||[])].map(id=>Number(id)).filter(Number.isFinite);
   return [...new Set(ids)].map(id=>ALL_PLAYERS.find(p=>Number(p.id)===id)).filter(Boolean);
+}
+function portraitMarkup(p,extra=''){
+  const image=p.image||'';
+  const initials=p.name.split(' ').map(x=>x[0]).join('').slice(0,3);
+  return '<div class="player-portrait '+extra+'"><span class="rank-badge">'+(p.rank||'—')+'</span>'+
+    (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'flex\\'"><div class="portrait-fallback" style="display:none"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>':
+    '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
 }
 function portraitMarkup(p,extra=''){
   const image=p.image||'';
@@ -192,29 +238,15 @@ async function renderSettings(){
 function renderCollection(){
   const owned=new Set(save.collection||[]);
   const total=ALL_PLAYERS.length;
-  const cards=ALL_PLAYERS.map(p=>{
-    const ownedNow=owned.has(p.id);
-    const c=cardModel(p,developmentFor(save,p.id));
-    const image=p.image||'';
-    const limited=p.limited===true;
-    const type=p.cardType||'STANDARD';
-    const typeLabel={CROWN:'CROWN',MOMENT:'MOMENT',TWO_WAY:'TWO-WAY',STANDARD:'STANDARD'}[type]||'LIMITED';
-    const abilities=c.abilities.slice(0,4).map(a=>'<span class="ability-chip '+(a.kind==='special'?'ability-special':'')+'">'+a.name+' '+a.ratePercent+'%</span>').join('');
-    const portrait=ownedNow
-      ? (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.parentElement.innerHTML=\'<div class=\"portrait-fallback\"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>\'">':'<div class="portrait-fallback"><span>'+p.name.split(' ').map(x=>x[0]).join('').slice(0,3)+'</span><small>PHOTO UNAVAILABLE</small></div>')
-      : '<div class="portrait-fallback locked-portrait"><span>?</span><small>LOCKED</small></div>';
-    return '<div class="player-card compact-player encyclopedia-card '+(!ownedNow?'locked':'')+' '+(limited?'limited-player limited-'+type.toLowerCase():'')+'" data-player-id="'+p.id+'">'+
-      '<div class="player-portrait">'+portrait+'<span class="rank-badge">'+c.rank+'</span>'+(ownedNow&&limited?'<span class="limited-badge">LIMITED</span>':'')+'</div>'+
-      '<div class="player-head"><strong>'+ (ownedNow?c.name:'？？？') +'</strong><b>'+(ownedNow?'OVR '+c.overall:'LOCKED')+'</b></div>'+
-      '<span class="player-meta">'+(ownedNow?(limited?'<b class="card-type-label">'+typeLabel+'</b> ':'')+c.pos+' · '+c.era:'スカウトで解放')+'</span>'+
-      '<div class="mini-stats">'+(ownedNow?'<span>打 '+c.stats.contact+'</span><span>パ '+c.stats.power+'</span><span>守 '+c.stats.field+'</span><span>走 '+c.stats.speed+'</span>':'<span>？？</span><span>？？</span><span>？？</span><span>？？</span>')+'</div>'+
-      '<div class="ability-list">'+(ownedNow?abilities:'<span class="small">未獲得選手</span>')+'</div>'+
-    '</div>';
-  }).join('');
   const unlocked=[...owned].filter(id=>ALL_PLAYERS.some(p=>p.id===id)).length;
-  card.innerHTML='<h2>選手名鑑</h2><p>解放 '+unlocked+' / 全 '+total+' 名　・　未獲得選手も一覧表示</p><div class="player-grid">'+cards+'</div><button class="action back" id="back">ホームへ戻る</button>';
+  const cards=ALL_PLAYERS.map(p=>playerCardMarkup(p,{owned:owned.has(p.id),release:false,showAbilities:owned.has(p.id)})).join('');
+  card.innerHTML='<div class="collection-head">'+
+    '<div><span class="section-kicker">PLAYER ARCHIVE</span><h2>選手名鑑</h2><p>現役NPBを主軸に、NPBレジェンド・MLBの歴史的アイコン・海外組を収録。</p></div>'+
+    '<div class="collection-count"><strong>'+unlocked+'</strong><span>/ '+total+'</span><small>COLLECTED</small></div>'+
+  '</div><div class="collection-filter-row"><span>ALL</span><span>NPB ACTIVE</span><span>LEGENDS</span><span>MLB</span></div>'+
+  '<div class="sc-player-grid">'+cards+'</div><button class="action back" id="back">ホームへ戻る</button>';
   $('back').onclick=()=>setMode('home');
-  card.querySelectorAll('.encyclopedia-card.locked').forEach(b=>b.onclick=()=>setMode('gacha'));
+  card.querySelectorAll('.is-locked').forEach(b=>b.onclick=()=>setMode('gacha'));
   bindPlayerCards();
 }
 function renderGacha(){
