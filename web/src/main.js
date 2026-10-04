@@ -957,10 +957,4 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
   camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)
 }renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
-window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-playable-modes-v15";<style id="settings-gameplay-v1">
-.settings-list{display:grid;gap:7px;margin:10px 0 16px}
-.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid #ffffff14;border-radius:7px;background:#06101a}
-.settings-row>span{font-size:10px;color:#ccd5dc}.settings-row b{color:#e4c45d}
-.settings-segment{display:flex;gap:3px}.settings-segment button{border:1px solid #ffffff16;background:#0b1622;color:#aab6c0;border-radius:5px;padding:6px 10px;font-size:8px}.settings-segment button.selected{background:#d1b14d;color:#15110a;border-color:#e4c969}
-#steal{touch-action:manipulation}
-</style>
+window.__gameReady = true;window.__gameVersion="baseball-3d-web-20261004-playable-modes-v15";
