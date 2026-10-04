@@ -185,13 +185,6 @@ function portraitMarkup(p,extra=''){
   const image=p.image||'';
   const initials=p.name.split(' ').map(x=>x[0]).join('').slice(0,3);
   return '<div class="player-portrait '+extra+'"><span class="rank-badge">'+(p.rank||'—')+'</span>'+
-    (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async">':
-    '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
-}
-function portraitMarkup(p,extra=''){
-  const image=p.image||'';
-  const initials=p.name.split(' ').map(x=>x[0]).join('').slice(0,3);
-  return '<div class="player-portrait '+extra+'"><span class="rank-badge">'+(p.rank||'—')+'</span>'+
     (image?'<img src="'+image+'" alt="'+p.name+'" loading="eager" referrerpolicy="no-referrer" decoding="async" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="portrait-fallback" style="display:none"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>':
     '<div class="portrait-fallback"><span>'+initials+'</span><small>PHOTO UNAVAILABLE</small></div>')+'</div>';
 }
@@ -267,7 +260,7 @@ function upgradedRenderGacha(){
   function featuredCard(p,index){
     const initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
     return '<button type="button" class="gacha-feature-card '+(p.limited?'limited':'')+'" data-player-id="'+escape(p.id)+'">'+
-      (p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="gacha-fallback" aria-hidden="true"><b>'+escape(initials)+'</b></div>':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+      (p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
       '<span class="gacha-feature-rank">'+escape(p.rank||'—')+'</span>'+
       '<strong>'+escape(p.name)+'</strong><small>'+(p.limited?'LIMITED':'FEATURED')+' · '+escape(p.pos||'PLAYER')+'</small>'+
     '</button>';
@@ -308,7 +301,7 @@ function upgradedRenderGacha(){
       const player=x.result.player,initials=String(player.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
       return '<button type="button" class="gacha-result-card rank-'+escape(x.result.rank)+' '+(x.result.limited?'limited':'')+'" data-player-id="'+escape(player.id)+'">'+
         '<span class="result-badge">'+escape(x.result.rank)+'</span>'+
-        (player.image?'<img src="'+escape(player.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="gacha-fallback" aria-hidden="true"><b>'+escape(initials)+'</b></div>':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
+        (player.image?'<img src="'+escape(player.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<div class="gacha-fallback"><b>'+escape(initials)+'</b></div>')+
         '<strong>'+escape(player.name)+'</strong>'+
         '<small>'+escape(player.pos||'PLAYER')+(x.result.limited?' · LIMITED':'')+'</small>'+
         (x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':index===0&&bonusApplied?'<em>10連保証枠</em>':'')+
