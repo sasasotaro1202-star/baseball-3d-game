@@ -265,14 +265,14 @@ function renderGacha(){
     `;
   }
 
-  function renderResults(results){
+  function renderResults(results,bonusApplied=false){
     if(!results?.length)return;
     const sorted=[...results].sort((a,b)=>{
       const score={S:6,A:5,B:4,C:3,D:2,F:1};
       return (score[b.result.rank]||0)-(score[a.result.rank]||0);
     });
     resultEl.innerHTML=`
-      <div class="results-head"><b>${results.length}連結果</b><small>新規 ${results.filter(x=>!x.duplicate).length} / 重複 ${results.filter(x=>x.duplicate).length}</small></div>
+      <div class="results-head"><b>${results.length}連結果</b><small>新規 ${results.filter(x=>!x.duplicate).length} / 重複 ${results.filter(x=>x.duplicate).length}${bonusApplied?' · Bランク以上ボーナス':''}</small></div>
       <div class="gacha-result-grid">${sorted.map((x,i)=>{const p=x.result.player;return `<div class="gacha-result-card rank-${escape(x.result.rank)} ${x.result.limited?'limited':''}">
         <div class="result-badge">${escape(x.result.rank)}</div>
         ${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback">?</div>'}
@@ -323,7 +323,7 @@ function renderGacha(){
         ? [{result:r.result,duplicate:!!r.duplicate,duplicateReward:r.duplicateReward||0}]
         : (Array.isArray(r.results)?r.results:[]);
       if(!results.length || !results.every(x=>x?.result?.player)) throw new Error('SCOUT_RESULT_EMPTY');
-      renderResults(results);
+      renderResults(results,Boolean(r.bonusApplied));
       const best=results.slice().sort((x,y)=>({S:6,A:5,B:4,C:3,D:2,F:1}[y.result.rank]||0)-({S:6,A:5,B:4,C:3,D:2,F:1}[x.result.rank]||0))[0];
       if(best?.result?.player){
         try{
