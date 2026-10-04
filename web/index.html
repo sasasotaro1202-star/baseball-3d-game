@@ -555,7 +555,7 @@ body{background:#050505}
 <div class="match-topbar"><div class="score-pill" id="inning-label">1回表</div><div class="score-pill scoreboard"><span>A <b id="away-score">0</b> - <b id="home-score">0</b> H</span></div><div class="score-pill" id="count-label">B0 S0 O0</div></div>
 <div id="matchhud" class="matchhud">1回表　0 - 0</div>
 <div class="match-view-switch"><button type="button" data-view="BATTER" class="selected">打者視点</button><button type="button" data-view="PITCHER">投手視点</button></div><div id="aim-area" class="aim-area"><div id="strike-zone" class="strike-zone"><i></i><i></i><i></i><i></i></div><div id="trajectory" class="trajectory"></div><div id="aim-cursor" class="aim-cursor">＋</div></div>
-<div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b></div></div>
+<div class="atbat-card"><div><span class="small">打者</span><strong id="batter-name">Shohei Ohtani</strong></div><div class="pitch-readout"><span class="small">球種</span><b id="pitch-readout">READY</b><small id="pitcher-stamina">ST 100</small></div></div>
 <div class="aim-help" id="aim-help">投球時：画面をドラッグしてコース指定</div>
 <div class="pitch-control"><button type="button" data-pitch="FASTBALL">ストレート</button><button type="button" data-pitch="SLIDER">スライダー</button><button type="button" data-pitch="CURVEBALL">カーブ</button><button type="button" data-pitch="CHANGEUP">チェンジアップ</button></div>
 <div class="bat-mode-pill" id="bat-mode-pill"><button id="bat-contact-mode" type="button" class="selected">ミート</button><button id="bat-power-mode" type="button">強振</button></div><button id="steal" class="steal-button" type="button">盗塁</button>
@@ -1454,4 +1454,6 @@ document.querySelectorAll('[data-ai-difficulty]').forEach(b=>b.addEventListener(
 </style><style id="steal-control-v1">
 #match-ui .steal-button{display:none;position:absolute;right:8px;top:103px;z-index:14;height:31px;padding:0 11px;border-radius:7px;border:1px solid #ffffff22;background:#07121ceF;color:#dbe7ef;font-size:8px;font-weight:900;box-shadow:0 5px 13px #0009;pointer-events:auto}
 #match-ui .steal-button:active{transform:translateY(1px)}
+</style><style id="pitcher-stamina-v1">
+#pitcher-stamina{display:block;margin-top:2px;font-size:7px;color:#9fb7a7;letter-spacing:.06em;font-weight:800}
 </style>
