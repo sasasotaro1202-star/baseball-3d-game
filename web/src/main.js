@@ -852,7 +852,7 @@ function showMatchResult(localWon){
   panel.innerHTML='<div class="match-result-box"><span>FINAL SCORE</span><strong>'+title+'</strong><div class="result-score"><b>'+match.score.away+'</b><i>-</i><b>'+match.score.home+'</b></div><small>'+match.inning+'回 '+(match.half==='TOP'?'表':'裏')+'</small><button type="button" id="result-home">ホームへ</button><button type="button" id="result-retry">もう一度</button></div>';
   panel.classList.add('show');
   $('result-home').onclick=()=>{panel.classList.remove('show');onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');};
-  $('result-retry').onclick=()=>{panel.classList.remove('show');startAIMatch();};
+  $('result-retry').onclick=()=>{panel.classList.remove('show');if(matchMode==='ONLINE'){onlineConnection?.close?.();onlineConnection=null;setMode('online-lobby');}else startAIMatch();};
 }
 function resetMatchView(){
   ensureMatchPresentation();
@@ -909,10 +909,10 @@ document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',(
 let aimPointerStart=null;let aimPointerMoved=false;
 $('aim-area')?.addEventListener('pointerdown',e=>{aimDragging=true;aimPointerMoved=false;aimPointerStart={x:e.clientX,y:e.clientY};updateAimFromPointer(e);$('aim-area').setPointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointermove',e=>{if(!aimDragging)return;if(aimPointerStart&&Math.hypot(e.clientX-aimPointerStart.x,e.clientY-aimPointerStart.y)>8)aimPointerMoved=true;updateAimFromPointer(e);});
-$('aim-area')?.addEventListener('pointerup',e=>{const tap=!aimPointerMoved;aimDragging=false;if(tap&&match.half==='TOP'&&pitchState==='pitch')pointerSwing();aimPointerStart=null;aimPointerMoved=false;$('aim-area').releasePointerCapture?.(e.pointerId);});
+$('aim-area')?.addEventListener('pointerup',e=>{const tap=!aimPointerMoved;aimDragging=false;if(tap&&isLocalBatter()&&pitchState==='pitch')pointerSwing();aimPointerStart=null;aimPointerMoved=false;$('aim-area').releasePointerCapture?.(e.pointerId);});
 $('aim-area')?.addEventListener('pointercancel',e=>{aimDragging=false;aimPointerStart=null;aimPointerMoved=false;});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setMatchCamera(b.dataset.view)));
-$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('steal')?.addEventListener('click',performSteal);$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setBattingMode('CONTACT');
+$('pitch').addEventListener('click',pitch);$('swing').addEventListener('click',swing);$('steal')?.addEventListener('click',performSteal);$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setAIDifficulty(matchDifficulty);setBattingMode(save.settings?.battingModeDefault==='POWER'?'POWER':'CONTACT');
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
 function animate(){requestAnimationFrame(animate);const now=performance.now();const frameDt=Math.max(0,Math.min(.05,(now-lastFrameTime)/1000));lastFrameTime=now;updateRunnerVisuals();animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if(pitchState==='hit'&&fielderTarget){const lead=fielders[fielderIndex];const defender=fieldingPlayer(fielderIndex);const reaction=Math.max(.75,Math.min(1.35,(Number(defender?.reaction||defender?.field||70)/70)));const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14*reaction,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2*reaction)}}else if(fielderAction!=='idle'&&performance.now()<fielderActionUntil){const lead=fielders[fielderIndex];animatePlayer(lead,fielderAction,.5)}else if(fielderAction!=='idle'){fielderAction='idle';}if(pitchState==='pitch'){
   const previous=ballPhysics;
@@ -958,7 +958,7 @@ function animate(){requestAnimationFrame(animate);const now=performance.now();co
           fielderArm:defender.arm||defender.field||70,
           throwDistance:completed==='SINGLE'?27:42,
           batterSpeed:((lineupPlayer(0)?.speed)||70),
-          difficulty:isOnlineMatch()?'NORMAL':matchDifficulty
+          difficulty:(matchMode==='AI'&&match.half==='TOP')?matchDifficulty:'NORMAL'
         });
         fielderAction=finalResult.throwSuccess?'throw':finalResult.catchSuccess?'catch':'idle';fielderActionUntil=performance.now()+280;
         matchEvent(finalResult.event==='THROW_ON_TARGET'?'OUT AT BASE':finalResult.event==='CATCH_MISS'?'CATCH MISS':finalResult.event==='FIELDING_ERROR'?'ERROR':finalResult.event==='CLEAN_CATCH'?'CATCH':'IN PLAY','field');
