@@ -28,7 +28,7 @@ const checks = [
   ["batting order state", sim.includes('batterIndex') && js.includes('match.batterIndex')],
   ["online signal encoder", online.includes('encodeSignal') && online.includes('replace(/\\+/g,"-")')],
   ["online role routing", js.includes('function isLocalBatter()') && js.includes('function isLocalPitcher()') && js.includes("matchMode==='ONLINE'")],
-  ["manual fielding controls", html.includes('id="fielding-console"') && html.includes('id="fielding-pad"') && html.includes('id="fielding-catch"') && html.includes('data-throw-base="1"') && js.includes('function fieldingPadStart') && js.includes("pitchState!=='hit'&&pitchState!=='fielding-wait") && js.includes('function selectThrowBase') && js.includes('function resolveManualFielding') && js.includes("catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':(fielderThrowTarget?'送球':'処理')")],
+  ["manual fielding controls", html.includes('id="fielding-console"') && html.includes('id="fielding-pad"') && html.includes('id="fielding-catch"') && html.includes('data-throw-base="1"') && js.includes('function fieldingPadStart') && js.includes("pitchState!=='hit'&&pitchState!=='fielding-wait") && js.includes('function selectThrowBase') && js.includes('function resolveManualFielding') && js.includes("catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':'送球'") && js.includes("resolveManualFielding(pendingOutcome==='FLY_OUT'?'catch':'throw')")],
   ["steal control", html.includes('id="steal"') && js.includes('function performSteal')],
   ["pitcher stamina and rotation", sim.includes('pitcherStamina') && sim.includes('pitcherIndex') && sim.includes('advancePitcher')],
   ["GameState validator", sim.includes('isValidMatchState')],
