@@ -268,6 +268,37 @@ function installPremiumDesignSystemV3Hotfix(){
 }
 installPremiumDesignSystemV3Hotfix();
 
+function installPlayerPortraitPolish(){
+  if(document.getElementById('player-portrait-polish-v1'))return;
+  const style=document.createElement('style');
+  style.id='player-portrait-polish-v1';
+  style.textContent=String.raw`
+    .generated-player-portrait{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(145deg,#173653,#06101a)}
+    .generated-player-portrait .generated-player-art{display:block;width:100%;height:100%;object-fit:cover}
+    .generated-player-portrait .player-photo{display:block;width:100%;height:100%;object-fit:cover}
+    .sc-card-portrait>.generated-player-portrait{position:absolute;inset:0}
+    .sc-card-portrait>.generated-player-portrait .player-photo,.sc-card-portrait>.generated-player-portrait .generated-player-art{height:100%}
+    .gacha-feature-card>.generated-player-portrait{display:block;width:100%;height:103px}
+    .gacha-feature-card:first-child>.generated-player-portrait{height:126px}
+    .gacha-result-feature-art>.generated-player-portrait{display:block;width:100%;height:100%;min-height:112px}
+    .gacha-result-card>.generated-player-portrait{display:block;width:100%;height:78px}
+    .training-portrait>.generated-player-portrait{display:block;width:100%;height:100%}
+    .lineup-slot-body>.generated-player-portrait{flex:0 0 46px;width:46px;height:52px;border-radius:6px;box-shadow:inset 0 0 0 1px #ffffff18}
+    .lineup-slot-body>.generated-player-portrait .generated-player-art{height:100%}
+    #presentation .pres-card-art>.generated-player-portrait{display:block;width:100%;height:100%;min-height:250px}
+    #presentation .pres-card-art>.generated-player-portrait .generated-player-art,#presentation .pres-card-art>.generated-player-portrait .player-photo{height:100%;object-fit:cover}
+    @media(max-width:390px){
+      .gacha-feature-card>.generated-player-portrait{height:88px}
+      .gacha-feature-card:first-child>.generated-player-portrait{height:126px}
+      .gacha-result-card>.generated-player-portrait{height:64px}
+      .gacha-result-feature-art>.generated-player-portrait{min-height:96px}
+      .lineup-slot-body>.generated-player-portrait{flex-basis:38px;width:38px;height:46px}
+    }
+  `;
+  document.head.appendChild(style);
+}
+installPlayerPortraitPolish();
+
 function installScoutPresentationV4(){
   if(document.getElementById('scout-presentation-v4'))return;
   const style=document.createElement('style');
