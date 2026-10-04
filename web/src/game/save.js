@@ -1,5 +1,37 @@
 const KEY='baseball3d.save.v1';
-export const SAVE_VERSION=2;
+export const SAVE_VERSION=3;
+const MIXED_CATALOG_ID_MAP=Object.freeze(Object.fromEntries(
+  Array.from({length:42},(_,i)=>[i+9,2009+i])
+));
+function mapLegacyMixedId(value,source){
+  const n=Number(value);
+  if(!Number.isFinite(n))return value;
+  if(MIXED_CATALOG_ID_MAP[n])return MIXED_CATALOG_ID_MAP[n];
+  const legacyIds=new Set([1,2,3,4,5,6,7,8]);
+  const legacyActiveEvidence=[
+    ...(Array.isArray(source?.collection)?source.collection:[]),
+    ...(Array.isArray(source?.team?.lineup)?source.team.lineup:[]),
+    ...(Array.isArray(source?.team?.pitchers)?source.team.pitchers:[])
+  ].map(Number);
+  if(legacyIds.has(n)&&legacyActiveEvidence.some(id=>id>=9&&id<=50))return 2000+n;
+  return n;
+}
+function migratePlayerIds(source){
+  const next={...source};
+  if(Array.isArray(source?.collection))next.collection=source.collection.map(id=>mapLegacyMixedId(id,source));
+  if(source?.team&&typeof source.team==='object'){
+    next.team={...source.team};
+    if(Array.isArray(source.team.lineup))next.team.lineup=source.team.lineup.map(id=>mapLegacyMixedId(id,source));
+    if(Array.isArray(source.team.pitchers))next.team.pitchers=source.team.pitchers.map(id=>mapLegacyMixedId(id,source));
+  }
+  if(source?.progress&&typeof source.progress==='object'&&source.progress.players&&typeof source.progress.players==='object'){
+    next.progress={...source.progress,players:{}};
+    for(const [id,data] of Object.entries(source.progress.players)){
+      next.progress.players[mapLegacyMixedId(id,source)]=data;
+    }
+  }
+  return next;
+}
 
 function baseSettings(){
   return {
@@ -37,7 +69,8 @@ function migrate(input){
   const base=defaultSave();
   const source=input&&typeof input==='object'?input:{};
   const version=Number.isInteger(source.version)?source.version:1;
-  const next={...base,...source};
+  const compatible=migratePlayerIds(source);
+  const next={...base,...compatible};
   next.version=SAVE_VERSION;
   next.currency=Number.isFinite(Number(source.currency))?Math.max(0,Number(source.currency)):base.currency;
   next.unlimitedCoins=Boolean(source.unlimitedCoins);
