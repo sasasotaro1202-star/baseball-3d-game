@@ -125,23 +125,24 @@ export function stepBallPhysics(input,dt=.016){
 export function isFiniteBallPhysics(state){
   return Boolean(state&&!state.invalid&&finite3(state.position)&&finite3(state.velocity)&&finite3(state.acceleration)&&finite(state.time));
 }
-export function resolveFieldingPlay(input,{result='SINGLE',distance=8,travelTime=1,fielderReaction=70,fielderField=70,fielderCatch=70,fielderArm=70,throwDistance=27,batterSpeed=70,rng=Math.random}={}) {
+export function resolveFieldingPlay(input,{result='SINGLE',distance=8,travelTime=1,fielderReaction=70,fielderField=70,fielderCatch=70,fielderArm=70,throwDistance=27,batterSpeed=70,difficulty='NORMAL',rng=Math.random}={}) {
   const s=cloneState(input);
   const d=Math.max(0,Number(distance)||0),t=Math.max(.05,Number(travelTime)||.05);
   const quality=clamp01((Number(fielderReaction||70)*.34+Number(fielderField||70)*.26+Number(fielderCatch||70)*.40)/100);
+  const difficultyBonus={EASY:-.12,NORMAL:0,HARD:.08}[difficulty]||0;
   const arm=clamp01(Number(fielderArm||70)/100);
   if(result==='HOME_RUN')return{state:s,finalOutcome:'HOME_RUN',catchSuccess:false,throwSuccess:false,event:'HOMERUN'};
   const isAir=result==='FLY_OUT';
-  const catchChance=clamp01((isAir ? .90 : .80)-d/36+quality*.20+Math.min(t,1.8)*.035);
+  const catchChance=clamp01((isAir ? .90 : .80)-d/36+quality*.20+Math.min(t,1.8)*.035+difficultyBonus);
   const catchSuccess=rng()<catchChance;
   if(isAir)return{state:s,finalOutcome:catchSuccess?'FLY_OUT':'SINGLE',catchSuccess,throwSuccess:false,event:catchSuccess?'CLEAN_CATCH':'CATCH_MISS'};
-  const pickupChance=clamp01(.92-d/42+quality*.16);
+  const pickupChance=clamp01(.92-d/42+quality*.16+difficultyBonus);
   const pickupSuccess=rng()<pickupChance;
   if(result==='GROUND_OUT'){
     return{state:s,finalOutcome:pickupSuccess?'OUT':'SINGLE',catchSuccess:pickupSuccess,throwSuccess:false,event:pickupSuccess?'GROUND_PICKUP':'FIELDING_ERROR'};
   }
   if(!pickupSuccess)return{state:s,finalOutcome:result,catchSuccess:false,throwSuccess:false,event:'FIELDING_MISS'};
-  const throwChance=clamp01(.92+arm*.10-Number(throwDistance||27)/65-(Number(batterSpeed||70)-70)*.006);
+  const throwChance=clamp01(.92+arm*.10-Number(throwDistance||27)/65-(Number(batterSpeed||70)-70)*.006+difficultyBonus);
   const throwSuccess=rng()<throwChance;
   let finalOutcome=result;
   if(result==='SINGLE'&&throwSuccess)finalOutcome='OUT';
