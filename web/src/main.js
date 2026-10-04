@@ -25,8 +25,10 @@ const infield=new THREE.Mesh(new THREE.CircleGeometry(10,4),new THREE.MeshStanda
 const mound=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,.3,32),new THREE.MeshStandardMaterial({color:0xc89565}));mound.position.set(0,.15,3);scene.add(mound);
 const home=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.12,5),new THREE.MeshStandardMaterial({color:0xffffff}));home.rotation.y=Math.PI/4;home.position.set(0,.08,-8);scene.add(home);
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,20,20),new THREE.MeshStandardMaterial({color:0xffffff}));ball.position.set(0,2.1,3);scene.add(ball);
-const pitcher=createPlayerModel(modelConfig(ALL_PLAYERS[0]));pitcher.position.set(0,0,3);scene.add(pitcher);
-const batter=createPlayerModel(modelConfig(ALL_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;scene.add(batter);
+let pitcher=createPlayerModel(modelConfig(ALL_PLAYERS[0]));pitcher.position.set(0,0,3);pitcher.userData.identity.playerId=ALL_PLAYERS[0].id;scene.add(pitcher);
+let batter=createPlayerModel(modelConfig(ALL_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;batter.userData.identity.playerId=ALL_PLAYERS[4].id;scene.add(batter);
+const AI_TEAM_LINEUP=Object.freeze([2,3,4,7,8,9,10,11,12,13,14,15,16,17]);
+const AI_TEAM_PITCHERS=Object.freeze([1,18,19]);
 const FIELDER_STARTS=Object.freeze([[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]]);
 const fielders=FIELDER_STARTS.map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
 const catcher=createPlayerModel({uniform:0x163a66,scale:.86});catcher.position.set(0,0,-9.7);catcher.rotation.y=Math.PI;scene.add(catcher);
@@ -353,7 +355,7 @@ function ensureMatchPresentation(){
 }
 function updatePremiumHUD(){
   const h=ensureMatchPresentation(), batting=match.half==='TOP';
-  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):(batting?lineupPlayer(0):lineupPlayer(0));
+  const p=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):lineupPlayer(0);
   const pc=p?cardModel(p,developmentFor(save,p.id)):null;
   $('mph-away').textContent=isOnlineMatch()?(onlineRole==='HOST'?'YOU':'RIVAL'):'YOU';
   $('mph-home').textContent=isOnlineMatch()?(onlineRole==='GUEST'?'YOU':'CPU'):'CPU';
@@ -402,7 +404,7 @@ function choosePitchManual(type){
 function pitch(){
   if(match.ended||pitchState!=='idle'||(match.half!=='TOP'&&match.half!=='BOTTOM')||!isLocalPitcher())return;
   pitchState='pitch';t=0;window.__pitchCount=(window.__pitchCount||0)+1;
-  const pitcherPlayer=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'home':'away',0):ALL_PLAYERS[0];
+  const pitcherPlayer=pitcherPlayerForSide(match.half==='TOP'?'home':'away');
   if(!isOnlineMatch()&&match.half==='TOP'){
     const decision=choosePitch({
       count:[match.balls,match.strikes],
@@ -511,16 +513,40 @@ function setFielderTarget(outcome){
 }
 
 /* Premium console-baseball presentation layer. Clean-room UI; no proprietary assets/code. */
+function rosterIdsForSide(side){
+  if(isOnlineMatch()){
+    return onlineRosters?.[side]?.length?onlineRosters[side]:(side==='away'?encodeTeamForOnline():(onlineRemoteRoster.length?onlineRemoteRoster:encodeTeamForOnline()));
+  }
+  if(matchMode==='AI'&&side==='home')return AI_TEAM_LINEUP;
+  const lineup=save.team?.lineup?.length?save.team.lineup:save.collection;
+  return Array.isArray(lineup)?lineup:[];
+}
 function lineupPlayer(index){
-  const ids=(save.team?.lineup?.length?save.team.lineup:save.collection)||[];
-  const side=match.half==='TOP'?'away':'home';
-  const slot=Number(match.batterIndex?.[side]||0)+Number(index||0);
-  return ids.length?ALL_PLAYERS.find(p=>p.id===Number(ids[slot%ids.length]))||ALL_PLAYERS[slot%ALL_PLAYERS.length]:ALL_PLAYERS[slot%ALL_PLAYERS.length];
+  const side=match.half==='TOP'?'away':'home',ids=rosterIdsForSide(side);
+  const slot=(Number(match.batterIndex?.[side]||0)+Number(index||0))%Math.max(1,ids.length);
+  const id=ids.length?ids[slot]:side==='home'?AI_TEAM_LINEUP[0]:ALL_PLAYERS[0]?.id;
+  return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
+}
+function pitcherPlayerForSide(side){
+  const ids=isOnlineMatch()?rosterIdsForSide(side):(matchMode==='AI'&&side==='home'?AI_TEAM_PITCHERS:(save.team?.pitchers?.length?save.team.pitchers:rosterIdsForSide(side)));
+  const id=ids[0];
+  return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
 }
 function fieldingPlayer(index){
-  const ids=(save.team?.lineup?.length?save.team.lineup:save.collection)||[];
+  const side=match.half==='TOP'?'home':'away',ids=rosterIdsForSide(side);
   const offset=4+(Number(index)||0);
-  return ids.length?ALL_PLAYERS.find(p=>p.id===Number(ids[offset%ids.length]))||ALL_PLAYERS[offset%ALL_PLAYERS.length]:ALL_PLAYERS[offset%ALL_PLAYERS.length];
+  const id=ids.length?ids[offset%ids.length]:ALL_PLAYERS[0]?.id;
+  return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
+}
+function syncVisualPlayers(){
+  const currentBatter=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):lineupPlayer(0);
+  const currentPitcher=isOnlineMatch()?pitcherPlayerForSide(match.half==='TOP'?'home':'away'):pitcherPlayerForSide(match.half==='TOP'?'home':'away');
+  if(currentBatter&&batter.userData.identity.playerId!==currentBatter.id){
+    scene.remove(batter);batter=createPlayerModel(modelConfig(currentBatter));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;batter.userData.identity.playerId=currentBatter.id;scene.add(batter);
+  }
+  if(currentPitcher&&pitcher.userData.identity.playerId!==currentPitcher.id){
+    scene.remove(pitcher);pitcher=createPlayerModel(modelConfig(currentPitcher));pitcher.position.set(0,0,3);pitcher.userData.identity.playerId=currentPitcher.id;scene.add(pitcher);
+  }
 }
 function miniPlayer(p,label){
   const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'';
@@ -738,6 +764,7 @@ function setBattingMode(mode){
   const pill=$('bat-mode-pill');if(pill)pill.dataset.mode=battingMode;
 }
 function updateMatchHUD(){
+  syncVisualPlayers();
   const batting=isLocalBatter();
   matchUI.classList.toggle('batting-phase',batting);
   matchUI.classList.toggle('pitching-phase',!batting);
