@@ -23,6 +23,7 @@ export function isValidMatchState(s){
   }
   if(!Number.isInteger(s.nextRunnerId)||s.nextRunnerId<1)return false;
   if(!Number.isInteger(s.batterIndex?.away)||s.batterIndex.away<0||!Number.isInteger(s.batterIndex?.home)||s.batterIndex.home<0)return false;
+  if(!s.pitcherStamina||!Number.isFinite(s.pitcherStamina.away)||!Number.isFinite(s.pitcherStamina.home)||s.pitcherStamina.away<0||s.pitcherStamina.away>100||s.pitcherStamina.home<0||s.pitcherStamina.home>100)return false;
   return typeof s.ended==='boolean';
 }
 
