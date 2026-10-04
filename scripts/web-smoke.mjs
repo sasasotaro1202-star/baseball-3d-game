@@ -4,6 +4,7 @@ const html = readFileSync("web/index.html", "utf8");
 const js = readFileSync("web/src/main.js", "utf8");
 const sim = readFileSync("web/src/game/simulation.js", "utf8");
 const online = readFileSync("web/src/game/online.js", "utf8");
+const ai = readFileSync("web/src/game/ai.js", "utf8");
 const checks = [
   ["home screen", html.includes('id="home"')],
   ["match UI", html.includes('id="match-ui"')],
@@ -14,6 +15,7 @@ const checks = [
   ["batting mode controls", html.includes('id="bat-mode-pill"') && html.includes('id="bat-contact-mode"') && html.includes('id="bat-power-mode"')],
   ["field-first match console", html.includes('id="match-console-v7"') && html.includes('.mph-top') && html.includes('.strike-zone') && html.includes('.match-action-pad')],
   ["AI match entry", html.includes('data-mode="ai-match"') && html.includes('AI戦')],
+  ["AI difficulty", html.includes('data-ai-difficulty="EASY"') && html.includes('data-ai-difficulty="NORMAL"') && html.includes('data-ai-difficulty="HARD"') && ai.includes('AI_DIFFICULTIES')],
   ["online match entry", html.includes('data-mode="online-lobby"') && html.includes('オンライン戦')],
   ["P2P transport", js.includes("from './game/online.js'") && js.includes('createOnlineHost') && js.includes('createOnlineGuest') && js.includes('ONLINE_STATE')],
   ["fielding simulation", sim.includes('resolveFieldingPlay') && js.includes('resolveFieldingPlay')],
