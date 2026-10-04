@@ -3,7 +3,7 @@ function installPremiumDesignSystem(){
   if(document.getElementById('premium-design-system-v2')) return;
   const style=document.createElement('style');
   style.id='premium-design-system-v2';
-  style.textContent=String.raw\`
+  style.textContent=String.raw`
     :root{
       --ui-navy:#07111d;
       --ui-navy-2:#0b1725;
@@ -207,7 +207,7 @@ function installPremiumDesignSystem(){
       body.premium-ui .gacha-result-grid{grid-template-columns:repeat(5,1fr)!important}
       body.premium-ui .gacha-result-card img,.gacha-result-card .gacha-fallback{height:64px}
     }
-  \`;
+  `;
   document.head.appendChild(style);
   document.body.classList.add('premium-ui');
 }
