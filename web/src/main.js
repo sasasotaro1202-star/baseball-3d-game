@@ -85,7 +85,7 @@ function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
   const level=developmentFor(save,p.id)?.level||1;
   const team=String(p.team||'NPB').replace('NPB HISTORY','NPB HISTORY');
   const role=p.pos?.includes('P')?'PITCHER':'HITTER';
-  const initials=String(p.name||'?').replace(/[\\s・—–-]/g,'').slice(0,3);
+  const initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3);
   const color=playerTeamColor(p);
   const ability=showAbilities&&c.abilities.length
     ? c.abilities.slice(0,3).map(a=>'<span class="sc-card-ability '+(a.kind==='special'?'special':'')+'"><b>'+a.name+'</b><em>'+a.ratePercent+'%</em></span>').join('')
@@ -118,23 +118,6 @@ function playerCardMarkup(p,{owned=true,release=false,showAbilities=true}={}){
 }
 function playerCards(){
   return resolveOwnedPlayers().map(p=>playerCardMarkup(p,{owned:true,release:true})).join('');
-}
-function showPlayer3D(id){
-  const p=ALL_PLAYERS.find(x=>x.id===Number(id));
-  if(!p)return;
-  const cfg=modelConfig(p);
-  const preview=createPlayerModel(cfg);
-  preview.position.set(0,0,-2);
-  scene.add(preview);
-  const old=scene.userData.playerPreview;
-  if(old)scene.remove(old);
-  scene.userData.playerPreview=preview;
-  const root=ensurePresentationLayer();
-  root.className='pres-show';
-  $('pres-kicker').textContent='PLAYER';
-  $('pres-title').textContent=p.name;
-  const pc=cardModel(p,developmentFor(save,p.id)); $('pres-sub').textContent=(p.pos||'')+' · '+pc.rank+' RANK · OVR '+pc.overall+'　3D PREVIEW';
-  setTimeout(()=>{root.className='';},1100);
 }
 function showPlayer3D(id){
   const p=ALL_PLAYERS.find(x=>x.id===Number(id));
@@ -293,7 +276,7 @@ function renderGacha(){
     `;
     $('gacha-banner-card').innerHTML=`
       <div class="gacha-banner-copy"><small>SCOUT BANNER</small><h3>${escape(b.name)}</h3><p>${escape(b.subtitle)}</p><b>${escape(b.rateBonus)}</b></div>
-      <div class="gacha-featured">${picks.length?picks.map(p=>`<div class="gacha-feature-card ${p.limited?'limited':''}">${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback">?</div>'}<strong>${escape(p.name)}</strong><small>${escape(p.rank)} · ${p.limited?'LIMITED':'STANDARD'}</small></div>`).join(''):'<div class="gacha-no-pool">対象選手を準備中</div>'}</div>
+      <div class="gacha-featured">${picks.length?picks.map(p=>`<div class="gacha-feature-card ${p.limited?'limited':''}">${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>'}<strong>${escape(p.name)}</strong><small>${escape(p.rank)} · ${p.limited?'LIMITED':'STANDARD'}</small></div>`).join(''):'<div class="gacha-no-pool">対象選手を準備中</div>'}</div>
     `;
   }
 
@@ -307,7 +290,7 @@ function renderGacha(){
       <div class="results-head"><b>${results.length}連結果</b><small>新規 ${results.filter(x=>!x.duplicate).length} / 重複 ${results.filter(x=>x.duplicate).length}${bonusApplied?' · Bランク以上ボーナス':''}</small></div>
       <div class="gacha-result-grid">${sorted.map((x,i)=>{const p=x.result.player;return `<div class="gacha-result-card rank-${escape(x.result.rank)} ${x.result.limited?'limited':''}">
         <div class="result-badge">${escape(x.result.rank)}</div>
-        ${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback">?</div>'}
+        ${p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy">':'<div class="gacha-fallback"><b>'+escape(String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,3))+'</b></div>'}
         <strong>${escape(p.name)}</strong>
         <small>${escape(x.result.rarity)}${x.result.limited?' · LIMITED':''}</small>
         ${x.duplicate?'<em>重複 +'+x.duplicateReward+'</em>':''}
@@ -652,8 +635,9 @@ function syncVisualPlayers(){
   }
 }
 function miniPlayer(p,label){
-  const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'';
-  return '<div class="lineup-slot"><b>'+label+'</b>'+(img?'<img src="'+img+'" alt="" style="width:30px;height:30px;object-fit:cover;border-radius:3px;float:left;margin-right:4px">':'')+'<strong>'+c.name+'</strong><small>'+c.rank+' · OVR '+c.overall+'</small></div>';
+  const c=cardModel(p,developmentFor(save,p.id)),img=p.image||'',team=p.teamCode||'NPB',initials=String(p.name||'?').replace(/[\s・—–-]/g,'').slice(0,2);
+  const portrait=img?'<img src="'+img+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<span class="lineup-avatar">'+initials+'</span>';
+  return '<div class="lineup-slot premium-lineup-slot"><div class="lineup-slot-top"><b>'+label+'</b><i>'+team+'</i></div><div class="lineup-slot-body">'+portrait+'<div><strong>'+c.name+'</strong><small>'+c.pos+' · '+c.rank+' · OVR '+c.overall+'</small></div></div></div>';
 }
 function renderRoster(){
   const pos=[['LF','左翼手',12,17],['CF','中堅手',50,11],['RF','右翼手',88,17],['3B','三塁手',20,47],['SS','遊撃手',38,41],['2B','二塁手',62,41],['1B','一塁手',80,47],['DH','指名打者',50,67],['C','捕手',50,82]];
