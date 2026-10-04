@@ -27,7 +27,9 @@ const home=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.12,5),new THREE.Me
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,20,20),new THREE.MeshStandardMaterial({color:0xffffff}));ball.position.set(0,2.1,3);scene.add(ball);
 const pitcher=createPlayerModel(modelConfig(ALL_PLAYERS[0]));pitcher.position.set(0,0,3);scene.add(pitcher);
 const batter=createPlayerModel(modelConfig(ALL_PLAYERS[4]));batter.position.set(2.2,0,-8);batter.rotation.y=Math.PI;scene.add(batter);
-const fielders=[[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]].map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
+const FIELDER_STARTS=Object.freeze([[-10,0,1],[0,0,13],[10,0,1],[-17,0,-3],[17,0,-3],[-7,0,8],[7,0,8],[12,0,13],[-12,0,13]]);
+const fielders=FIELDER_STARTS.map(([x,y,z],i)=>{const p=createPlayerModel({uniform:0x163a66,scale:.9});p.position.set(x,y,z);scene.add(p);return p});
+function resetFielderPositions(){fielders.forEach((p,i)=>{const [x,y,z]=FIELDER_STARTS[i];p.position.set(x,y,z);});}
 
 /* Lightweight 3D stadium dressing: geometry only, no external assets. */
 function addFieldLine(a,b,width=.035){
@@ -670,6 +672,7 @@ function recordMatchResult(){
 }
 function resetMatchView(){
   ensureMatchPresentation();
+  resetFielderPositions();fielderAction='idle';fielderActionUntil=0;
   pitchState='idle';t=0;ballPhysics=null;pendingOutcome=null;window.__pitchVelocity=0;window.__hitOutcome=null;fielderTarget=null;
   updatePremiumHUD();
   cameraMode='BATTER';
@@ -768,6 +771,11 @@ function animate(){requestAnimationFrame(animate);animatePlayer(pitcher,pitchSta
       }
     }
   }
-}else if(cameraMode==='FIELDING'&&fielderTarget){camera.position.lerp(new THREE.Vector3(8,8,15),.035);camera.lookAt(fielderTarget.x,1,fielderTarget.z)}else if(cameraMode==='HOME_RUN'){camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)}renderer.render(scene,camera)}animate();
+}else if(cameraMode==='FIELDING'&&fielderTarget){
+  const lead=fielders[fielderIndex]||fielders[0],camTarget=new THREE.Vector3(lead.position.x+6.5,6.4,lead.position.z+7.5);
+  camera.position.lerp(camTarget,.07);camera.lookAt(lead.position.x,1.1,lead.position.z);
+}else if(cameraMode==='HOME_RUN'){
+  camera.position.lerp(new THREE.Vector3(0,13,9),.025);camera.lookAt(0,3,-2)
+}renderer.render(scene,camera)}animate();
 void getCloudSave().then(cloud=>{if(cloud){save={...save,currency:cloud.currency,collection:cloud.collection,team:cloud.team,progress:cloud.progress,settings:cloud.settings,matches:cloud.matches,wins:cloud.wins};saveGame(save);currency.textContent=save.unlimitedCoins?'∞':save.currency.toLocaleString("ja-JP");}}).catch(()=>{});
 window.__gameReady = true;window.__gameVersion="baseball-3d-web-20260920-15-syntax-fix";
