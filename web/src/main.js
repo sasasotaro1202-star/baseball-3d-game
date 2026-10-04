@@ -380,6 +380,12 @@ function renderGacha(){
   async function runPull(count){
     if(busy)return;
     const cost=250*count;
+    const activeBanner=getBanner();
+    const activePool=ALL_PLAYERS.filter(activeBanner.filter);
+    if(!activePool.length){
+      resultEl.innerHTML='<div class="gacha-error"><b>このスカウトは準備中です</b><small>現在の対象選手が0名のため実行できません。</small></div>';
+      return;
+    }
     if(!save.unlimitedCoins && Number(save.currency||0)<cost){
       resultEl.innerHTML='<div class="gacha-error"><b>コイン不足</b><small>必要 '+cost.toLocaleString('ja-JP')+' / 所持 '+Number(save.currency||0).toLocaleString('ja-JP')+'</small></div>';
       return;
