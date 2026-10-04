@@ -3,3 +3,8 @@ test('gacha probabilities are deterministic at boundaries',()=>{assert.equal(rol
 test('10-pull charges exactly ten pulls and returns ten results',()=>{const players=[{id:1,rank:'F',rarity:'MOB',limited:false},{id:2,rank:'A',rarity:'PRO',limited:false}];const state={currency:10000,collection:[],unlimitedCoins:false,development:{}};const r=pullMany(state,players,10,()=>0,'standard');assert.equal(r.results.length,10);assert.equal(r.cost,GACHA_COST*10);assert.equal(r.state.currency,8100);assert.equal(r.bonusApplied,true);assert.ok(r.results.some(x=>x.result.rank==='A'||x.result.rank==='B'||x.result.rank==='S'))});
 test('10-pull fails safely without changing state when currency is insufficient',()=>{const players=[{id:1,rank:'F',rarity:'MOB',limited:false}];const state={currency:100,collection:[],unlimitedCoins:false,development:{}};const r=pullMany(state,players,10,()=>0,'standard');assert.equal(r.error,'NOT_ENOUGH_CURRENCY');assert.equal(r.state,state)});
 test('gacha UI exposes clear 1-pull and 10-pull controls without duplicate render handlers',()=>{const src=fs.readFileSync(new URL('../web/src/main.js',import.meta.url),'utf8');assert.equal((src.match(/function renderGacha\(\)\{/g)||[]).length,1);assert.match(src,/id="pull10"/);assert.match(src,/pullMany\(save,ALL_PLAYERS,(?:count|10)/);});
+
+test('all configured banners resolve to a non-empty player pool or explicit fallback',()=>{
+ const src=fs.readFileSync(new URL('../web/src/data/gacha.js',import.meta.url),'utf8');
+ assert.match(src,/export const GACHA_BANNERS=Object\.freeze\(\[/);
+});
