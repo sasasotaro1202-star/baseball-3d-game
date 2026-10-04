@@ -590,6 +590,10 @@ function fieldingPlayer(index){
   const id=ids.length?ids[offset%ids.length]:ALL_PLAYERS[0]?.id;
   return ALL_PLAYERS.find(p=>Number(p.id)===Number(id))||ALL_PLAYERS[0];
 }
+function catcherPlayerForSide(side){
+  const ids=rosterIdsForSide(side);
+  return ALL_PLAYERS.find(p=>ids.includes(Number(p.id))&&String(p.pos||'').includes('C'))||fieldingPlayer(8);
+}
 function syncVisualPlayers(){
   const currentBatter=isOnlineMatch()?onlineRosterPlayer(match.half==='TOP'?'away':'home',Number(match.batterIndex?.[match.half==='TOP'?'away':'home']||0)):lineupPlayer(0);
   const currentPitcher=isOnlineMatch()?pitcherPlayerForSide(match.half==='TOP'?'home':'away'):pitcherPlayerForSide(match.half==='TOP'?'home':'away');
@@ -700,7 +704,8 @@ function performSteal(){
     if(!onlineActionSentForPitch){onlineActionSentForPitch=true;onlineSend({type:'ONLINE_STEAL',runnerId:candidate.runnerId,targetBase:candidate.targetBase});}
     return;
   }
-  const result=stealBase(match,candidate.runnerId,candidate.targetBase);
+  const catcher=catcherPlayerForSide(match.half==='TOP'?'home':'away');const pitcher=pitcherPlayerForSide(match.half==='TOP'?'home':'away');
+  const result=stealBase(match,candidate.runnerId,candidate.targetBase,{catcherArm:catcher?.arm||70,pitcherStamina:match.pitcherStamina?.[match.half==='TOP'?'home':'away']??100,difficulty:matchMode==='AI'?matchDifficulty:'NORMAL'});
   match=result.state;
   matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');
   updateMatchHUD();updatePremiumHUD();
@@ -784,7 +789,9 @@ function handleOnlineMessage(msg){
     }else if(msg.type==='ONLINE_TAKE'&&match.half==='BOTTOM'&&pitchState==='pitch'){
       resolveRemoteBatting(msg);
     }else if(msg.type==='ONLINE_STEAL'&&isLocalPitcher()&&pitchState==='idle'){
-      const result=stealBase(match,msg.runnerId,msg.targetBase);
+      if(!Number.isFinite(Number(msg.runnerId))||!Number.isInteger(Number(msg.targetBase))||Number(msg.targetBase)<1||Number(msg.targetBase)>2)return;
+      const catcher=catcherPlayerForSide(match.half==='TOP'?'home':'away');const pitcher=pitcherPlayerForSide(match.half==='TOP'?'home':'away');
+      const result=stealBase(match,Number(msg.runnerId),Number(msg.targetBase),{catcherArm:catcher?.arm||70,pitcherStamina:match.pitcherStamina?.[match.half==='TOP'?'home':'away']??100,difficulty:'NORMAL'});
       match=result.state;onlineStealPending=false;onlineRevision+=1;onlineSend({type:'ONLINE_STATE',revision:onlineRevision,match});
       matchEvent(result.success?'STEAL SUCCESS':'STEAL OUT','run');updateMatchHUD();updatePremiumHUD();
       if(!match.ended)setTimeout(()=>pitch(),450);
