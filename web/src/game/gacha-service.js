@@ -50,7 +50,7 @@ export function pullMany(state,players,count=10,rng=Math.random,bannerId='standa
     const old=results[slot];
     if(old?.duplicate){next={...next,currency:next.currency-duplicateReward(old.result.rarity)};duplicates=Math.max(0,duplicates-1);}
     const has=next.collection.includes(guaranteed.player.id);
-    next=ensureDevelopment({...next,currency:next.unlimitedCoins?next.currency:next.currency-GACHA_COST},guaranteed.player.id);
+    next=ensureDevelopment({...next,currency:next.currency},guaranteed.player.id);
     if(has){const reward=duplicateReward(guaranteed.rarity);next={...next,currency:next.currency+reward};duplicates++;results[slot]={result:guaranteed,duplicate:true,duplicateReward:reward};}
     else{next={...next,collection:[...(Array.isArray(next.collection)?next.collection:[]),guaranteed.player.id]};results[slot]={result:guaranteed,duplicate:false,duplicateReward:0};}
     bonusApplied=true;
