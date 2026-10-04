@@ -798,7 +798,7 @@ function updateFieldingUI(){
   if(catchBtn){
     const waiting=pitchState==='fielding-wait';
     catchBtn.style.display=waiting?'block':'none';
-    catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':(fielderThrowTarget?'送球':'処理');
+    catchBtn.textContent=pendingOutcome==='FLY_OUT'?'捕球':'送球';
   }
 }
 function fieldingPadStart(e){
@@ -1139,7 +1139,7 @@ $('fielding-pad')?.addEventListener('pointerdown',fieldingPadStart);
 $('fielding-pad')?.addEventListener('pointermove',fieldingPadMove);
 $('fielding-pad')?.addEventListener('pointerup',fieldingPadEnd);
 $('fielding-pad')?.addEventListener('pointercancel',fieldingPadEnd);
-$('fielding-catch')?.addEventListener('click',()=>resolveManualFielding('catch'));
+$('fielding-catch')?.addEventListener('click',()=>resolveManualFielding(pendingOutcome==='FLY_OUT'?'catch':'throw'));
 document.querySelectorAll('[data-throw-base]').forEach(b=>b.addEventListener('click',()=>selectThrowBase(b.dataset.throwBase)));$('bat-contact-mode')?.addEventListener('click',()=>setBattingMode('CONTACT'));$('bat-power-mode')?.addEventListener('click',()=>setBattingMode('POWER'));$('matchback').addEventListener('click',()=>{onlineConnection?.close?.();onlineConnection=null;onlineRole=null;onlineSessionStarted=false;setMode('home');});persist();updateProfileUI();updateAimUI();updateZoneUI();setAIDifficulty(matchDifficulty);setBattingMode(save.settings?.battingModeDefault==='POWER'?'POWER':'CONTACT');
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);
 function animate(){requestAnimationFrame(animate);const now=performance.now();const frameDt=Math.max(0,Math.min(.05,(now-lastFrameTime)/1000));lastFrameTime=now;updateRunnerVisuals();animatePlayer(pitcher,pitchState==='pitch'?'pitch':'idle',pitchState==='pitch'?t:0);animatePlayer(batter,pitchState==='hit'?'swing':'idle',pitchState==='hit'?t:0);if((pitchState==='hit'||pitchState==='fielding-wait')&&fielderTarget){const lead=fielders[fielderIndex];const defender=fieldingPlayer(fielderIndex);const reaction=Math.max(.75,Math.min(1.35,(Number(defender?.reaction||defender?.field||70)/70)));const dx=fielderTarget.x-lead.position.x,dz=fielderTarget.z-lead.position.z;const d=Math.hypot(dx,dz);const step=Math.min(.14*reaction,d);if(d>.1){lead.position.x+=dx/d*step;lead.position.z+=dz/d*step;animatePlayer(lead,'run',t*2*reaction)}}else if(fielderAction!=='idle'&&performance.now()<fielderActionUntil){const lead=fielders[fielderIndex];animatePlayer(lead,fielderAction,.5)}else if(fielderAction!=='idle'){fielderAction='idle';}if(pitchState==='pitch'){
